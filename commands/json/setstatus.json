@@ -1,0 +1,13 @@
+{
+    "name": "set-status",
+    "type": 1,
+    "description": "Set the status of the bot",
+    "options": [
+        {
+          "type": 3,
+          "name": "new-status",
+          "description": "The new status of the bot",
+          "required": true
+        }
+    ]
+}

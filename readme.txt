@@ -1,0 +1,1 @@
+regarder si la fonction addArrayJsonFile fonctionne toujours aussi bien
