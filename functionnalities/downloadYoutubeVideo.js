@@ -194,7 +194,7 @@ export async function downloadYtbVideo(message, user){
 
             for (let url of urls) {
 
-                // try{
+                try{
 
                     // If it's a playlist
                     if (url[0].includes('&list=')){
@@ -262,8 +262,8 @@ export async function downloadYtbVideo(message, user){
                             url = url.split('watch?v=')[1]
                         }
 
-                        // try{
-                            const videoUrl = `https://www.youtube.com/watch?v=${url}`;
+                        try{
+                            // const videoUrl = `https://www.youtube.com/watch?v=${url}`;
 
                             let metadata = await ytdl.getBasicInfo(url)
 
@@ -300,24 +300,24 @@ export async function downloadYtbVideo(message, user){
                             if (!(listDownloadVid.includes(videoTitle+'.mp3'))){
 
                                 await downloadAudio(url, tmpPath, targetChannel)
-                                
+
                             }
                             else{
                                 targetChannel.send(`${videoTitle} already downloaded, the file will not be downloaded another time...`)
                                 log(`${videoTitle} already downloaded, the file will not be downloaded another time...`)
                             }
-                        // }
-                        // catch{
-                        //     log(`ERROR, impossible to download the video ${url}`)
-                        //     targetChannel.send(`ERROR, impossible to download the video ${url}`)
-                        // }
+                        }
+                        catch{
+                            log(`ERROR, impossible to download the video ${url}`)
+                            targetChannel.send(`ERROR, impossible to download the video ${url}`)
+                        }
                     }
 
                     
-                // }
-                // catch(err){
-                //     targetChannel.send(`ERROR : Error while trying to retrieve/download the video, ${err}`)
-                // }
+                }
+                catch(err){
+                    targetChannel.send(`ERROR : Error while trying to retrieve/download the video, ${err}`)
+                }
             }
         }
     }
