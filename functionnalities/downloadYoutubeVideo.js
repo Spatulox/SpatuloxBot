@@ -249,8 +249,8 @@ export async function downloadYtbVideo(message, user){
                             });
                         }
                         catch{
-                            log(`ERROR, impossible to download the playlist ${url[0]}`)
-                            targetChannel.send(`ERROR, impossible to download the playlist ${url[0]}`)
+                            log(`ERROR, impossible to download the playlist ${url[0]}, or retrieve informations`)
+                            targetChannel.send(`ERROR, impossible to download the playlist ${url[0]}, or retrieve informations`)
                         }
                     }
                     // If it's just random links
@@ -308,8 +308,8 @@ export async function downloadYtbVideo(message, user){
                             }
                         }
                         catch{
-                            log(`ERROR, impossible to download the video ${url}`)
-                            targetChannel.send(`ERROR, impossible to download the video ${url}`)
+                            log(`ERROR, impossible to download the video ${url}, or retrieve informations`)
+                            targetChannel.send(`ERROR, impossible to download the video ${url}, or retrieve informations`)
                         }
                     }
 

@@ -13,6 +13,42 @@ export function log(str) {
   const logDir = path.join(__dirname.split('\\Functions')[0], 'log');
   const filePath = path.join(logDir, 'log.txt');
 
+  try {
+    const stats = fs.statSync(filePath);
+    const fileSizeInBytes = stats.size;
+    const fileSizeInKilobytes = fileSizeInBytes / 1024;
+    const fileSizeInMegabytes = fileSizeInKilobytes / 1024;
+
+    console.log(fileSizeInBytes, fileSizeInKilobytes, fileSizeInMegabytes)
+
+    if (fileSizeInMegabytes >= 10){
+      
+      let fileList = fs.readdirSync(logDir, (err, files) => {
+        if (err) {
+          console.error('Erreur lors de la lecture du répertoire : ' + err);
+          return 'Error';
+        }
+        return files
+      });
+
+      console.log(fileList)
+
+      if (fileList != 'Error'){
+        fs.renameSync(filePath, filePath.split('.txt')[0]+`${fileList.length}.txt`, (err) => {
+          if (err) {
+            console.error('Erreur lors du renommage du fichier de log : ' + err);
+          } else {
+            console.log('Fichier renommé avec succès.');
+          }
+        });
+      }
+    }
+
+
+  } catch (err) {
+    console.error('Erreur lors de la récupération de la taille du fichier : ' + err);
+  }
+
   try{
     if (fs.existsSync(logDir) == false) {
       fs.mkdirSync(logDir);
@@ -25,13 +61,13 @@ export function log(str) {
 
   var today = new Date();
   let previousStr = `[${today.toLocaleDateString()} - ${today.toLocaleTimeString()}] `
+  
   console.log(previousStr+str)
-
   try{
     fs.appendFileSync(filePath, previousStr+str+'\n');
   }
   catch(error){
-    console.log('Impossible to wriote the log file... ', error)
+    console.log('Impossible to write the log file... ', error)
   }
   
 }
@@ -170,6 +206,7 @@ export async function listFile(directoryPath, type) {
   }
 
   try {
+    type = type.split('.')[1]
     const files = await fs.promises.readdir(directoryPath);
     const jsonFiles = files.filter(file => path.extname(file) === '.'+type);
     return jsonFiles;
