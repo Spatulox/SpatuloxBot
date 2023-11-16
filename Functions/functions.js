@@ -13,15 +13,25 @@ export function log(str) {
   const logDir = path.join(__dirname.split('\\Functions')[0], 'log');
   const filePath = path.join(logDir, 'log.txt');
 
+  // Create the log directory
+  try{
+    if (fs.existsSync(logDir) == false) {
+      fs.mkdirSync(logDir);
+    }
+  }
+  catch (error){
+    console.log('ERROR : Impossible to create the log directory : ', error)
+  }
+
+  // Check the size of the log.txt file
   try {
     const stats = fs.statSync(filePath);
     const fileSizeInBytes = stats.size;
     const fileSizeInKilobytes = fileSizeInBytes / 1024;
     const fileSizeInMegabytes = fileSizeInKilobytes / 1024;
 
-    console.log(fileSizeInBytes, fileSizeInKilobytes, fileSizeInMegabytes)
-
-    if (fileSizeInMegabytes >= 10){
+    if (fileSizeInMegabytes >= 3){
+      // if (fileSizeInKilobytes >= 0.5){
       
       let fileList = fs.readdirSync(logDir, (err, files) => {
         if (err) {
@@ -41,6 +51,14 @@ export function log(str) {
             console.log('Fichier renommé avec succès.');
           }
         });
+
+        try{
+          fs.appendFileSync(filePath.split('.txt')[0]+`${fileList.length}.txt`, `Fichier renommé avec succès.\nSuite du fichier au fichier log.txt ou log${fileList.length+1}.txt`)
+        }
+        catch{
+          console.log('Impossible to write in the renamed file...')
+        }
+
       }
     }
 
@@ -48,17 +66,8 @@ export function log(str) {
   } catch (err) {
     console.error('Erreur lors de la récupération de la taille du fichier : ' + err);
   }
-
-  try{
-    if (fs.existsSync(logDir) == false) {
-      fs.mkdirSync(logDir);
-    }
-  }
-  catch (error){
-    console.log('ERROR : Impossible to create the log directory : ', error)
-  }
   
-
+  // Write the log.txt file
   var today = new Date();
   let previousStr = `[${today.toLocaleDateString()} - ${today.toLocaleTimeString()}] `
   
