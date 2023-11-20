@@ -1,9 +1,11 @@
-import config from '../config.json' assert { type: 'json' };
+// import config from '../config.json' assert { type: 'json' };
 import { readJsonFile, addVideoToJsonFile, postMessage, listJsonFile, switchYtbToken } from '../Functions/functions.js'
 import { log } from '../Functions/functions.js'
 import fetch from 'node-fetch'
 
 export async function recupLatestVideo(client){
+
+  let config = await readJsonFile('../config.json')
 
 
   // Need to create a function that retrieve the number of api ytb key used to use :
