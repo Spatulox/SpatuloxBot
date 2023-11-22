@@ -50,7 +50,7 @@ async function getLatestVideos() {
     console.log(`Total videos: ${data.items.length}`);
 
     // Load the existing channel JSON file
-    let channelsList = await listJsonFile();
+    // let channelsList = await listJsonFile();
     //console.log("Channel list:", channelsList);
 
     let listVideosId = []
