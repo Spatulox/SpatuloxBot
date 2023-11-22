@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path'
 import fs from 'fs'
+import readline from 'readline';
 
 //----------------------------------------------------------------------------//
 
@@ -224,6 +225,36 @@ export async function listFile(directoryPath, type) {
     return ['Error'];
   }
 }
+
+//----------------------------------------------------------------------------//
+
+export async function asyncSearchInLines(pathToFile, arrayToSearch) {
+
+  try{
+    const fileStream = fs.createReadStream(pathToFile);
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity
+    });
+
+    let lines = [];
+    for await (const line of rl) {
+
+      
+      if (arrayToSearch.every(element => line.includes(element))) {
+        lines.push(line);
+      }
+    }
+    return (lines)
+  }
+  catch{
+    log(`ERROR : Error asyncSearchInLines(), when reading file ${pathToFile}`)
+    return `ERROR : Error asyncSearchInLines(), when reading file ${pathToFile}`
+  }
+
+  // console.log(lines);
+}
+
 //----------------------------------------------------------------------------//
 
 export function postMessage(client, sentence, channelId, reactions) {
@@ -250,6 +281,38 @@ export function postMessage(client, sentence, channelId, reactions) {
     .catch(error => {
       log('ERROR when crossposting message : '+error)
     });
+}
+
+//----------------------------------------------------------------------------//
+
+// export async function sendLongMessage(channel, longMessage) {
+//  
+//   // const maxLength = 2000;
+//   const messageChunks = longMessage.match(/[\s\S]{1,2000}/g);
+//   for (const chunk of messageChunks) {
+//     channel.send(chunk);
+//   }
+// }
+
+export async function sendLongMessage(channel, longMessage) {
+  // Parse long sentence (> 2000) into different messages to send it
+  // Use full to recap the error of the bots..
+  const maxLength = 2000;
+  const chunks = longMessage.split('\n');
+  let currentMessage = '';
+
+  for (const chunk of chunks) {
+    if (currentMessage.length + chunk.length < maxLength) {
+      currentMessage += chunk + '\n';
+    } else {
+      channel.send(currentMessage);
+      currentMessage = chunk + '\n';
+    }
+  }
+
+  if (currentMessage.length > 0) {
+    channel.send(currentMessage);
+  }
 }
 
 
