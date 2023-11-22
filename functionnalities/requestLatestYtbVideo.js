@@ -5,13 +5,17 @@ import fetch from 'node-fetch'
 
 export async function recupLatestVideo(client){
 
-  let config = await readJsonFile('../config.json')
-
+  let config = await readJsonFile('./config.json')
 
   // Need to create a function that retrieve the number of api ytb key used to use :
   // switchYtbToken()
 
   // Actual YouTube API key
+
+  if(config == 'Error'){
+    log('Error, impossible to read the JSON file, aborded recupLAtestVideo()')
+    return
+  }
   const apiKey = config.ytbToken[config.usingYtbToken];
   log(`Using youtube api key : ${apiKey}, ${config.usingYtbToken}` )
 
@@ -21,9 +25,20 @@ export async function recupLatestVideo(client){
 
   const nbJsonFile = await listJsonFile('ytbChannels/')
 
+  if (nbJsonFile == 'Error'){
+    log(`Impossible to list the JSON file ./ytbChannels/`)
+    return
+  }
+
   for (let index = 0; index < nbJsonFile.length; index++) {
     const jsonChannel = nbJsonFile[index];
     let jsonFile = await readJsonFile(`./ytbChannels/${jsonChannel}`)
+
+    if (jsonFile =='Error'){
+      log(`Impossible to read the JSON file ./ytbChannels/${jsonChannel}`)
+      return
+    }
+
     let channelId = jsonFile.ytbChannel
     let author = jsonFile.name
     console.log(channelId)
