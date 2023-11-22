@@ -9,7 +9,7 @@ import { duplicateMessage } from './functionnalities/duplicateMessage.js'
 import { downloadYtbVideo } from './functionnalities/downloadYoutubeVideo.js'
 import { recupLatestVideo } from './functionnalities/requestLatestYtbVideo.js'
 import { addReactions } from './functionnalities/reactions.js'
-import { log, switchYtbToken, asyncSearchInLines, sendLongMessage } from './Functions/functions.js'
+import { log, switchYtbToken, recapBotsErrors } from './Functions/functions.js'
 import { checkInternetCo } from './Functions/checkInternetCo.js'
 import { deployCommand } from './commands/deployCommand.js';
 import { executeSlashCommand } from './commands/executeCommand.js';
@@ -82,15 +82,8 @@ function main(){
 			await deployCommand(client)
 			owner.send('Bot online');
 
-			// Search for the latest ERRORS and send it to the owner :
-			let res = await asyncSearchInLines('./log/log.txt', ['22/11/2023', 'ERROR'])
-			console.log('res')
-			console.log(res)
-
-			if (typeof(res) !== 'string'){
-				res = res.join('\n')
-				await sendLongMessage(owner, res)
-			}
+			// Search for the latest ERRORS and send it to the correct channel :
+			recapBotsErrors(client, config)
 
 			try{
 				// switchYtbToken()
