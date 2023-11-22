@@ -2,8 +2,19 @@
 import { readJsonFile, addVideoToJsonFile, postMessage, listJsonFile, switchYtbToken } from '../Functions/functions.js'
 import { log } from '../Functions/functions.js'
 import fetch from 'node-fetch'
+import { checkXTimesInternetCo } from '../Functions/checkInternetCo.js'
 
 export async function recupLatestVideo(client){
+
+  // Checking if internet is still available
+  let res = await checkXTimesInternetCo(5)
+
+  if (res == 'Error'){
+    log('ERROR : Unexpected error with Internet, not connected when trying to recupLatestVideo()')
+    return
+  }
+
+
 
   let config = await readJsonFile('./config.json')
 
