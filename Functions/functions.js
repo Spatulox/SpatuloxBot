@@ -201,7 +201,7 @@ export async function listJsonFile(directoryPath) {
     return jsonFiles;
   } catch (err) {
     log('ERROR : impossible to read the directory: '+err);
-    return ['Error'];
+    return 'Error';
   }
 }
 
