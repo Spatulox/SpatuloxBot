@@ -1,11 +1,15 @@
-//import librairies
+//Librairies
 import { Client, GatewayIntentBits } from 'discord.js';
+
+// Files
 import config from './config.json' assert { type: 'json' };
+
+// Functions
 import { duplicateMessage } from './functionnalities/duplicateMessage.js'
 import { downloadYtbVideo } from './functionnalities/downloadYoutubeVideo.js'
 import { recupLatestVideo } from './functionnalities/requestLatestYtbVideo.js'
 import { addReactions } from './functionnalities/reactions.js'
-import { log, switchYtbToken } from './Functions/functions.js'
+import { log, switchYtbToken, asyncSearchInLines, sendLongMessage } from './Functions/functions.js'
 import { checkInternetCo } from './Functions/checkInternetCo.js'
 import { deployCommand } from './commands/deployCommand.js';
 import { executeSlashCommand } from './commands/executeCommand.js';
@@ -71,11 +75,22 @@ function main(){
 
 			client.user.setStatus('dnd');
 
+			// Creating the owner (Just me, if it's an arry, it not gonna work)
 			const owner = await client.users.fetch(config.owner);
 
+			// Deploy Commands
 			await deployCommand(client)
-
 			owner.send('Bot online');
+
+			// Search for the latest ERRORS and send it to the owner :
+			let res = await asyncSearchInLines('./log/log.txt', ['22/11/2023', 'ERROR'])
+			console.log('res')
+			console.log(res)
+
+			if (typeof(res) !== 'string'){
+				res = res.join('\n')
+				await sendLongMessage(owner, res)
+			}
 
 			try{
 				// switchYtbToken()
