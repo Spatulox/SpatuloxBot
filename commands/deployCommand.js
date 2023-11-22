@@ -7,6 +7,11 @@ export async function deployCommand(client){
   // Import commands files
   const listFile = await listJsonFile('./commands/json/')
 
+  if (listFile == 'Error'){
+    log('ERROR : Impossible to list files in deployCommand()')
+    return
+  }
+
   // Create slash commands
   let createdCommand = []
   for (const file of listFile) {
