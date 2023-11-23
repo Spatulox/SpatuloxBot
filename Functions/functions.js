@@ -287,12 +287,14 @@ export function postMessage(client, sentence, channelId, reactions) {
 
 //----------------------------------------------------------------------------//
 
-export async function sendLongMessage(channel, longMessage) {
+export async function sendLongMessage(channel, title, longMessage) {
   // Parse long sentence (> 2000) into different messages to send it
   // Use full to recap the error of the bots..
   const maxLength = 2000;
   const chunks = longMessage.split('\n');
   let currentMessage = '';
+
+  channel.send(title)
 
   for (const chunk of chunks) {
     if (currentMessage.length + chunk.length < maxLength) {
@@ -346,14 +348,12 @@ export async function recapBotsErrors(client, config){
       let resToday = await asyncSearchInLines('./log/log.txt', [today.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
 
       if (typeof(resYesterday) !== 'string' && resYesterday != []){
-        errorChannel.send('# Yesterday errors :')
         resYesterday = resYesterday.join('\n')
-        await sendLongMessage(errorChannel, resYesterday)
+        await sendLongMessage(errorChannel, '# Yesterday errors :', resYesterday)
       }
       if (typeof(resToday) !== 'string' && resToday != []){
-        errorChannel.send('# Today errors :')
         resToday = resToday.join('\n')
-        await sendLongMessage(errorChannel, resToday)
+        await sendLongMessage(errorChannel, '# Today errors :', resToday)
       }	
     }
   }
