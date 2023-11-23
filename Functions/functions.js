@@ -330,29 +330,34 @@ export function switchYtbToken(){
 //----------------------------------------------------------------------------//
 
 export async function recapBotsErrors(client, config){
-  // Create a today and a yesterday var to search it into the log file..
-  const errorChannel = await client.channels.cache.get(config.errorChannel)
+  try{
+    // Create a today and a yesterday var to search it into the log file..
+    const errorChannel = await client.channels.cache.get(config.errorChannel)
 
-  if (config.sendChannelErrors == "yes"){
-    var today = new Date();
-    today.setUTCHours(0,0,0,0)
-    let yesterday = new Date();
-    yesterday.setUTCHours(0,0,0,0)
-    yesterday.setDate(yesterday.getDate() -1)
+    if (config.sendChannelErrors == "yes"){
+      var today = new Date();
+      today.setUTCHours(0,0,0,0)
+      let yesterday = new Date();
+      yesterday.setUTCHours(0,0,0,0)
+      yesterday.setDate(yesterday.getDate() -1)
 
-    // asyncSearchInLines (fileToSaearch [arrayOfStringToSearch], [arrayOfStringToAvoid])
-    let resYesterday = await asyncSearchInLines('./log/log.txt', [yesterday.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
-    let resToday = await asyncSearchInLines('./log/log.txt', [today.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
+      // asyncSearchInLines (fileToSaearch [arrayOfStringToSearch], [arrayOfStringToAvoid])
+      let resYesterday = await asyncSearchInLines('./log/log.txt', [yesterday.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
+      let resToday = await asyncSearchInLines('./log/log.txt', [today.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
 
-    if (typeof(resYesterday) !== 'string' && resYesterday != []){
-      errorChannel.send('# Yesterday errors :')
-      resYesterday = resYesterday.join('\n')
-      await sendLongMessage(errorChannel, resYesterday)
+      if (typeof(resYesterday) !== 'string' && resYesterday != []){
+        errorChannel.send('# Yesterday errors :')
+        resYesterday = resYesterday.join('\n')
+        await sendLongMessage(errorChannel, resYesterday)
+      }
+      if (typeof(resToday) !== 'string' && resToday != []){
+        errorChannel.send('# Today errors :')
+        resToday = resToday.join('\n')
+        await sendLongMessage(errorChannel, resToday)
+      }	
     }
-    if (typeof(resToday) !== 'string' && resToday != []){
-      errorChannel.send('# Today errors :')
-      resToday = resToday.join('\n')
-      await sendLongMessage(errorChannel, resToday)
-    }	
+  }
+  catch{
+    log('ERROR : Impossible to post the recap of the error in the channel')
   }
 }
