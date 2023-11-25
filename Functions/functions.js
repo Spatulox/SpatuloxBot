@@ -347,11 +347,11 @@ export async function recapBotsErrors(client, config){
       let resYesterday = await asyncSearchInLines('./log/log.txt', [yesterday.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
       let resToday = await asyncSearchInLines('./log/log.txt', [today.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
 
-      if (typeof(resYesterday) !== 'string' && resYesterday != []){
+      if (typeof(resYesterday) !== 'string' && resYesterday.length != 0){
         resYesterday = resYesterday.join('\n')
         await sendLongMessage(errorChannel, '# Yesterday errors :', resYesterday)
       }
-      if (typeof(resToday) !== 'string' && resToday != []){
+      if (typeof(resToday) !== 'string' && resToday.length != 0){
         resToday = resToday.join('\n')
         await sendLongMessage(errorChannel, '# Today errors :', resToday)
       }	
