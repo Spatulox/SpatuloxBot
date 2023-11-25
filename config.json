@@ -23,12 +23,6 @@
     "spatuloxs-bot",
     "spatuloxs-bot-bis"
   ],
-  "ytbToken": [
-    "AIzaSyB3PZmhW5jJXzPUF5R-COQPh-CRohev-yc",
-    "AIzaSyD6o2j-h4P87nXFJeNp8kBoJwI4muyiQtw"
-  ],
-  "ytbTokenBKP": [
-    "AIzaSyB3PZmhW5jJXzPUF5R-COQPh-CRohev-yc",
-    "AIzaSyD6o2j-h4P87nXFJeNp8kBoJwI4muyiQtw"
-  ]
+  "ytbToken": [],
+  "ytbTokenBKP": []
 }
