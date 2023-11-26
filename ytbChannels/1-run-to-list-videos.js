@@ -8,7 +8,7 @@ import fs from 'fs'
 // ctrl + f "brawse_id"
 
 // Replace 'YOUR_API_KEY' with your actual YouTube API key
-const apiKey = config.ytbToken[config.usingYtbToken];
+
 // Replace 'USERNAME' with the desired YouTube username
 //'UCeZje_7vr6CPK9vPQDfV3WA' // Syrex
 //'UCeZje_7vr6CPK9vPQDfV3WA' // Fuze²
@@ -22,18 +22,29 @@ const apiKey = config.ytbToken[config.usingYtbToken];
 //UCIVSqoHCUN1XdEpiVItxfoQ aCookieGod
 //UCqGtqSn0NiOCottKpYwBc4w Futakuchi Mana
 // @aCookieGod // @WadZee
+// UCxH16958KSxT4Z9yL_9JYtw Ego
 
-const channelId = 'UCqGtqSn0NiOCottKpYwBc4w'
-
-let channelMusique = "1132993974689341550"
-let channelVideos = "1172961385731342458"
-let channelToPost = channelMusique
-
+// Need to go throught this function to give the "discordSlash" string
 // Set the number of latest videos to retrieve
-const maxResults = 5000;
 
 
 async function getLatestVideos() {
+
+  // console.log(string, ytbChannelId, discordChannelToPost)
+
+  const maxResults = 5000;
+  
+  const apiKey = config.ytbToken[config.usingYtbToken];
+  let channelId
+  let channelToPost
+
+  let channelMusique = "1132993974689341550"
+  let channelVideos = "1172961385731342458"
+  channelToPost = channelMusique
+
+  const channelId = 'UCxH16958KSxT4Z9yL_9JYtw'
+  
+
   try {
     console.log(`Checking YouTube...`);
 
@@ -80,8 +91,10 @@ async function getLatestVideos() {
     // }
 
     console.log(`Checking completed...`);
+    return 'Ok'
   } catch (error) {
     console.error('Error:', error);
+    return 'Error'
   }
 }
 
