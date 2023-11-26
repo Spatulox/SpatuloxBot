@@ -10,19 +10,20 @@ export async function downloadYtbVideo(message, user){
 
     try{
 
-        const regexUrl = /(https:\/\/www.youtu[a-zA-Z-_:.\/0-9]*)/
+        // const regexUrl = /(https:\/\/w{0,3}.{0,1}youtu[a-zA-Z-_:.\/0-9]*)/
+        const regexUrl = /https?:\/\/(www\.)?youtu(be\.com\/watch\?v=|\.be\/)[\w-]{11}/g
+        
         const regexName = /(🎵  [a-zA-Z-_:.\/0-9 ()]*  🎵)/
         const regexAuthor = /(Author :[ a-zA-Z0-9()/\\:.-_]*)/
 
         let path = `C:\\Marc\\Perso\\Musics\\1-TelechargesViaDiscord\\`
 
-        const targetChannel = message.guild.channels.cache.get(message.channelId)
+        const targetChannel = await message.guild.channels.cache.get(message.channelId)
         let err = ''
-
-        
 
         // Test if there is a link in the video
         if (regexUrl.test(message.content) && config.userCanReact.includes(user.tag)){
+            log('Begin function to download video...')
 
             if(message.author.bot){
 
@@ -190,7 +191,8 @@ export async function downloadYtbVideo(message, user){
                 targetChannel.send('Download(s) begin...')
                 log('Download(s) begin...')
 
-                var urls = message.content.matchAll(/(https:\/\/www.youtu[a-zA-Z-_:.\/0-9&=?]*)/g);
+                // var urls = message.content.matchAll(/(https:\/\/w{0,3}.{0,1}youtu[a-zA-Z-_:.\/0-9]*)/g);
+                var urls = message.content.matchAll(/https?:\/\/(www\.)?youtu(be\.com\/watch\?v=|\.be\/)[\w-]{11}/g);
                 const invalidChars = /[<>:"\\/|?*\x00-\x1F,']/g; // Expression régulière pour les caractères impossibles
                 const validChar = '-'; // Caractère valide pour remplacer les caractères impossibles
 
@@ -200,6 +202,7 @@ export async function downloadYtbVideo(message, user){
 
                         // If it's a playlist
                         if (url[0].includes('&list=')){
+                            console.log('Playlist')
                             const playlistId = url[0].split('&list=')[1].split('&')[0]
 
                             let tmpPath = path
@@ -329,7 +332,8 @@ export async function downloadYtbVideo(message, user){
             targetChannel.send('ERROR : Error when executing function downloadYtbVideo()')
         }
         catch{
-            console.log('Impossible to send the error message of the function downloadYtbVideo()')
+            // console.log('Impossible to send the error message of the function downloadYtbVideo()')
+            log('Impossible to send the error message of the function downloadYtbVideo()')
         }
         log('ERROR : Error when executing function downloadYtbVideo()')
     }
@@ -343,7 +347,7 @@ async function downloadAudio(url, tmpPath, targetChannel){
     let metadata = await ytdl.getBasicInfo(url)
 
     const videoUrl = `https://www.youtube.com/watch?v=${url}`;
-    console.log(videoUrl)
+    console.log("downloadAudio : ", videoUrl)
 
     let videoTitle = metadata.player_response.videoDetails.title
 
