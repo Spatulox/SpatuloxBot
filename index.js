@@ -26,11 +26,15 @@ async function loginBot(client) {
 				log('Logged in successfully!');
 				return 'Connected'
 			})
-			.catch((err) => {
+			.catch(async (err) => {
 				log(`ERROR : ${err}, retrying...`);
 				new Promise(resolve => setTimeout(resolve, 30000));
 				return 'Not Connected'
 			});
+
+		// if (ok == 'Not Connected'){
+		// 	await new Promise(resolve => setTimeout(resolve, 30000));
+		// }
 	}
   }
 
