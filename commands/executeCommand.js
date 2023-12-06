@@ -40,8 +40,8 @@ export async function executeSlashCommand(interaction, client){
             await interaction.reply(`Status switched for ${interaction.options.getString('new-status')}`);
             log(`Status switched for ${interaction.options.getString('new-status')}`)
         }
-        catch{
-            log('ERROR : Impossible to set the activity of the bot')
+        catch(err){
+            log(`ERROR : Impossible to set the activity of the bot : ${err}`)
         }
         
     }
