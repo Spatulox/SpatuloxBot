@@ -24,10 +24,10 @@ export async function recupLatestVideo(client){
   // Actual YouTube API key
 
   if(config == 'Error'){
-    log('Error, impossible to read the JSON file, aborded recupLAtestVideo()')
+    log('ERROR : Impossible to read the JSON file, aborded recupLAtestVideo()')
     return
   }
-  const apiKey = config.ytbToken[config.usingYtbToken];
+  let apiKey = config.ytbToken[config.usingYtbToken];
   log(`Using youtube api key : ${apiKey}, ${config.usingYtbToken}` )
 
   // Set the number of latest videos to retrieve
@@ -72,12 +72,37 @@ export async function recupLatestVideo(client){
 
     await fetch(fetchSentence)
     .then(response => response.json())
-    .then(data => {
+    .then( async data => {
       
       if (data.error){
         log(data.error.message)
         let message = data.error.message.split('<')[0]+data.error.message.split('>')[1].split('<')[0] + ` using ${config.usingYtbToken} ytbToken`
-        postMessage(client, message, jsonFile.guildChannelToPostVideo, [])
+        await postMessage(client, message, jsonFile.guildChannelToPostVideo, [])
+
+        if (message.includes('exceeded your quota')){
+          let lastYtbToken = config.usingYtbToken
+
+          try {
+            log('Try to switch the ytbToken')
+            await switchYtbToken()
+            log('YtbToken switched, reading config.json...')
+            config = await readJsonFile('./config.json')
+
+            if(config == 'Error'){
+              log('ERROR : Impossible to read the JSON file, aborded recupLAtestVideo()')
+              return
+            }
+            log('Config.json read')
+            apiKey = config.ytbToken[config.usingYtbToken];
+            log(`Youtube token switched successfully, using youtube api key : ${apiKey}, ${config.usingYtbToken}` )
+            await postMessage(client, `Youtube token switched for ${config.usingYtbToken}`, jsonFile.guildChannelToPostVideo, [])
+          }
+          catch (err){
+            log(`ERROR when switching youtube token from ${lastYtbToken} to the pther one, or postMessage() error : ${err}`)
+            await postMessage(client, `ERROR when switching youtube token from ${lastYtbToken} to ${config.usingYtbToken}`, jsonFile.guildChannelToPostVideo, [])
+
+          }
+        }
 
       }
       else{
