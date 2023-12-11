@@ -138,7 +138,7 @@ export function replaceValueJsonFile(fileName, keyOfValue, valueToReplace) {
     const updatedData = JSON.stringify(file, Object.keys(file).sort(), 2);
 
     // Écrire les modifications dans le fichier JSON
-    fs.writeFile(fileName, updatedData, 'utf8', (err) => {
+    fs.writeFileSync(fileName, updatedData, 'utf8', (err) => {
       if (err) {
         log('ERROR : Erreur d\'écriture dans le fichier JSON : '+err);
         return;
