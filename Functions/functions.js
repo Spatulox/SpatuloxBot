@@ -114,7 +114,7 @@ export async function addVideoToJsonFile(directoryPath, fileName, valueToPut){
 
 export function replaceValueJsonFile(fileName, keyOfValue, valueToReplace) {
   // write the JSON files
-  fs.readFileSync(fileName, 'utf8', (err, data) => {
+  fs.readFile(fileName, 'utf8', (err, data) => {
     if (err) {
       log('ERROR : Erreur de lecture du fichier JSON :'+err);
       return 'Error';
