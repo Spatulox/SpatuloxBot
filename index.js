@@ -20,22 +20,30 @@ const maxCrashCount = 5
 async function loginBot(client) {
 
 	var ok = 'Not Connected'
-	while(ok == 'Not Connected'){
-		ok = await client.login(config.token)
-			.then(() => {
-				log('Logged in successfully!');
-				return 'Connected'
-			})
-			.catch(async (err) => {
-				log(`ERROR : ${err}, retrying...`);
-				new Promise(resolve => setTimeout(resolve, 30000));
-				return 'Not Connected'
-			});
+	if (config.token != ""){
 
-		// if (ok == 'Not Connected'){
-		// 	await new Promise(resolve => setTimeout(resolve, 30000));
-		// }
+		while(ok == 'Not Connected'){
+			ok = await client.login(config.token)
+				.then(() => {
+					log('Logged in successfully!');
+					return 'Connected'
+				})
+				.catch(async (err) => {
+					log(`ERROR : ${err}, retrying...`);
+					new Promise(resolve => setTimeout(resolve, 30000));
+					return 'Not Connected'
+				});
+
+			// if (ok == 'Not Connected'){
+			// 	await new Promise(resolve => setTimeout(resolve, 30000));
+			// }
+		}
 	}
+	else{
+		log('ERROR : Please enter a valid Discord token....')
+		return "Token error"
+	}
+
   }
 
 function main(){
@@ -67,7 +75,12 @@ function main(){
 		// 	// Set the bon online
 		// 	// client.login(config.token);
 		// }
-		loginBot(client)
+		var tmp = loginBot(client)
+		if (tmp == "Token error")
+		{
+			log('Stopping program')
+			process.exit()
+		}
 		
 
 		// Evènement qui attent deux chose (nom évènements, fonction associée)
