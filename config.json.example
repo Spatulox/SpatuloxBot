@@ -1,0 +1,18 @@
+{
+	"token":"botToken",
+	"owner":"username_of_owner",
+	"downloadChannel":["channelID1", "channelID2", "..."],
+	"usingYtbToken":0,
+	"ytbToken":[
+		"tokenYoutube0","tokenYoutube1"
+	],
+	"getReactionChannel":["channelID1", "channelID2", "..."],
+	"sendDuplicateMessageChannel":["channelID"],
+	"errorChannel":"channelID1",
+	"sendChannelErrors":"yes or no",
+	"userCanReact":[
+		"globalUsernameForPlayerWhoCanReact1",
+		"globalUsernameForPlayerWhoCanReact2"
+	],
+	"emojiReact":["✅","💾"]
+}
