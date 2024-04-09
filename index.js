@@ -92,12 +92,21 @@ function main(){
 
 			client.user.setStatus('dnd');
 
+
+			if(config.sendToOwnerOrChannel == "0"){
+	          const owner = await client.users.fetch(config.owner);
+	          owner.send('Bot online');
+	        }
+	        else if(config.sendToOwnerOrChannel == "1"){
+	          const channelLogin = client.channels.cache.get(config.channelPingLogin)
+	          channelLogin.send(`<@${config.owner}>, Bot is online!`);
+	        }
+
 			// Creating the owner (Just me, if it's an arry, it not gonna work)
 			const owner = await client.users.fetch(config.owner);
 
 			// Deploy Commands
 			await deployCommand(client)
-			owner.send('Bot online');
 
 			// Search for the latest ERRORS and send it to the correct channel :
 			recapBotsErrors(client, config)
