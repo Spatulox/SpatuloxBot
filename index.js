@@ -114,7 +114,7 @@ function main(){
 			try{
 				// switchYtbToken()
 				recupLatestVideo(client)
-				setInterval(function(){recupLatestVideo(client);}, 3600000) // 1h (5 minutes = 300000)
+				setInterval(function(){recupLatestVideo(client);}, 5400000) // 1h30 (5 minutes = 300000) (1h = 3 600 000)
 			}
 			catch(error){
 				log(`Error when trying to retrieve latest video ${error}`)
