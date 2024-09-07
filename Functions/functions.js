@@ -241,11 +241,6 @@ export async function asyncSearchInLines(pathToFile, arrayToSearch, arrayToAvoid
 
     let lines = [];
     for await (const line of rl) {
-
-      
-      // if (arrayToSearch.every(element => line.includes(element))) {
-      //   lines.push(line);
-      // }
       if (arrayToSearch.every(element => line.includes(element)) && !arrayToAvoid.some(element => line.includes(element))) {
         lines.push(line);
       }
@@ -289,6 +284,13 @@ export function postMessage(client, sentence, channelId, reactions = "default") 
     .catch(error => {
       log('ERROR when crossposting message : '+error)
     });
+}
+
+//----------------------------------------------------------------------------//
+
+export async function sendMessage(targetChannel, message){
+  log(message)
+  targetChannel.send(message)
 }
 
 //----------------------------------------------------------------------------//
