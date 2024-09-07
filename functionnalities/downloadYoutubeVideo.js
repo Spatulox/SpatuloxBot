@@ -1,9 +1,10 @@
-import config from '../config.json' assert { type: 'json' };
-import {log, listFile, postMessage, sendMessage} from '../Functions/functions.js'
-import ytdl from 'ytdl-core'
+import config from '../config.json' assert {type: 'json'};
+import {listFile, log, sendMessage} from '../Functions/functions.js'
+//import ytdl from 'ytdl-core'
+import ytdl from '@distube/ytdl-core'
+
 import ytpl from 'ytpl'
 import fs from 'fs'
-import { auth } from 'googleapis/build/src/apis/abusiveexperiencereport/index.js';
 
 
 export async function downloadYtbVideo(message, user){
@@ -15,7 +16,7 @@ export async function downloadYtbVideo(message, user){
 
         const targetChannel = await message.guild.channels.cache.get(message.channelId)
 
-        if (message.content.includes("Overwrite file")) {
+        if ((message.content.includes("Overwrite file") || message.content.includes("overwriting"))) {
             return
         }
         // Test if there is a link in the video
@@ -106,7 +107,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     videoTitle = await getUserAnswerIfDuplicateFile(message, videoTitle, tmpPath)
 
     log(`Downloading Audio : ${videoUrl}`)
-    return new Promise((resolve, reject) => {
+    return await new Promise(async (resolve, reject) => {
 
         let audioStream
         try{
@@ -132,45 +133,11 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
             });
         }
 
-        audioStream.pipe(fs.createWriteStream(`${tmpPath}${videoTitle}.mp3`));
-
-        audioStream.on('end', () => {
-            sendMessage(targetChannel, `Download complete for ${videoTitle}`)
-            resolve();
-        });
-
-        audioStream.on('error', (error) => {
-            console.error("Erreur détaillée :", error);
-            if (error.statusCode) {
-                console.error(`Code d'état HTTP : ${error.statusCode}`);
-            }
-            sendMessage(targetChannel, `ERROR : Impossible to download __**${videoTitle}**__, ${error.message}\n> '${tmpPath}\\${videoTitle}'`);
-
-            const filePath = `${tmpPath}\\${videoTitle}.mp3`;
-
-            // Vérifier si le fichier existe avant de tenter de le supprimer
-            fs.access(filePath, fs.constants.F_OK, (err) => {
-                if (err) {
-                    // Le fichier n'existe pas, pas besoin de le supprimer
-                    console.log(`Le fichier n'existe pas : ${filePath}`);
-                    reject(error);
-                } else {
-                    // Le fichier existe, on peut le supprimer
-                    fs.unlink(filePath, (unlinkError) => {
-                        if (unlinkError) {
-                            console.error(`Erreur lors de la suppression du fichier : ${unlinkError}`);
-                            sendMessage(targetChannel, `Erreur lors de la suppression du fichier : ${unlinkError.message}`);
-                        } else {
-                            console.log(`Fichier supprimé avec succès : ${filePath}`);
-                            sendMessage(targetChannel, `Fichier supprimé avec succès : ${filePath}`);
-                        }
-                        reject(error);
-                    });
-                }
-            });
-            reject(error);
-        });
-
+        try {
+            await downloadWithRetry(audioStream, tmpPath, videoTitle, targetChannel);
+        } catch (error) {
+            sendMessage(targetChannel, `Échec final du téléchargement : ${error.message}`);
+        }
     });
 }
 
@@ -235,8 +202,7 @@ async function getBasicInfoWithRetry(url, maxRetries = 2) {
 
     while (attempts <= maxRetries) {
         try {
-            const metadata = await ytdl.getBasicInfo(url);
-            return metadata; // Succès, retourner les métadonnées
+            return await ytdl.getBasicInfo(url); // Succès, retourner les métadonnées
         } catch (error) {
             attempts++;
             console.error(`Tentative ${attempts} échouée:`, error.message);
@@ -269,65 +235,102 @@ async function getUserAnswerIfDuplicateFile(message, videoName, tmpPath){
                 return acc;
             }
         }, 0);
+        videoName = await askingUserAndWaitReaction(message, videoName, count)
+    }
+    return videoName
+}
 
-        // Reply with a message to inform the user
-        let collected = await message.reply('This video is already download, what do you want to do ?\n> - ☠️ = Overwrite file\n> - 💾 = Save the file without overwrite it')
-            .then(async message2 => {
-                await message2.react('☠️');
-                await message2.react('💾');
+async function askingUserAndWaitReaction(message, videoName, count) {
+    try {
+        // Envoyer le message et ajouter les réactions
+        const replyMessage = await message.reply('This video is already downloaded. What do you want to do?\n> - ☠️ = Overwrite file\n> - 💾 = Save the file without overwriting it');
+        await replyMessage.react('☠️');
+        await replyMessage.react('💾');
 
-                // Let the user choose the overwite or not the music
-                let filter = (reaction, user) => {
-                    return ['☠️', '💾'].includes(reaction.emoji.name) && user.id !== message.author.id;
-                };
+        // Configurer le collecteur de réactions
+        const filter = (reaction, user) => ['☠️', '💾'].includes(reaction.emoji.name) && !user.bot;
 
-                let options = { max: 1, time: 60000, errors: ['time'] };
-
-                const collector = message2.createReactionCollector(filter, options);
-
-                return new Promise((resolve, reject) => {
-                    collector.on('collect', (reaction, user) => {
-                        resolve(reaction);
-                        collector.stop();
-                    });
-
-                    collector.on('end', collected => {
-                        if (collected.size === 0) {
-                            reject('No reaction collected');
-                        }
-                    });
-                });
-            })
-            .catch((err) => {
-                log(`ERROR : Impossible to collect the reaction of the replied duplicate music file message : ${err}`)
-            });
-
-        // Add (or not) a number depend of the user reaction
-        if (typeof(collected) !== 'string'){
-
-            let messageReply = collected.message
-            try {
-                log('Reactions collected !')
-                const reaction = collected//[0]
-                let messageBack = ''
-
+        const collector = replyMessage.createReactionCollector({ filter, max: 1, time: 60000 });
+        return new Promise((resolve, reject) => {
+            collector.on('collect', (reaction, user) => {
+                let messageBack = '';
                 if (reaction.emoji.name === '☠️') {
                     log('Overwrite file');
-                    messageBack = 'Overwrite file'
+                    messageBack = 'Overwrite file';
                 } else if (reaction.emoji.name === '💾') {
                     log('Save file without overwriting');
-                    messageBack = 'Save file without overwriting'
-                    videoName += count
+                    messageBack = 'Save file without overwriting';
+                    videoName += ` (${count})`;
                 }
 
-                await messageReply.edit(`Your choice : ${messageBack}`);
-            } catch (error) {
-                console.error(error);
-                videoName += count
-                await messageReply.edit('You did not react in time :(, saving file without overwriting it');
-            }
-        }
-    }
+                replyMessage.edit(`Your choice: ${messageBack}`);
+                resolve(videoName);
+            });
 
-    return videoName
+            collector.on('end', collected => {
+                if (collected.size === 0) {
+                    message.channel.send('You did not react in time. Saving file without overwriting.');
+                    resolve(videoName + ` (${count})`);
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Error in handleDuplicateFile:', error);
+        await message.channel.send('You did not react in time. Saving file without overwriting.');
+        return videoName + ` (${count})`; // ou toute autre logique pour gérer les doublons
+    }
+}
+
+
+
+
+
+
+async function downloadWithRetry(audioStream, tmpPath, videoTitle, targetChannel, maxRetries = 3) {
+    return new Promise(async (resolve, reject) => {
+        let attempts = 0;
+
+        async function attemptDownload() {
+            attempts++;
+            const filePath = `${tmpPath}\\${videoTitle}.mp3`;
+            const writeStream = fs.createWriteStream(filePath);
+
+            audioStream.pipe(writeStream);
+
+            audioStream.on('end', () => {
+                sendMessage(targetChannel, `Download complete for ${videoTitle}`);
+                resolve();
+            });
+
+            audioStream.on('error', async (error) => {
+                console.error(`Erreur détaillée (tentative ${attempts}):`, error);
+                if (error.statusCode) {
+                    console.error(`Code d'état HTTP : ${error.statusCode}`);
+                }
+                sendMessage(targetChannel, `ERROR : Impossible to download __**${videoTitle}**__, ${error.message}\n> '${filePath}'`);
+
+                writeStream.end();
+
+                try {
+                    await fs.promises.access(filePath, fs.constants.F_OK);
+                    await fs.promises.unlink(filePath);
+                    log(`Fichier 'corrompu de 0 octets' supprimé avec succès : ${filePath}`)
+                } catch (unlinkError) {
+                    if (unlinkError.code !== 'ENOENT') {
+                        log(`Erreur lors de la suppression du fichier 'corrompu de 0 octets' : ${unlinkError.message}`);
+                    }
+                }
+
+                if (attempts < maxRetries) {
+                    console.log(`Nouvelle tentative de téléchargement (${attempts + 1}/${maxRetries})...`);
+                    sendMessage(targetChannel, `Nouvelle tentative de téléchargement (${attempts + 1}/${maxRetries})...`);
+                    setTimeout(attemptDownload, 5000); // Attendre 5 secondes avant de réessayer
+                } else {
+                    reject(new Error(`Échec du téléchargement après ${maxRetries} tentatives.`));
+                }
+            });
+        }
+
+        attemptDownload();
+    });
 }
