@@ -32,8 +32,9 @@ export async function deployCommand(client){
             case 3:
               commandData.addStringOption(option =>
                   option.setName(optionC.name)
-                      .setDescription(optionC.description)
-                      .setRequired(optionC.required)
+                    .setDescription(optionC.description)
+                    .setRequired(optionC.required)
+                    //.setChoices(optionC.choices ? optionC.choices.map(choice => ({ name: choice.name, value: choice.value })) : [])
               );
               break;
               
@@ -42,6 +43,7 @@ export async function deployCommand(client){
                   option.setName(optionC.name)
                       .setDescription(optionC.description)
                       .setRequired(optionC.required)
+                      //.setChoices(optionC.choices ? optionC.choices.map(choice => ({ name: choice.name, value: choice.value })) : [])
               );
               break;
 
