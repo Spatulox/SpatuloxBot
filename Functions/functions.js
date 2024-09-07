@@ -216,7 +216,9 @@ export async function listFile(directoryPath, type) {
   }
 
   try {
-    type = type.split('.')[1]
+    if(type.includes(".")){
+      type = type.split('.')[1]
+    }
     const files = await fs.promises.readdir(directoryPath);
     const jsonFiles = files.filter(file => path.extname(file) === '.'+type);
     return jsonFiles;
