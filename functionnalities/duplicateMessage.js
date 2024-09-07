@@ -1,83 +1,43 @@
 import config from '../config.json' assert { type: 'json' }
-import { log } from '../Functions/functions.js'
+import {log} from '../Functions/functions.js'
 
+export async function duplicateMessage(reaction, user) {
+    const { message, emoji } = reaction;
+    const { channelId, content, attachments, guild } = message;
 
-export async function duplicateMessage(reaction, user){
+    // Vérifications initiales
+    if (attachments.size > 0 || !content ||
+        !config.getReactionChannel.includes(channelId) ||
+        emoji.name !== config.emojiReact[0] ||
+        !config.userCanReact.includes(user.tag)) {
+        return;
+    }
 
-    if (!reaction.message.attachments.size && reaction.message.content){
-        // Check the right channel, the right emoji, and the right user
-        if (config.getReactionChannel.includes(reaction.message.channelId) && reaction.emoji.name == config.emojiReact && config.userCanReact.includes(user.tag)) {
-            // Check if the message was sent by the bot to avoid an infinite loop
-            //if (reaction.message.author.id === client.user.id) return;
+    // Trouver le canal cible
+    const targetChannel = config.sendDuplicateMessageChannel
+        .map(id => guild.channels.cache.get(id))
+        .find(channel => channel);
 
-            config.getReactionChannel.forEach((channel, index) => {
+    if (!targetChannel) {
+        log('Canal cible non trouvé')
+        return;
+    }
 
-                    // Check if the channel where the message were sent is in the list
-                    if (config.getReactionChannel[index] == reaction.message.channelId){
-                        //console.log('trouvé dans le tableau !', index)
+    // Vérifier les réactions des utilisateurs autorisés
+    const users = await reaction.users.fetch();
+    const authorizedReactors = users.filter(u => config.userCanReact.includes(u.tag));
 
-                        //If yes searching if the channel still exist in the guild
-                        log(`${user.tag} reacted with ${reaction.emoji.name}`)
-                        log('Searching if the channel still exist in the guild')
+    if (authorizedReactors.size > 1) {
+        log('Un utilisateur autorisé a déjà réagi à ce message.')
+        return;
+    }
 
-                        let targetChannel
-
-                        config.sendDuplicateMessageChannel.forEach((channel) =>{
-                          
-                          if (reaction.message.guild.channels.cache.get(channel)){
-                              targetChannel = reaction.message.guild.channels.cache.get(channel);
-                          }
-                          //Else => go to try catch (lol)
-
-                        })
-                        
-                      //Before duplicate, check if another users in config.user has already reacted.
-                      //Using promise
-                      reaction.users.fetch().then(users => {
-                        let usernames = users.map(user => user.username);
-                        // Creating an array to compare usernames and config.userCanReact
-                            const hasCommonElement = usernames.filter(element => config.userCanReact.includes(element));
-
-                          if (hasCommonElement.length > 1){
-                              log('An authorised user has already react at this message.')
-                          }
-                          else{
-                              if (targetChannel){
-                                  targetChannel.send(`${reaction.message.content}`)
-                                  .then(message => {
-                                    message.react('💾');
-                                  })
-                                  .catch(console.error);
-                                  log(`Message duplicated : ${(reaction.message.content).split('\n')[0]}`)
-                              }
-                              else{
-                                  log('Impossible to duplicate the message')
-                                  reaction.message.channel.send('Impossible to duplicate the message, the channel may not still exist...')
-                              }
-                          }
-                      }).catch(error => {
-                          try{
-                              log(error);
-                              reaction.message.channel.send(`Unexpected error : ${error}`);
-                          }
-                          catch{
-                              log(error);
-                          }
-                          
-                        });
-                    }
-            })
-        }
-        // else{
-        //     log('Wrong channel, emoji, user, or not a text message')
-        // }
-    }else{
-        try{
-            log('Impossible to duplicate this type of data');
-          reaction.message.channel.send('Impossible to duplicate this type of data');
-      }
-      catch{
-        log('Impossible to duplicate this type of data');
-      }
+    // Dupliquer le message
+    try {
+        const duplicatedMessage = await targetChannel.send(content);
+        log(`Message dupliqué : ${content.split('\n')[0]}`);
+    } catch (error) {
+        log(`Erreur lors de la duplication : ${error}`);
+        await message.channel.send('Impossible de dupliquer le message.').catch(() => {});
     }
 }
