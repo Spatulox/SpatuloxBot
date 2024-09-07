@@ -259,15 +259,19 @@ export async function asyncSearchInLines(pathToFile, arrayToSearch, arrayToAvoid
 
 //----------------------------------------------------------------------------//
 
-export function postMessage(client, sentence, channelId, reactions) {
+export function postMessage(client, sentence, channelId, reactions = "default") {
   
   let targetChannel = client.channels.cache.get(channelId);
   targetChannel.send(sentence)
     .then(message => {
       
-      if (reactions.length != 0) {
+      if (reactions != null && reactions.length !== 0) {
         for (var i = 0; i < reactions.length; i++) {
           message.react(reactions[i]);
+        }
+      } else if(reactions === "default") {
+        for (let i = 0; i < config.emojiReact.length; i++) {
+          message.react(config.emojiReact[i])
         }
       }
 
