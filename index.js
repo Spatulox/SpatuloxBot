@@ -6,6 +6,7 @@ import config from './config.json' assert { type: 'json' };
 
 // Functions
 import { duplicateMessage } from './functionnalities/duplicateMessage.js'
+//import { downloadYtbVideo } from './functionnalities/downloadYoutubeVideo_old.js'
 import { downloadYtbVideo } from './functionnalities/downloadYoutubeVideo.js'
 import { recupLatestVideo } from './functionnalities/requestLatestYtbVideo.js'
 import { addReactions } from './functionnalities/reactions.js'
@@ -65,25 +66,14 @@ function main(){
 			],
 		});
 
-		//console.log(config);
-
 		log('Trying to connect to Discord Servers')
-		// let ok = "Not Connected"
-		// while(ok == 'Not Connected'){
-		// 	ok = loginBot(client)
-		// 	log(ok)
-		// 	// Set the bon online
-		// 	// client.login(config.token);
-		// }
 		var tmp = loginBot(client)
-		if (tmp == "Token error")
+		if (tmp === "Token error")
 		{
 			log('Stopping program')
 			process.exit()
 		}
-		
 
-		// Evènement qui attent deux chose (nom évènements, fonction associée)
 		client.on('ready', async () => {
 			log(`${client.user.username} has logged in, waiting...`)
 			client.user.setActivity({
@@ -93,16 +83,16 @@ function main(){
 			client.user.setStatus('dnd');
 
 
-			if(config.sendToOwnerOrChannel == "0"){
+			if(config.sendToOwnerOrChannel === "0"){
 	          const owner = await client.users.fetch(config.owner);
 	          owner.send('Bot online');
 	        }
-	        else if(config.sendToOwnerOrChannel == "1"){
+	        else if(config.sendToOwnerOrChannel === "1"){
 	          const channelLogin = client.channels.cache.get(config.channelPingLogin)
 	          channelLogin.send(`<@${config.owner}>, Bot is online!`);
 	        }
 
-			// Creating the owner (Just me, if it's an arry, it not gonna work)
+			// Creating the owner (Just me, if it's an array, it not gonna work)
 			const owner = await client.users.fetch(config.owner);
 
 			// Deploy Commands
@@ -112,9 +102,8 @@ function main(){
 			recapBotsErrors(client, config)
 
 			try{
-				// switchYtbToken()
-				recupLatestVideo(client)
-				setInterval(function(){recupLatestVideo(client);}, 5400000) // 1h30 (5 minutes = 300000) (1h = 3 600 000)
+				//recupLatestVideo(client)
+				//setInterval(function(){recupLatestVideo(client);}, 5400000) // 1h30 (5 minutes = 300000) (1h = 3 600 000)
 			}
 			catch(error){
 				log(`Error when trying to retrieve latest video ${error}`)
@@ -136,10 +125,10 @@ function main(){
 
 			// Listen for the messageReactionAdd event
 			client.on('messageReactionAdd', async (reaction, user) => {
-				if (reaction == '💾' && config.downloadChannel.includes(reaction.message.channelId)){
+				if (reaction._emoji.name === '💾' && config.downloadChannel.includes(reaction.message.channelId) && !user.bot){
 					downloadYtbVideo(reaction.message, user)
 				}
-				else{
+				else if(reaction._emoji.name === '✅'){
 					duplicateMessage(reaction, user)
 				}
 				
@@ -147,7 +136,6 @@ function main(){
 		});
 
 		client.on('interactionCreate', async (interaction) => {
-
 			executeSlashCommand(interaction, client)
 		  });
 	});
