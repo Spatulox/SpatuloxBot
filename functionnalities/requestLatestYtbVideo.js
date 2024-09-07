@@ -23,7 +23,7 @@ export async function recupLatestVideo(client){
 
   // Actual YouTube API key
 
-  if(config == 'Error'){
+  if(config === 'Error'){
     log('ERROR : Impossible to read the JSON file, aborded recupLAtestVideo()')
     return
   }
@@ -36,7 +36,7 @@ export async function recupLatestVideo(client){
 
   const nbJsonFile = await listJsonFile('ytbChannels/')
 
-  if (nbJsonFile == 'Error'){
+  if (nbJsonFile === 'Error'){
     log(`Impossible to list the JSON file ./ytbChannels/`)
     return
   }
@@ -45,7 +45,7 @@ export async function recupLatestVideo(client){
     const jsonChannel = nbJsonFile[index];
     let jsonFile = await readJsonFile(`./ytbChannels/${jsonChannel}`)
 
-    if (jsonFile =='Error'){
+    if (jsonFile ==='Error'){
       log(`Impossible to read the JSON file ./ytbChannels/${jsonChannel}`)
       return
     }
@@ -88,7 +88,7 @@ export async function recupLatestVideo(client){
             log('YtbToken switched, reading config.json...')
             config = await readJsonFile('./config.json')
 
-            if(config == 'Error'){
+            if(config === 'Error'){
               log('ERROR : Impossible to read the JSON file, aborded recupLAtestVideo()')
               return
             }
@@ -128,13 +128,10 @@ export async function recupLatestVideo(client){
 
               let sentence = `# 🎵 __** ${videoTitle} **__ 🎵\n> - https://www.youtu.be/${videoId}\n> - Author : ${author}\n> - Uploaded on ${date.toLocaleDateString()}, <t:${timestamp}:R>`
               log(`Posting Video ${videoTitle} - ${videoId}`)
-              postMessage(client, sentence, jsonFile.guildChannelToPostVideo, ['✅', '💾', '👀'])
+              postMessage(client, sentence, jsonFile.guildChannelToPostVideo)//['✅', '💾', '👀', '🎵']
               addVideoIdToFile.push(videoId)
-
             }
-
           }
-          // return addVideoIdToFile
         }
         else{
           addVideoIdToFile = 'No channel corresponding to the id found...'
