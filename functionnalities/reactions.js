@@ -1,12 +1,17 @@
 import { log } from '../Functions/functions.js'
+import config from '../config.json' assert { type: 'json' };
 
 export async function addReactions(message){
 
 	try{
 		const regexUrl = /https?:\/\/(www\.)?youtu(be\.com\/watch\?v=|\.be\/)[\w-]{11}/ // Regex to search for a link
-		if (message.channelId == "1132996287520841869" && regexUrl.test(message.content)){ //Channel Musiques à sauvegarder (télécharger) 
-			message.react('💾')
-			// log("Good channel, reacted with : 💾")
+
+		config.emojiReact
+
+		if (config.getReactionChannel.includes(message.channelId) && regexUrl.test(message.content)){ //Channel Musiques à sauvegarder (télécharger)
+			for (let i = 0; i < config.emojiReact.length; i++) {
+				message.react(config.emojiReact[i])
+			}
 		}
 		
 	}
