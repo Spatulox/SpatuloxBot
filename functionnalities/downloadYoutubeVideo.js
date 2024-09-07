@@ -6,6 +6,7 @@ import ytdl from '@distube/ytdl-core'
 import ytpl from 'ytpl'
 import fs from 'fs'
 
+// ------------------------------------------------------------------------------------------//
 
 export async function downloadYtbVideo(message, user){
     try {
@@ -55,6 +56,8 @@ export async function downloadYtbVideo(message, user){
     }
 }
 
+// ------------------------------------------------------------------------------------------//
+
 async function downloadAudio(url, tmpPath, targetChannel, message){
 
     url = url.split('/').pop();
@@ -71,7 +74,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     //let metadata = await ytdl.getBasicInfo(url)
     let metadata = await getBasicInfoWithRetry(url);
     if(metadata === false){
-        sendMessage(targetChannel, `Impossible to retrieve informations for ${url}, plz try again later..`)
+        sendMessage(targetChannel, `Impossible to retrieve informations for ${url} (getBasicInfoWithRetry() = false), plz try again later..`)
         return false
     }
 
@@ -107,7 +110,13 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     videoTitle = await getUserAnswerIfDuplicateFile(message, videoTitle, tmpPath)
 
     log(`Downloading Audio : ${videoUrl}`)
-    return await new Promise(async (resolve, reject) => {
+
+    try {
+        await downloadWithRetry(videoUrl, tmpPath, videoTitle, targetChannel);
+    } catch (error) {
+        sendMessage(targetChannel, `Échec final du téléchargement : ${error.message}`);
+    }
+    /*return await new Promise(async (resolve, reject) => {
 
         let audioStream
         try{
@@ -134,14 +143,14 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
         }
 
         try {
-            await downloadWithRetry(audioStream, tmpPath, videoTitle, targetChannel);
+            await downloadWithRetry(videoUrl, tmpPath, videoTitle, targetChannel);
         } catch (error) {
             sendMessage(targetChannel, `Échec final du téléchargement : ${error.message}`);
         }
-    });
+    });*/
 }
 
-
+// ------------------------------------------------------------------------------------------//
 
 async function downloadPlaylist(playlistId, path, message, targetChannel){
     let tmpPath = path
@@ -197,18 +206,20 @@ async function downloadPlaylist(playlistId, path, message, targetChannel){
     }
 }
 
+// ------------------------------------------------------------------------------------------//
+
 async function getBasicInfoWithRetry(url, maxRetries = 2) {
     let attempts = 0;
 
     while (attempts <= maxRetries) {
         try {
-            return await ytdl.getBasicInfo(url); // Succès, retourner les métadonnées
+            return await ytdl.getBasicInfo(url);
         } catch (error) {
             attempts++;
-            console.error(`Tentative ${attempts} échouée:`, error.message);
+            log(`Tentative ${attempts} échouée:`, error.message);
 
             if (attempts > maxRetries) {
-                console.error("Nombre maximal de tentatives atteint. Abandon.");
+                log("Nombre maximal de tentatives atteint. Abandon.");
                 return false
             }
 
@@ -218,13 +229,14 @@ async function getBasicInfoWithRetry(url, maxRetries = 2) {
     }
 }
 
+// ------------------------------------------------------------------------------------------//
 
 async function getUserAnswerIfDuplicateFile(message, videoName, tmpPath){
 
     let listDownloadVid = await listFile(`${tmpPath}\\`, 'mp3')
 
     if (listDownloadVid.includes(videoName+'.mp3')){
-        log("Already exist video, asking user")
+        log("This video already exist")
         // Detect the number of files with the same name
         let regex = new RegExp(videoName + '\\d*\\.mp3');
 
@@ -240,9 +252,12 @@ async function getUserAnswerIfDuplicateFile(message, videoName, tmpPath){
     return videoName
 }
 
+// ------------------------------------------------------------------------------------------//
+
 async function askingUserAndWaitReaction(message, videoName, count) {
     try {
         // Envoyer le message et ajouter les réactions
+        log("Asking user, and waiting for his reaction")
         const replyMessage = await message.reply('This video is already downloaded. What do you want to do?\n> - ☠️ = Overwrite file\n> - 💾 = Save the file without overwriting it');
         await replyMessage.react('☠️');
         await replyMessage.react('💾');
@@ -253,6 +268,7 @@ async function askingUserAndWaitReaction(message, videoName, count) {
         const collector = replyMessage.createReactionCollector({ filter, max: 1, time: 60000 });
         return new Promise((resolve, reject) => {
             collector.on('collect', (reaction, user) => {
+                log("User reacted in time")
                 let messageBack = '';
                 if (reaction.emoji.name === '☠️') {
                     log('Overwrite file');
@@ -269,24 +285,22 @@ async function askingUserAndWaitReaction(message, videoName, count) {
 
             collector.on('end', collected => {
                 if (collected.size === 0) {
+                    log("User didn\'t react in time")
                     message.channel.send('You did not react in time. Saving file without overwriting.');
                     resolve(videoName + ` (${count})`);
                 }
             });
         });
     } catch (error) {
-        console.error('Error in handleDuplicateFile:', error);
+        log('User didn\'t react in time or Error in handleDuplicateFile:', error);
         await message.channel.send('You did not react in time. Saving file without overwriting.');
         return videoName + ` (${count})`; // ou toute autre logique pour gérer les doublons
     }
 }
 
+// ------------------------------------------------------------------------------------------//
 
-
-
-
-
-async function downloadWithRetry(audioStream, tmpPath, videoTitle, targetChannel, maxRetries = 3) {
+async function downloadWithRetry(url, tmpPath, videoTitle, targetChannel, maxRetries = 3) {
     return new Promise(async (resolve, reject) => {
         let attempts = 0;
 
@@ -295,29 +309,46 @@ async function downloadWithRetry(audioStream, tmpPath, videoTitle, targetChannel
             const filePath = `${tmpPath}\\${videoTitle}.mp3`;
             const writeStream = fs.createWriteStream(filePath);
 
+            let audioStream;
+            try {
+                audioStream = ytdl(url, {
+                    quality: 'highestaudio',
+                    filter: 'audioonly',
+                });
+            } catch (error) {
+                sendMessage(targetChannel, `Erreur lors de la création du stream (tentative ${attempts}): ${error}`);
+                return;
+            }
+
             audioStream.pipe(writeStream);
 
             audioStream.on('end', () => {
+                writeStream.end();
                 sendMessage(targetChannel, `Download complete for ${videoTitle}`);
                 resolve();
             });
 
-            audioStream.on('error', async (error) => {
+            audioStream.on('error', handleError);
+            writeStream.on('error', handleError);
+
+            async function handleError(error) {
                 console.error(`Erreur détaillée (tentative ${attempts}):`, error);
                 if (error.statusCode) {
                     console.error(`Code d'état HTTP : ${error.statusCode}`);
                 }
                 sendMessage(targetChannel, `ERROR : Impossible to download __**${videoTitle}**__, ${error.message}\n> '${filePath}'`);
 
+                // Fermer les streams
+                audioStream.destroy();
                 writeStream.end();
 
                 try {
                     await fs.promises.access(filePath, fs.constants.F_OK);
                     await fs.promises.unlink(filePath);
-                    log(`Fichier 'corrompu de 0 octets' supprimé avec succès : ${filePath}`)
+                    log(`Fichier 'corrompu de 0 octets' supprimé avec succès : ${filePath}`);
                 } catch (unlinkError) {
                     if (unlinkError.code !== 'ENOENT') {
-                        log(`Erreur lors de la suppression du fichier 'corrompu de 0 octets' : ${unlinkError.message}`);
+                        sendMessage(targetChannel, `Erreur lors de la suppression du fichier 'corrompu de 0 octets' : ${unlinkError.message}`)
                     }
                 }
 
@@ -328,7 +359,7 @@ async function downloadWithRetry(audioStream, tmpPath, videoTitle, targetChannel
                 } else {
                     reject(new Error(`Échec du téléchargement après ${maxRetries} tentatives.`));
                 }
-            });
+            }
         }
 
         attemptDownload();
