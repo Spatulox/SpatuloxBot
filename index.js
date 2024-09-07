@@ -102,8 +102,8 @@ function main(){
 			recapBotsErrors(client, config)
 
 			try{
-				//recupLatestVideo(client)
-				//setInterval(function(){recupLatestVideo(client);}, 5400000) // 1h30 (5 minutes = 300000) (1h = 3 600 000)
+				recupLatestVideo(client)
+				setInterval(function(){recupLatestVideo(client);}, 5400000) // 1h30 (5 minutes = 300000) (1h = 3 600 000)
 			}
 			catch(error){
 				log(`Error when trying to retrieve latest video ${error}`)
