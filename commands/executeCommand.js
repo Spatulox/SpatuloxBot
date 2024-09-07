@@ -1,8 +1,7 @@
 // Slashes command in alphabetical order...
 import { switchYtbToken, readJsonFile, log } from '../Functions/functions.js'
 import { addYtbChannel } from './commandsFunctions/add-ytb-channel.js'
-// import { readJsonFile } from '../Functions/functions.js';
-// import { log } from '../Functions/functions.js';
+import { setStatus } from './commandsFunctions/set-status.js'
 
 export async function executeSlashCommand(interaction, client){
     if (!interaction.isCommand()) return;
@@ -33,17 +32,7 @@ export async function executeSlashCommand(interaction, client){
     }
 
     if (interaction.commandName === 'set-status') {
-        try{
-            client.user.setActivity({
-                name: interaction.options.getString('new-status')
-            })
-            await interaction.reply(`Status switched for ${interaction.options.getString('new-status')}`);
-            log(`Status switched for ${interaction.options.getString('new-status')}`)
-        }
-        catch(err){
-            log(`ERROR : Impossible to set the activity of the bot : ${err}`)
-        }
-        
+        setStatus(interaction)
     }
 
       
