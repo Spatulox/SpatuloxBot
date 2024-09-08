@@ -1,5 +1,6 @@
 // import config from '../config.json' assert { type: 'json' };
-import { readJsonFile, addVideoToJsonFile, postMessage, listJsonFile, switchYtbToken } from '../Functions/functions.js'
+import { readJsonFile, addVideoToJsonFile, listJsonFile, switchYtbToken } from '../Functions/functions.js'
+import { postMessage } from '../Functions/messages.js'
 import { log } from '../Functions/functions.js'
 import fetch from 'node-fetch'
 import { checkXTimesInternetCo } from '../Functions/checkInternetCo.js'
