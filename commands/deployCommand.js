@@ -54,10 +54,6 @@ export async function deployCommand(client){
               permissions |= BigInt(PermissionFlagsBits.ManageRoles);
               break;
 
-            case "manage_permission":
-              permissions |= BigInt(PermissionFlagsBits.ManageRoles);
-              break;
-
             case "manage_users":
               permissions |= BigInt(PermissionFlagsBits.ModerateMembers);
               break;
