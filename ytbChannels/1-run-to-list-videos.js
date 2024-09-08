@@ -1,6 +1,6 @@
 import config from '../config.json' assert { type: 'json' };
 import fetch from 'node-fetch'
-import { listJsonFile } from '../Functions/functions.js'
+import { listJsonFile } from '../functions/files.js'
 import fs from 'fs'
 
 // How to have Id channel ?
@@ -35,7 +35,7 @@ async function getLatestVideos() {
   const maxResults = 5000;
   
   const apiKey = config.ytbToken[config.usingYtbToken];
-  let channelId
+  //let channelId
   let channelToPost
 
   let channelMusique = "1132993974689341550"

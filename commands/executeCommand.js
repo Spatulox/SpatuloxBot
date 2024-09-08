@@ -1,5 +1,6 @@
 // Slashes command in alphabetical order...
-import { switchYtbToken, readJsonFile, log } from '../Functions/functions.js'
+import { switchYtbToken } from '../functions/functions.js'
+import { readJsonFile } from '../functions/files.js'
 import { addYtbChannel } from './commandsFunctions/add-ytb-channel.js'
 import { setStatus } from './commandsFunctions/set-status.js'
 

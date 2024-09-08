@@ -4,9 +4,9 @@ import { Client, GatewayIntentBits } from 'discord.js';
 // Files
 import config from '../config.json' assert { type: 'json' };
 
-// Functions
-import { log, switchYtbToken, recapBotsErrors } from '../Functions/functions.js'
-import { checkInternetCo } from '../Functions/checkInternetCo.js'
+// functions
+import { log, switchYtbToken, recapBotsErrors } from '../functions/functions.js'
+import { checkInternetCo } from '../functions/checkInternetCo.js'
 
 let crashCount = 0
 const maxCrashCount = 5

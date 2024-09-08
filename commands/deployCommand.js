@@ -1,5 +1,5 @@
-import { log } from '../Functions/functions.js';
-import { listJsonFile, readJsonFile } from '../Functions/functions.js';
+import { log } from '../functions/functions.js';
+import { readJsonFile, listJsonFile } from '../functions/files.js'
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 export async function deployCommand(client){
@@ -7,7 +7,7 @@ export async function deployCommand(client){
   // Import commands files
   const listFile = await listJsonFile('./commands/json/')
 
-  if (listFile == 'Error'){
+  if (listFile === 'Error'){
     log('ERROR : Impossible to list files in deployCommand()')
     return
   }

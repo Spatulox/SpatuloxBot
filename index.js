@@ -4,14 +4,14 @@ import { Client, GatewayIntentBits } from 'discord.js';
 // Files
 import config from './config.json' assert { type: 'json' };
 
-// Functions
-import { duplicateMessage } from './functionnalities/duplicateMessage.js'
-//import { downloadYtbVideo } from './functionnalities/downloadYoutubeVideo_old.js'
-import { downloadYtbVideo } from './functionnalities/downloadYoutubeVideo.js'
-import { recupLatestVideo } from './functionnalities/requestLatestYtbVideo.js'
-import { addReactions } from './functionnalities/reactions.js'
-import { log, switchYtbToken, recapBotsErrors } from './Functions/functions.js'
-import { checkInternetCo } from './Functions/checkInternetCo.js'
+// functions
+import { duplicateMessage } from './events/duplicateMessage.js'
+//import { downloadYtbVideo } from './events/downloadYoutubeVideo_old.js'
+import { downloadYtbVideo } from './events/downloadYoutubeVideo.js'
+import { recupLatestVideo } from './events/automatics/requestLatestYtbVideo.js'
+import { addReactions } from './events/reactions.js'
+import { log, switchYtbToken, recapBotsErrors } from './functions/functions.js'
+import { checkInternetCo } from './functions/checkInternetCo.js'
 import { deployCommand } from './commands/deployCommand.js';
 import { executeSlashCommand } from './commands/executeCommand.js';
 

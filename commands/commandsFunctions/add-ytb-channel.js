@@ -1,5 +1,6 @@
 import fetch from 'node-fetch'
-import { listJsonFile, readJsonFile, log } from '../../Functions/functions.js'
+import { log } from '../../functions/functions.js'
+import { readJsonFile } from '../../functions/files.js'
 import fs from 'fs'
 
 // How to have Id channel ?

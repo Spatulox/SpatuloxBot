@@ -1,4 +1,4 @@
-import { log } from '../Functions/functions.js'
+import { log } from '../functions/functions.js'
 import config from '../config.json' assert { type: 'json' };
 
 export async function addReactions(message){

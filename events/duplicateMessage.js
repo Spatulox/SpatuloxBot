@@ -1,5 +1,5 @@
 import config from '../config.json' assert { type: 'json' }
-import {log} from '../Functions/functions.js'
+import {log} from '../functions/functions.js'
 
 export async function duplicateMessage(reaction, user) {
     const { message, emoji } = reaction;

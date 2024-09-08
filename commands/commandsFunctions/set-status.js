@@ -1,4 +1,4 @@
-import {log} from "../../Functions/functions.js";
+import {log} from "../../functions/functions.js";
 
 export async function setStatus(interaction){
     await interaction.deferReply()

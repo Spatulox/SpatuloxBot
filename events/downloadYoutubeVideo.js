@@ -1,5 +1,7 @@
 import config from '../config.json' assert {type: 'json'};
-import {listFile, log, sendMessage} from '../Functions/functions.js'
+import { sendMessage } from '../functions/messages.js'
+import { log } from '../functions/functions.js'
+import { listFile } from "../functions/files.js";
 //import ytdl from 'ytdl-core'
 import ytdl from '@distube/ytdl-core'
 

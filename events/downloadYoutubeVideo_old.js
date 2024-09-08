@@ -1,5 +1,6 @@
 import config from '../config.json' assert { type: 'json' };
-import { log, listFile } from '../Functions/functions.js'
+import { log } from '../functions/functions.js'
+import { listFile } from '../functions/files.js'
 import ytdl from 'ytdl-core'
 import ytpl from 'ytpl'
 import fs from 'fs'
@@ -18,7 +19,7 @@ export async function downloadYtbVideo(message, user){
 
     let path = `C:\\Marc\\Perso\\Musics\\1-TelechargesViaDiscord\\`
 
-    const targetChannel = await message.guild.channels.cache.get(message.channelId)
+    const targetChannel = message.guild.channels.cache.get(message.channelId)
     let err = ''
 
     // Test if there is a link in the video

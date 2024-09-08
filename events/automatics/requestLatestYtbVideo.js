@@ -1,9 +1,10 @@
 // import config from '../config.json' assert { type: 'json' };
-import { readJsonFile, addVideoToJsonFile, listJsonFile, switchYtbToken } from '../Functions/functions.js'
-import { postMessage } from '../Functions/messages.js'
-import { log } from '../Functions/functions.js'
+import { switchYtbToken } from '../../functions/functions.js'
+import { readJsonFile, addVideoToJsonFile, listJsonFile } from '../../functions/files.js'
+import { postMessage } from '../../functions/messages.js'
+import { log } from '../../functions/functions.js'
 import fetch from 'node-fetch'
-import { checkXTimesInternetCo } from '../Functions/checkInternetCo.js'
+import { checkXTimesInternetCo } from '../../functions/checkInternetCo.js'
 
 export async function recupLatestVideo(client){
 
