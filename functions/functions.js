@@ -124,10 +124,17 @@ export function switchYtbToken(){
 
 export async function recapBotsErrors(client, config){
   try{
-    // Create a today and a yesterday var to search it into the log file..
-    const errorChannel = await client.channels.cache.get(config.errorChannel)
+    // Create a today and a yesterday var to search it into the log file.
+    if (config?.sendChannelErrors === "yes"){
 
-    if (config.sendChannelErrors == "yes"){
+      let errorChannel
+      if(config?.errorChannel){
+        errorChannel = await client.channels.cache.get(config.errorChannel)
+      } else {
+        log("INFO : 'errorChannel' isn't defined inside the config file, set it with the id of the channel you want the errors to pop")
+        return false
+      }
+
       var today = new Date();
       today.setUTCHours(0,0,0,0)
       let yesterday = new Date();
@@ -145,10 +152,17 @@ export async function recapBotsErrors(client, config){
       if (typeof(resToday) !== 'string' && resToday.length != 0){
         resToday = resToday.join('\n')
         await sendLongMessage(errorChannel, '# Today errors :', resToday)
-      }	
+      }
+      return true
+    } else {
+      if(config?.sendChannelErrors !== "no"){
+        log("INFO : sendChannelErrors isn't defined inside the config file, set it to 'yes' or 'no'..")
+        return false
+      }
     }
   }
   catch{
     log('ERROR : Impossible to post the recap of the error in the channel')
+    return false
   }
 }
