@@ -1,6 +1,6 @@
 //Librairies
 import { Client, GatewayIntentBits } from 'discord.js';
-
+import Discord from 'discord.js'
 // Files
 import config from './config.json' assert { type: 'json' };
 
@@ -50,6 +50,7 @@ function main(){
 	checkInternetCo()
     .then(() => {
 
+		log(`Using discord.js version: ${Discord.version}`);
 		log('Creating Client')
 		//Créer un "client"
 		const client = new Client({ intents: [

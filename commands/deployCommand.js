@@ -4,7 +4,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { PermissionFlagsBits } from 'discord-api-types/v10';
 
 export async function deployCommand(client){
-
+  log('Deploying slashes commands')
   // Import commands files
   const listFile = await listJsonFile('./commands/json/')
 
