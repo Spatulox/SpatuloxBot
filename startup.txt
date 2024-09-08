@@ -7,3 +7,8 @@ pm2-startup install => Je sais pas ce que ca fait :/
 
 pm2 start index.js (démarerr index.js)
 pm2 save (sauvegarde ce qui doit être démarré lors du démarrage du PC)
+
+
+
+// Pour mettre à jour un package : npm install nom_package@latest
+// Pour démarrer mon projet : node index.js
