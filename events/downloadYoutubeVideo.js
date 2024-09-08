@@ -17,10 +17,15 @@ export async function downloadYtbVideo(message, user){
 
         let path = `C:\\Marc\\Perso\\Musics\\1-TelechargesViaDiscord\\`
 
-        const targetChannel = await message.guild.channels.cache.get(message.channelId)
+        const targetChannel = message.guild.channels.cache.get(message.channelId) || message.channel || (await message.guild.channels.fetch(message.channelId)) // Last condition probably useless
+
+        if(!targetChannel){
+            log("ERROR : targetChannel to send messages can't be detected")
+            return false
+        }
 
         if ((message.content.includes("Overwrite file") || message.content.includes("overwriting"))) {
-            return
+            return false
         }
         // Test if there is a link in the video
         if (!regexUrl.test(message.content)) {

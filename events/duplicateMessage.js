@@ -14,12 +14,22 @@ export async function duplicateMessage(reaction, user) {
     }
 
     // Trouver le canal cible
-    const targetChannel = config.sendDuplicateMessageChannel
-        .map(id => guild.channels.cache.get(id))
-        .find(channel => channel);
+    let targetChannel = null;
+    for (const id of config.sendDuplicateMessageChannel) {
+        targetChannel = guild.channels.cache.get(id);
+        if (!targetChannel) {
+            try {
+                targetChannel = await guild.channels.fetch(id);
+            } catch (error) {
+                log(`ERROR : Lors de la récupération du canal ${id}:`, error);
+                continue;
+            }
+        }
+        if (targetChannel) break;
+    }
 
     if (!targetChannel) {
-        log('Canal cible non trouvé')
+        log('ERROR : Canal cible non trouvé')
         return;
     }
 
