@@ -16,8 +16,6 @@ export async function recupLatestVideo(client){
     return
   }
 
-
-
   let config = await readJsonFile('./config.json')
 
   // Need to create a function that retrieve the number of api ytb key used to use :
@@ -114,8 +112,6 @@ export async function recupLatestVideo(client){
 
           log(`Latest video for ${data.items[0].snippet.channelTitle}: ${data.items[0].snippet.title} - ${data.items[0].id.videoId}`)
 
-          
-
           for (let i = 0; i < data.items.length; i++) {
 
             const videoId = data.items[i].id.videoId;
@@ -153,7 +149,6 @@ export async function recupLatestVideo(client){
       await addVideoToJsonFile(`./ytbChannels`, `${jsonChannel}`, addVideoIdToFile)
     }
   }
-  
 }
 
 

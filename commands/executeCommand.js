@@ -6,7 +6,6 @@ import { setStatus } from './commandsFunctions/set-status.js'
 
 export async function executeSlashCommand(interaction, client){
     if (!interaction.isCommand()) return;
-    // console.log(client)
 
     if (interaction.commandName === 'add-ytb-channel') {
         interaction.reply('Searching on internet and adding ytbChannel...')
@@ -36,5 +35,4 @@ export async function executeSlashCommand(interaction, client){
         setStatus(interaction)
     }
 
-      
 };

@@ -24,6 +24,7 @@ export async function checkInternetCo() {
   }
 }
 
+// ------------------------------------------------------------------------------ //
 
 export async function checkXTimesInternetCo(xTime) {
   let count = 0;
@@ -47,7 +48,6 @@ export async function checkXTimesInternetCo(xTime) {
           log('ERROR when awaiting the promise to await 1 minutes')
         }
     }
-
   }
   return 'Error'
 }

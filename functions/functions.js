@@ -60,11 +60,8 @@ export function log(str) {
         catch{
           console.log('Impossible to write in the renamed file...')
         }
-
       }
     }
-
-
   } catch (err) {
     console.error('Erreur lors de la récupération de la taille du fichier : ' + err);
   }
@@ -106,7 +103,6 @@ export async function asyncSearchInLines(pathToFile, arrayToSearch, arrayToAvoid
     log(`ERROR : Error asyncSearchInLines(), when reading file ${pathToFile}`)
     return `ERROR : Error asyncSearchInLines(), when reading file ${pathToFile}`
   }
-
 }
 
 //----------------------------------------------------------------------------//
@@ -122,8 +118,6 @@ export function switchYtbToken(){
     // Set to 0 but the programm will automatically switch between 0 and 1
     replaceValueJsonFile('./config.json', 'usingYtbToken', '0')
   }
-
-
 }
 
 //----------------------------------------------------------------------------//

@@ -17,7 +17,6 @@ export async function deployCommand(client){
   for (const file of listFile) {
 
     try{
-
       const command = await readJsonFile(`./commands/json/${file}`, 'utf8')
 
       let commandData = new SlashCommandBuilder()
@@ -100,8 +99,6 @@ export async function deployCommand(client){
     catch(err){
       log(`ERROR : Impossible to create the ${file.split('.json')[0]} command : ${err}`)
     }
-    
   }
-
   log(`Created global command ${createdCommand.length}/${listFile.length} : ${createdCommand}`)
 }

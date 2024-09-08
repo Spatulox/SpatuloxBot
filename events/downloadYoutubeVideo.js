@@ -123,38 +123,6 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     } catch (error) {
         sendMessage(targetChannel, `Échec final du téléchargement : ${error.message}`);
     }
-    /*return await new Promise(async (resolve, reject) => {
-
-        let audioStream
-        try{
-            audioStream = ytdl(videoUrl, {
-                quality: 'highestaudio',
-                filter: 'audioonly',
-                requestOptions: {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    }
-                }
-            });
-        }
-        catch{
-            audioStream = ytdl(videoUrl, {
-                quality: 'lowestaudio',
-                filter: 'audioonly',
-                requestOptions: {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    }
-                }
-            });
-        }
-
-        try {
-            await downloadWithRetry(videoUrl, tmpPath, videoTitle, targetChannel);
-        } catch (error) {
-            sendMessage(targetChannel, `Échec final du téléchargement : ${error.message}`);
-        }
-    });*/
 }
 
 // ------------------------------------------------------------------------------------------//
@@ -168,7 +136,6 @@ async function downloadPlaylist(playlistId, path, message, targetChannel){
             .then(async playlist => {
 
                 // Iterate over the video IDs and download each video
-
                 let playTitle = playlist.title
                 let author = playlist.items[0].author.name
 

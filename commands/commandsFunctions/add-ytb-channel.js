@@ -35,9 +35,6 @@ export async function addYtbChannel(channelId, channelToPost) {
 
   const apiKey = config.ytbToken[config.usingYtbToken];
 
-  console.log(channelId, channelToPost)
-  
-
   try {
     log(`Checking YouTube...`);
 
@@ -51,8 +48,6 @@ export async function addYtbChannel(channelId, channelToPost) {
 
     const data = await response.json();
 
-    console.log(`Total videos: ${data.items.length}`);
-
     // Load the existing channel JSON file
     // let channelsList = await listJsonFile();
     //console.log("Channel list:", channelsList);
@@ -61,8 +56,6 @@ export async function addYtbChannel(channelId, channelToPost) {
     for (var i = 0; i < data.items.length; i++) {
       listVideosId.push(data.items[i].id.videoId)
     }
-
-    console.log(listVideosId)
 
     // if (!channelsList.includes(`${channelId}.json`)){
       const jsonToWrite = {
@@ -81,7 +74,6 @@ export async function addYtbChannel(channelId, channelToPost) {
         }
         log('JSON file has been created.');
       });
-    // }
 
     log(`Checking completed...`);
     return data.items[0].snippet.channelTitle
