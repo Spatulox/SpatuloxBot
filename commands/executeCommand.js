@@ -7,7 +7,7 @@ import { setStatus } from './commandsFunctions/set-status.js'
 export async function executeSlashCommand(interaction, client){
     if (!interaction.isCommand()) return;
 
-    if (interaction.commandName === 'add-ytb-channel') {
+    if (interaction.commandName === 'ytb-channel') {
         interaction.reply('Searching on internet and adding ytbChannel...')
         
         let discordChannel = interaction.options.getChannel('discord-channel-to-post').id
