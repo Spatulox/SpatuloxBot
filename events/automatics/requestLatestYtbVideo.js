@@ -1,4 +1,3 @@
-// import config from '../config.json' assert { type: 'json' };
 import { switchYtbToken } from '../../functions/functions.js'
 import { readJsonFile, addVideoToJsonFile, listJsonFile } from '../../functions/files.js'
 import { postMessage } from '../../functions/messages.js'

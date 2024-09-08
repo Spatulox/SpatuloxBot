@@ -1,7 +1,9 @@
+import {log} from "./functions.js";
+import path, { dirname } from 'path'
+import fs from 'fs'
+
 //----------------------------------------------------------------------------//
 
-
-import {log} from "./functions.js";
 export async function addVideoToJsonFile(directoryPath, fileName, valueToPut){
 
     log('Updating json file')
