@@ -16,7 +16,7 @@ export async function executeSlashCommand(interaction, client){
         let res = await addYtbChannel(ytbChannel, discordChannel)
         let tmp = await client.channels.cache.get(discordChannel);
 
-        if(tmp != 'Error'){
+        if(tmp !== 'Error'){
             tmp.send(`Added ${res} : ${ytbChannel}`)
         }
         else{

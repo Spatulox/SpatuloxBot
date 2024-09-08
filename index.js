@@ -21,9 +21,9 @@ const maxCrashCount = 5
 async function loginBot(client) {
 
 	var ok = 'Not Connected'
-	if (config.token != ""){
+	if (config.token !== ""){
 
-		while(ok == 'Not Connected'){
+		while(ok === 'Not Connected'){
 			ok = await client.login(config.token)
 				.then(() => {
 					log('Logged in successfully!');
@@ -34,18 +34,13 @@ async function loginBot(client) {
 					new Promise(resolve => setTimeout(resolve, 30000));
 					return 'Not Connected'
 				});
-
-			// if (ok == 'Not Connected'){
-			// 	await new Promise(resolve => setTimeout(resolve, 30000));
-			// }
 		}
 	}
 	else{
 		log('ERROR : Please enter a valid Discord token....')
 		return "Token error"
 	}
-
-  }
+}
 
 function main(){
 
@@ -141,27 +136,5 @@ function main(){
 	});
 };
 
-async function startProgram() {
-	log('----------------------------------------------------')
-	log('Starting Program');
-
-	try {
-		main();
-	} catch (error) {
-		crashCount++;
-		log(`Program crashed for the ${crashCount} time(s), ${error}`);
-		if (crashCount >= maxCrashCount) {
-			log(`Program crashed ${crashCount} times, exiting...`);
-			process.exit();
-		} else if (error.code !== 'ENOTFOUND' && error.code !== 'ECONNRESET') {
-			// Restart the program only if the error is not related to internet connectivity
-			await new Promise(resolve => setTimeout(resolve, 10000));
-			await startProgram();
-		}
-	}
-} 
-
-
 main()
-// startProgram()
 
