@@ -1,3 +1,6 @@
+import config from '../config.json' assert { type: 'json' };
+import {log} from "./functions.js";
+
 //----------------------------------------------------------------------------//
 
 export function postMessage(client, sentence, channelId, reactions = "default") {
@@ -7,7 +10,7 @@ export function postMessage(client, sentence, channelId, reactions = "default") 
         .then(message => {
 
             if (reactions != null && reactions.length !== 0) {
-                for (var i = 0; i < reactions.length; i++) {
+                for (let i = 0; i < reactions.length; i++) {
                     message.react(reactions[i]);
                 }
             } else if(reactions === "default") {
