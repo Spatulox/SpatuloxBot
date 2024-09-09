@@ -90,8 +90,8 @@ export async function deployCommand(client){
 
 
 function createTypeCommand(commandData, optionC, file = null){
-  console.log("-----------------------")
-  console.log(optionC.type, optionC.name)
+  //console.log("-----------------------")
+  //console.log(optionC.type, optionC.name)
   switch (optionC.type) {
 
     // SubCommand type
