@@ -1,7 +1,8 @@
 import fetch from 'node-fetch'
 import { log } from '../../functions/functions.js'
-import { readJsonFile } from '../../functions/files.js'
+import {listJsonFile, readJsonFile} from '../../functions/files.js'
 import fs from 'fs'
+import {createEmbed, fillEmbed, readyToSendEmbed} from "../../functions/embeds.js";
 
 // How to have Id channel ?
 // Clique droit => Code source de la page
@@ -26,7 +27,78 @@ import fs from 'fs'
 
 
 
-export async function addYtbChannel(channelId, channelToPost) {
+export async function ytbChannelCommand(client, interaction){
+
+  await interaction.deferReply()
+  //interaction.reply('Searching on internet and adding ytbChannel...')
+  const subcommand = interaction.options.getSubcommand()
+
+  switch (subcommand) {
+    case 'add':
+
+      let discordChannel = interaction.options.getChannel('discord-channel-to-post').id
+      let ytbChannel = interaction.options.getString('ytb-channel-id')
+
+      let res = await addYtbChannel(ytbChannel, discordChannel)
+      let tmp = await client.channels.cache.get(discordChannel);
+
+      if(tmp !== 'Error'){
+        tmp.send(`Added ${res} : ${ytbChannel}`)
+      }
+      else{
+        tmp.send(`Error when adding the ytb channel ${ytbChannel}`)
+      }
+
+      break;
+
+    case 'list':
+      listYtbChannel(interaction)
+      break
+
+    default:
+      log("WARNING : Default case for ytb-channel function")
+      interaction.editReply("Something went wrong, but what are you doing here ?")
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+async function listYtbChannel(interaction){
+  const listFile = await listJsonFile("./ytbChannels/")
+
+  if(listFile === "Error"){
+    interaction.editReply("Something went wrong when listing channels")
+    return false
+  }
+
+  const embed = createEmbed()
+  embed.title = "\n # Liste des chaînes youtube suivies # "
+  embed.color = 0xff1a1a
+  embed.thumbnail.url = "https://cdn.discordapp.com/attachments/123456789/youtube_icon.png"
+  embed.footer.text = `Total des chaînes suivies : ${listFile.length}`
+
+  for (const file of listFile) {
+    const data = readJsonFile(`./ytbChannels/${file}`)
+    if (data === ["Error"]) {
+      interaction.editReply(`Something went wrong when reading the file ${file}`)
+      return false
+    }
+
+    const channelWhereitPost = data?.guildChannelToPostVideo
+    const numberVideoPosted = data?.videosId.length
+
+    embed.fields.push({
+      name: `🎥 __${data?.name}__ (${data?.ytbChannel})`,
+      value: `.\n**${numberVideoPosted} Vidéos postées** dans <#${channelWhereitPost}>`
+    })
+  }
+  interaction.editReply(readyToSendEmbed(embed));
+  return true
+}
+
+// -------------------------------------------------------------------------- //
+
+async function addYtbChannel(channelId, channelToPost) {
 
   // Set the number of latest videos to retrieve
   const maxResults = 5000;
