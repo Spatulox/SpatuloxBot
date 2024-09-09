@@ -4,10 +4,10 @@ import {listJsonFile, readJsonFile} from '../../functions/files.js'
 import fs from 'fs'
 import {
   createEmbed,
-  fillEmbed,
   readyToSendEmbed,
   waitPrivateEmbedOrMessage
 } from "../../functions/embeds.js";
+import {sendMessage} from "../../functions/messages.js";
 
 // How to have Id channel ?
 // Clique droit => Code source de la page
@@ -119,16 +119,22 @@ async function addYtbChannel(channelId, channelToPost) {
   
   const config = await readJsonFile('./config.json')
 
+  if(config === ["Error"]){
+    log("ERROR : Impossible to read the config file in addYtbChannel")
+    return 'Error'
+  }
+
   const apiKey = config.ytbToken[config.usingYtbToken];
 
   try {
     log(`Checking YouTube...`);
 
+    let response
     if(channelId.includes('@')){
-      var response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&forUsername=${channelId}&maxResults=${maxResults}&order=date&type=video&key=${apiKey}`);
+      response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&forUsername=${channelId}&maxResults=${maxResults}&order=date&type=video&key=${apiKey}`);
     }
     else{
-      var response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=${maxResults}&order=date&type=video&key=${apiKey}`);
+      response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=${maxResults}&order=date&type=video&key=${apiKey}`);
     }
     
 
@@ -139,7 +145,7 @@ async function addYtbChannel(channelId, channelToPost) {
     //console.log("Channel list:", channelsList);
 
     let listVideosId = []
-    for (var i = 0; i < data.items.length; i++) {
+    for (let i = 0; i < data.items.length; i++) {
       listVideosId.push(data.items[i].id.videoId)
     }
 
