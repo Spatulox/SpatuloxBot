@@ -1,0 +1,49 @@
+{
+  "title": "Formulaire Complet",
+  "id": "complete_form",
+  "inputs": [
+    {
+      "type": "text",
+      "id": "simple_text",
+      "title": "Texte Simple",
+      "style": "short",
+      "required": true
+    },
+    {
+      "type": "text",
+      "id": "long_text",
+      "title": "Texte Long",
+      "style": "long",
+      "required": false
+    },
+    {
+      "type": "text_placeholder",
+      "id": "text_with_placeholder",
+      "title": "Texte avec Placeholder",
+      "style": "short",
+      "required": true,
+      "placeholder": "Entrez votre texte ici"
+    },
+    {
+      "type": "text_minmax_length",
+      "id": "text_with_length",
+      "title": "Texte avec Longueur Min/Max",
+      "style": "long",
+      "required": true,
+      "minLength": 10,
+      "maxLength": 100
+    },
+    {
+      "type": "number",
+      "id": "number_input",
+      "title": "Entrée Numérique",
+      "required": true
+    },
+    {
+      "type": "date",
+      "id": "date_input",
+      "title": "Date",
+      "required": true
+    }
+  ]
+}
