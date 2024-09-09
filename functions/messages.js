@@ -39,6 +39,13 @@ export async function sendMessage(targetChannel, message){
 
 //----------------------------------------------------------------------------//
 
+export async function sendEmbedErrorMessage(targetChannel, message){
+    log(message)
+    targetChannel.send(returnToSendEmbed(createErrorEmbed(message)))
+}
+
+//----------------------------------------------------------------------------//
+
 export async function sendLongMessage(channel, title, longMessage) {
     // Parse long sentence (> 2000) into different messages to send it
     // Use full to recap the error of the bots..
