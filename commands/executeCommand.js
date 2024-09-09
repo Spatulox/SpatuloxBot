@@ -3,6 +3,7 @@ import { switchYtbToken } from '../functions/functions.js'
 import { readJsonFile } from '../functions/files.js'
 import { ytbChannelCommand } from './commandsFunctions/ytb-channel.js'
 import { setStatus } from './commandsFunctions/set-status.js'
+import { reminderCommand } from "./commandsFunctions/reminder.js";
 
 export async function executeSlashCommand(interaction, client){
     if (!interaction.isCommand()) return;
@@ -19,6 +20,10 @@ export async function executeSlashCommand(interaction, client){
 
     if (interaction.commandName === 'set-status') {
         setStatus(client, interaction)
+    }
+
+    if(interaction.commandName === 'reminder'){
+        reminderCommand(interaction)
     }
 
 }

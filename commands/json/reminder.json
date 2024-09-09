@@ -1,0 +1,30 @@
+{
+    "name":"reminder",
+    "type": 1,
+    "description": "Manage the reminders",
+    "options": [
+        {
+            "type": 1,
+            "name": "list",
+            "description": "Liste les rappels existant"
+        },
+        {
+            "type": 1,
+            "name": "add",
+            "description": "Ajoute un rappel"
+        },
+        {
+            "type": 1,
+            "name": "remove",
+            "description": "Supprime un rappel",
+            "options": [
+                {
+                  "type": 4,
+                  "name": "id",
+                  "description": "ID du reminder",
+                  "required": true
+                }
+            ]
+        }
+    ]
+}
