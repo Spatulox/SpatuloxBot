@@ -86,7 +86,7 @@ export async function deployCommand(client){
       log(`ERROR : Impossible to create the ${file.split('.json')[0]} command : ${err}`)
     }
   }
-  log(`Created global command ${createdCommand.length}/${listFile.length} : ${createdCommand}`)
+  log(`Created global command ${createdCommand.length}/${listFile.length} : ${createdCommand.join(', ')}`)
 }
 
 
