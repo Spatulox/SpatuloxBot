@@ -1,6 +1,6 @@
 import {log} from "../../functions/functions.js";
 
-export async function setStatus(interaction){
+export async function setStatus(client, interaction){
     await interaction.deferReply()
     try{
         client.user.setActivity({
@@ -12,7 +12,7 @@ export async function setStatus(interaction){
     }
     catch(err){
         log(`ERROR : Impossible to set the activity of the bot : ${err}`)
-        await interaction.editReply(`May have some crash :/`)
+        await interaction.editReply(`Impossible to set the activity of the bot : ${err}`)
         return
     }
 

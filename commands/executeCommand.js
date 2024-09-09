@@ -32,7 +32,7 @@ export async function executeSlashCommand(interaction, client){
     }
 
     if (interaction.commandName === 'set-status') {
-        setStatus(interaction)
+        setStatus(client, interaction)
     }
 
 };
