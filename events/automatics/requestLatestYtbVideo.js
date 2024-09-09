@@ -51,7 +51,7 @@ export async function recupLatestVideo(client){
 
     let channelId = jsonFile.ytbChannel
     let author = jsonFile.name
-    console.log(channelId)
+    //console.log(channelId)
 
     log(`Checking youtube...`)
 
