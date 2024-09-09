@@ -9,13 +9,9 @@ export function postMessage(client, sentence, channelId, reactions = "default") 
     targetChannel.send(sentence)
         .then(message => {
 
-            if (reactions != null && reactions.length !== 0) {
+            if (reactions != null && reactions !== "default" && reactions.length !== 0) {
                 for (let i = 0; i < reactions.length; i++) {
                     message.react(reactions[i]);
-                }
-            } else if(reactions === "default") {
-                for (let i = 0; i < config.emojiReact.length; i++) {
-                    message.react(config.emojiReact[i])
                 }
             }
 
@@ -24,6 +20,7 @@ export function postMessage(client, sentence, channelId, reactions = "default") 
             message.crosspost()
                 .then(() => log(`Crossposted message : ${sentence.split('\n')[0]}`))
                 .catch(error => {
+                    sendEmbedErrorMessage(targetChannel, 'ERROR when posting message : '+error)
                     log('ERROR when posting message : '+error)
                 });
 
