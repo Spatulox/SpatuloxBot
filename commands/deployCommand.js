@@ -13,10 +13,11 @@ export async function deployCommand(client){
     return
   }
 
-  const index = listFile.findIndex(item => item.includes("example"));
-  if (index !== -1) {
-    listFile.splice(index, 1); // Retire l'élément à l'index trouvé
+  let index;
+  while ((index = listFile.findIndex(item => item.includes("example"))) !== -1) {
+    listFile.splice(index, 1);
   }
+
 
   // Create slash commands
   let createdCommand = []
