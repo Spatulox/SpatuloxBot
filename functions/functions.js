@@ -122,6 +122,7 @@ export function switchYtbToken(){
 
 export async function recapBotsErrors(client, config){
   try{
+    log("Recap bot errors...")
     // Create a today and a yesterday var to search it into the log file.
     if (config?.sendChannelErrors === "yes"){
 
