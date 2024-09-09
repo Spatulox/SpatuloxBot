@@ -2,7 +2,12 @@ import fetch from 'node-fetch'
 import { log } from '../../functions/functions.js'
 import {listJsonFile, readJsonFile} from '../../functions/files.js'
 import fs from 'fs'
-import {createEmbed, fillEmbed, readyToSendEmbed} from "../../functions/embeds.js";
+import {
+  createEmbed,
+  fillEmbed,
+  readyToSendEmbed,
+  waitPrivateEmbedOrMessage
+} from "../../functions/embeds.js";
 
 // How to have Id channel ?
 // Clique droit => Code source de la page
@@ -28,72 +33,81 @@ import {createEmbed, fillEmbed, readyToSendEmbed} from "../../functions/embeds.j
 
 
 export async function ytbChannelCommand(client, interaction){
+  try{
+    //interaction.reply('Searching on internet and adding ytbChannel...')
+    const subcommand = interaction.options.getSubcommand()
 
-  await interaction.deferReply()
-  //interaction.reply('Searching on internet and adding ytbChannel...')
-  const subcommand = interaction.options.getSubcommand()
+    switch (subcommand) {
+      case 'add':
+        await interaction.deferReply(waitPrivateEmbedOrMessage())
 
-  switch (subcommand) {
-    case 'add':
+        let discordChannel = interaction.options.getChannel('discord-channel-to-post').id
+        let ytbChannel = interaction.options.getString('ytb-channel-id')
 
-      let discordChannel = interaction.options.getChannel('discord-channel-to-post').id
-      let ytbChannel = interaction.options.getString('ytb-channel-id')
+        let res = await addYtbChannel(ytbChannel, discordChannel)
 
-      let res = await addYtbChannel(ytbChannel, discordChannel)
-      let tmp = await client.channels.cache.get(discordChannel);
+        if(res === 'Error'){
+          interaction.editReply(`Error when adding the ytb channel ${ytbChannel}`)
+        } else {
+          interaction.editReply(`Added ${res} : ${ytbChannel}`)
+        }
 
-      if(tmp !== 'Error'){
-        tmp.send(`Added ${res} : ${ytbChannel}`)
-      }
-      else{
-        tmp.send(`Error when adding the ytb channel ${ytbChannel}`)
-      }
+        break;
 
-      break;
+      case 'list':
+        await interaction.deferReply()
+        listYtbChannel(interaction)
+        break
 
-    case 'list':
-      listYtbChannel(interaction)
-      break
-
-    default:
-      log("WARNING : Default case for ytb-channel function")
-      interaction.editReply("Something went wrong, but what are you doing here ?")
+      default:
+        log("WARNING : Default case for ytb-channel function")
+        interaction.editReply("Something went wrong, but what are you doing here ?")
+    }
+  } catch (e){
+    log(`ERROR : Crash when ytbChannelCommand : ${e}`)
+    return false
   }
 }
 
 // -------------------------------------------------------------------------- //
 
 async function listYtbChannel(interaction){
-  const listFile = await listJsonFile("./ytbChannels/")
+  try {
+    const listFile = await listJsonFile("./ytbChannels/")
 
-  if(listFile === "Error"){
-    interaction.editReply("Something went wrong when listing channels")
-    return false
-  }
-
-  const embed = createEmbed()
-  embed.title = "\n # Liste des chaînes youtube suivies # "
-  embed.color = 0xff1a1a
-  embed.thumbnail.url = "https://cdn.discordapp.com/attachments/123456789/youtube_icon.png"
-  embed.footer.text = `Total des chaînes suivies : ${listFile.length}`
-
-  for (const file of listFile) {
-    const data = readJsonFile(`./ytbChannels/${file}`)
-    if (data === ["Error"]) {
-      interaction.editReply(`Something went wrong when reading the file ${file}`)
+    if (listFile === "Error") {
+      interaction.editReply("Something went wrong when listing channels")
       return false
     }
 
-    const channelWhereitPost = data?.guildChannelToPostVideo
-    const numberVideoPosted = data?.videosId.length
+    const embed = createEmbed()
+    embed.title = "\n # Liste des chaînes youtube suivies # "
+    embed.color = 0xff1a1a
+    embed.thumbnail.url = "https://cdn.discordapp.com/attachments/123456789/youtube_icon.png"
+    embed.footer.text = `Total des chaînes suivies : ${listFile.length}`
 
-    embed.fields.push({
-      name: `🎥 __${data?.name}__ (${data?.ytbChannel})`,
-      value: `.\n**${numberVideoPosted} Vidéos postées** dans <#${channelWhereitPost}>`
-    })
+    for (const file of listFile) {
+      const data = readJsonFile(`./ytbChannels/${file}`)
+      if (data === ["Error"]) {
+        interaction.editReply(`Something went wrong when reading the file ${file}`)
+        return false
+      }
+
+      const channelWhereitPost = data?.guildChannelToPostVideo
+      const numberVideoPosted = data?.videosId.length
+
+      embed.fields.push({
+        name: `🎥 __${data?.name}__ (${data?.ytbChannel})`,
+        value: `.\n**${numberVideoPosted} Vidéos postées** dans <#${channelWhereitPost}>`
+      })
+    }
+    interaction.editReply(readyToSendEmbed(embed));
+    return true
   }
-  interaction.editReply(readyToSendEmbed(embed));
-  return true
+  catch (e){
+    log(`ERROR : Crash when listYtbChannel : ${e}`)
+    return false
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -142,7 +156,7 @@ async function addYtbChannel(channelId, channelToPost) {
       fs.writeFile(`./ytbChannels/${data.items[0].snippet.channelTitle.split('|')[0].trim()}.json`, jsonData, (err) => {
         if (err) {
           log(err);
-          return;
+          return 'Error';
         }
         log('JSON file has been created.');
       });
@@ -150,7 +164,8 @@ async function addYtbChannel(channelId, channelToPost) {
     log(`Checking completed...`);
     return data.items[0].snippet.channelTitle
   } catch (error) {
-    console.error('Error:', error);
+    log(`ERROR : Crash when addYtbchannel : ${error}`)
+    //console.error('Error:', error);
     return 'Error'
   }
 }
