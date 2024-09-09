@@ -49,7 +49,7 @@ export function replaceValueJsonFile(fileName, keyOfValue, valueToReplace) {
             file[keyOfValue] = valueToReplace;
         } else {
             let tmp = file[keyOfValue]
-            if (tmp == "0") {file[keyOfValue] = "1"; valueToReplace = "1"}
+            if (tmp === "0") {file[keyOfValue] = "1"; valueToReplace = "1"}
             else {file[keyOfValue] = "0"; valueToReplace = "0"}
         }
 
@@ -115,8 +115,7 @@ export async function listJsonFile(directoryPath) {
 
     try {
         const files = await fs.promises.readdir(directoryPath);
-        const jsonFiles = files.filter(file => path.extname(file) === '.json');
-        return jsonFiles;
+        return files.filter(file => path.extname(file) === '.json');
     } catch (err) {
         log('ERROR : impossible to read the directory: '+err);
         return 'Error';
@@ -137,8 +136,7 @@ export async function listFile(directoryPath, type) {
             type = type.split('.')[1]
         }
         const files = await fs.promises.readdir(directoryPath);
-        const jsonFiles = files.filter(file => path.extname(file) === '.'+type);
-        return jsonFiles;
+        return files.filter(file => path.extname(file) === '.' + type);
     } catch (err) {
         log('ERROR : impossible to read the directory: '+err);
         return ['Error'];
