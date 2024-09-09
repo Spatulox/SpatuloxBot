@@ -61,7 +61,7 @@ export async function ytbChannelCommand(client, interaction){
 
       default:
         log("WARNING : Default case for ytb-channel function")
-        interaction.editReply("Something went wrong, but what are you doing here ?")
+        interaction.reply("Something went wrong, but what are you doing here ?")
     }
   } catch (e){
     log(`ERROR : Crash when ytbChannelCommand : ${e}`)
