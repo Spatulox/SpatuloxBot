@@ -3,8 +3,8 @@ import { log } from '../../functions/functions.js'
 import {listJsonFile, readJsonFile} from '../../functions/files.js'
 import fs from 'fs'
 import {
-  createEmbed,
-  readyToSendEmbed,
+  createEmbed, createErrorEmbed,
+  returnToSendEmbed,
   waitPrivateEmbedOrMessage
 } from "../../functions/embeds.js";
 import {sendMessage} from "../../functions/messages.js";
@@ -56,7 +56,7 @@ export async function ytbChannelCommand(client, interaction){
 
       case 'list':
         await interaction.deferReply()
-        listYtbChannel(interaction)
+        await listYtbChannel(interaction)
         break
 
       default:
@@ -65,6 +65,7 @@ export async function ytbChannelCommand(client, interaction){
     }
   } catch (e){
     log(`ERROR : Crash when ytbChannelCommand : ${e}`)
+    try{interaction.editReply(returnToSendEmbed(createErrorEmbed(e)))}catch(e2){log(`ERROR : Impossible to edit reply when error in ytbChannelCommand : ${e2}`)}
     return false
   }
 }
@@ -80,9 +81,8 @@ async function listYtbChannel(interaction){
       return false
     }
 
-    const embed = createEmbed()
+    const embed = createEmbed("youtube")
     embed.title = "\n # Liste des chaînes youtube suivies # "
-    embed.color = 0xff1a1a
     embed.thumbnail.url = "https://cdn.discordapp.com/attachments/123456789/youtube_icon.png"
     embed.footer.text = `Total des chaînes suivies : ${listFile.length}`
 
@@ -101,11 +101,12 @@ async function listYtbChannel(interaction){
         value: `.\n**${numberVideoPosted} Vidéos postées** dans <#${channelWhereitPost}>`
       })
     }
-    interaction.editReply(readyToSendEmbed(embed));
+    interaction.editReply(returnToSendEmbed(embed));
     return true
   }
   catch (e){
     log(`ERROR : Crash when listYtbChannel : ${e}`)
+    await interaction.editReply(returnToSendEmbed(createErrorEmbed(e)))
     return false
   }
 }
@@ -171,7 +172,7 @@ async function addYtbChannel(channelId, channelToPost) {
     return data.items[0].snippet.channelTitle
   } catch (error) {
     log(`ERROR : Crash when addYtbchannel : ${error}`)
-    //console.error('Error:', error);
+    await interaction.editReply(returnToSendEmbed(createErrorEmbed(error)))
     return 'Error'
   }
 }
