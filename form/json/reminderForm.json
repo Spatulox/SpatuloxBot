@@ -1,0 +1,27 @@
+{
+  "title": "Créer un évènement",
+  "id" : "add_reminder",
+  "inputs":[
+    {
+      "type": "text",
+      "id": "nom",
+      "title": "Nom de l'évènement",
+      "style": "short",
+      "required": true
+    },
+    {
+      "type":"text",
+      "id": "description",
+      "title": "Description de l'évènement",
+      "style": "long",
+      "required": true
+    },
+    {
+      "type":"date",
+      "id": "date",
+      "title": "Date de l'évènement",
+      "style": "short",
+      "required": true
+    }
+  ]
+}
