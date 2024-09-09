@@ -1,5 +1,6 @@
 import config from '../config.json' assert {type: 'json'};
-import {sendEmbedErrorMessage, sendMessage} from '../functions/messages.js'
+import { sendMessage } from '../functions/messages.js'
+import { sendEmbedErrorMessage } from "../functions/embeds.js";
 import { log } from '../functions/functions.js'
 import { listFile } from "../functions/files.js";
 //import ytdl from 'ytdl-core'

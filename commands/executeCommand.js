@@ -4,7 +4,7 @@ import { readJsonFile } from '../functions/files.js'
 import { ytbChannelCommand } from './commandsFunctions/ytb-channel.js'
 import { setStatus } from './commandsFunctions/set-status.js'
 import { reminderCommand } from "./commandsFunctions/reminder.js";
-import {createEmbed, createErrorEmbed, createSuccessEmbed, returnToSendEmbed} from "../functions/embeds.js";
+import { createEmbed, createErrorEmbed, createSuccessEmbed, returnToSendEmbed } from "../functions/embeds.js";
 
 export async function executeSlashCommand(interaction, client){
     if (!interaction.isCommand()) return;

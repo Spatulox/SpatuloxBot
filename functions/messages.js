@@ -1,6 +1,6 @@
 import config from '../config.json' assert { type: 'json' };
 import {log} from "./functions.js";
-import {createErrorEmbed, returnToSendEmbed} from "./embeds.js";
+import {createErrorEmbed, returnToSendEmbed, sendEmbedErrorMessage} from "./embeds.js";
 
 //----------------------------------------------------------------------------//
 
@@ -36,13 +36,6 @@ export function postMessage(client, sentence, channelId, reactions = "default") 
 export async function sendMessage(targetChannel, message){
     log(message)
     targetChannel.send(message)
-}
-
-//----------------------------------------------------------------------------//
-
-export async function sendEmbedErrorMessage(targetChannel, message){
-    log(message)
-    targetChannel.send(returnToSendEmbed(createErrorEmbed(message)))
 }
 
 //----------------------------------------------------------------------------//

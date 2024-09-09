@@ -101,6 +101,13 @@ export async function sendEmbed(targetChannel, embed){
     return false
 }
 
+//----------------------------------------------------------------------------//
+
+export async function sendEmbedErrorMessage(targetChannel, message){
+    log(message)
+    targetChannel.send(returnToSendEmbed(createErrorEmbed(message)))
+}
+
 // ------------------------------------------------------------- //
 
 export function returnToSendEmbed(embed, privateVisibility = false){
