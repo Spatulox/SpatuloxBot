@@ -21,4 +21,4 @@ export async function executeSlashCommand(interaction, client){
         setStatus(client, interaction)
     }
 
-};
+}

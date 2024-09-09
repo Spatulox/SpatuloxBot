@@ -10,7 +10,7 @@ export async function recupLatestVideo(client){
   // Checking if internet is still available
   let res = await checkXTimesInternetCo(5)
 
-  if (res == 'Error'){
+  if (res === 'Error'){
     log('ERROR : Unexpected error with Internet, not connected when trying to recupLatestVideo()')
     return
   }
@@ -118,8 +118,8 @@ export async function recupLatestVideo(client){
             let date = data.items[i].snippet.publishTime;
             date = new Date(date)
             const timestamp = Math.floor(Date.parse(date) / 1000)
-            const channelTitle = data.items[i].snippet.channelTitle;
-            const videoDescription = data.items[i].snippet.description;
+            /*const channelTitle = data.items[i].snippet.channelTitle;
+            const videoDescription = data.items[i].snippet.description;*/
 
             if (!(jsonFile.videosId.includes(videoId))){
 

@@ -3,6 +3,7 @@ import { sendLongMessage } from "./messages.js";
 import path, { dirname } from 'path'
 import fs from 'fs'
 import readline from 'readline';
+import {readJsonFile, replaceValueJsonFile} from "./files.js";
 
 //----------------------------------------------------------------------------//
 
@@ -17,7 +18,7 @@ export function log(str) {
 
   // Create the log directory
   try{
-    if (fs.existsSync(logDir) == false) {
+    if (fs.existsSync(logDir) === false) {
       fs.mkdirSync(logDir);
     }
   }
@@ -43,9 +44,7 @@ export function log(str) {
         return files
       });
 
-      console.log(fileList)
-
-      if (fileList != 'Error'){
+      if (fileList !== 'Error'){
         fs.renameSync(filePath, filePath.split('.txt')[0]+`${fileList.length}.txt`, (err) => {
           if (err) {
             console.error('Erreur lors du renommage du fichier de log : ' + err);
@@ -67,7 +66,7 @@ export function log(str) {
   }
   
   // Write the log.txt file
-  var today = new Date();
+  let today = new Date();
   let previousStr = `[${today.toLocaleDateString()} - ${today.toLocaleTimeString()}] `
   
   console.log(previousStr+str)
@@ -110,9 +109,8 @@ export async function asyncSearchInLines(pathToFile, arrayToSearch, arrayToAvoid
 export function switchYtbToken(){
   const jsonFile = readJsonFile('./config.json')
 
-  if (jsonFile == ['Error']){
+  if (jsonFile === ['Error']){
     log('ERROR : Impossible de changer le token youtube')
-    return
   }
   else{
     // Set to 0 but the programm will automatically switch between 0 and 1
@@ -135,7 +133,7 @@ export async function recapBotsErrors(client, config){
         return false
       }
 
-      var today = new Date();
+      let today = new Date();
       today.setUTCHours(0,0,0,0)
       let yesterday = new Date();
       yesterday.setUTCHours(0,0,0,0)
@@ -145,11 +143,11 @@ export async function recapBotsErrors(client, config){
       let resYesterday = await asyncSearchInLines('./log/log.txt', [yesterday.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
       let resToday = await asyncSearchInLines('./log/log.txt', [today.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
 
-      if (typeof(resYesterday) !== 'string' && resYesterday.length != 0){
+      if (typeof(resYesterday) !== 'string' && resYesterday.length !== 0){
         resYesterday = resYesterday.join('\n')
         await sendLongMessage(errorChannel, '# Yesterday errors :', resYesterday)
       }
-      if (typeof(resToday) !== 'string' && resToday.length != 0){
+      if (typeof(resToday) !== 'string' && resToday.length !== 0){
         resToday = resToday.join('\n')
         await sendLongMessage(errorChannel, '# Today errors :', resToday)
       }

@@ -44,8 +44,8 @@ export async function duplicateMessage(reaction, user) {
 
     // Dupliquer le message
     try {
-        const duplicatedMessage = await targetChannel.send(content);
         log(`Message dupliqué : ${content.split('\n')[0]}`);
+        await targetChannel.send(content);
     } catch (error) {
         log(`Erreur lors de la duplication : ${error}`);
         await message.channel.send('Impossible de dupliquer le message.').catch(() => {});
