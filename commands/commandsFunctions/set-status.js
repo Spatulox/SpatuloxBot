@@ -12,8 +12,13 @@ export async function setStatus(client, interaction){
     }
     catch(err){
         log(`ERROR : Impossible to set the activity of the bot : ${err}`)
-        await interaction.editReply(`Impossible to set the activity of the bot : ${err}`)
-        return
+        try{
+            await interaction.editReply(`Impossible to set the activity of the bot : ${err}`)
+            return
+        } catch{
+            
+        }
+
     }
 
 
