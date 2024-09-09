@@ -1,5 +1,5 @@
 import config from '../config.json' assert {type: 'json'};
-import { sendMessage } from '../functions/messages.js'
+import {sendEmbedErrorMessage, sendMessage} from '../functions/messages.js'
 import { log } from '../functions/functions.js'
 import { listFile } from "../functions/files.js";
 //import ytdl from 'ytdl-core'
@@ -7,6 +7,7 @@ import ytdl from '@distube/ytdl-core'
 
 import ytpl from 'ytpl'
 import fs from 'fs'
+import {createEmbed, createErrorEmbed, returnToSendEmbed} from "../functions/embeds.js";
 
 // ------------------------------------------------------------------------------------------//
 
@@ -29,12 +30,12 @@ export async function downloadYtbVideo(message, user){
         }
         // Test if there is a link in the video
         if (!regexUrl.test(message.content)) {
-            sendMessage(targetChannel, "No link in this message")
+            sendEmbedErrorMessage(targetChannel, "No link in this message")
             return false
         }
 
         if (!config.userCanReact.includes(user.tag)) {
-            sendMessage(targetChannel, "You are not authorized to do this")
+            sendEmbedErrorMessage(targetChannel, "You are not authorized to do this")
             return false
         }
 
@@ -81,7 +82,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     //let metadata = await ytdl.getBasicInfo(url)
     let metadata = await getBasicInfoWithRetry(url);
     if(metadata === false){
-        sendMessage(targetChannel, `Impossible to retrieve informations for ${url} (getBasicInfoWithRetry() = false), plz try again later..`)
+        sendEmbedErrorMessage(targetChannel, `Impossible to retrieve informations for '${url}' (getBasicInfoWithRetry() = false), plz try again later..`)
         return false
     }
 
@@ -111,7 +112,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
         if (fs.existsSync(tmpPath)) {
             sendMessage(targetChannel, `Created ${tmpPath}`)
         } else {
-            sendMessage(targetChannel, `Error when creating ${tmpPath}`)
+            sendEmbedErrorMessage(targetChannel, `Error when creating ${tmpPath}`)
             return false
         }
     }
@@ -122,7 +123,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     try {
         await downloadWithRetry(videoUrl, tmpPath, videoTitle, targetChannel);
     } catch (error) {
-        sendMessage(targetChannel, `Échec final du téléchargement : ${error.message}`);
+        sendEmbedErrorMessage(targetChannel, `Échec final du téléchargement : ${error.message}`);
     }
 }
 
@@ -179,7 +180,9 @@ async function downloadPlaylist(playlistId, path, message, targetChannel){
             });
     }
     catch{
-        sendMessage(targetChannel, `ERROR, impossible to download the playlist ${playlistId}, or retrieve informations`)
+        /*targetChannel.send(returnToSendEmbed(createErrorEmbed(`ERROR, impossible to download the playlist ${playlistId}, or retrieve informations`)))
+        log(`ERROR, impossible to download the playlist ${playlistId}, or retrieve informations`)*/
+        sendEmbedErrorMessage(targetChannel, `ERROR, impossible to download the playlist ${playlistId}, or retrieve informations`)
         return false
     }
 }
@@ -263,8 +266,9 @@ async function askingUserAndWaitReaction(message, videoName, count) {
 
             collector.on('end', collected => {
                 if (collected.size === 0) {
-                    log("User didn\'t react in time")
-                    message.channel.send('You did not react in time. Saving file without overwriting.');
+                    sendEmbedErrorMessage(message.channel, "User didn\'t react in time")
+                    /*log("User didn\'t react in time")
+                    message.channel.send('You did not react in time. Saving file without overwriting.');*/
                     resolve(videoName + ` (${count})`);
                 }
             });
@@ -272,7 +276,8 @@ async function askingUserAndWaitReaction(message, videoName, count) {
         });
     } catch (error) {
         log('User didn\'t react in time or Error in handleDuplicateFile:', error);
-        await message.channel.send('You did not react in time. Saving file without overwriting.');
+        message.channel.send(returnToSendEmbed(createErrorEmbed(`You did not react in time. Saving file without overwriting.`)))
+        //await message.channel.send('You did not react in time. Saving file without overwriting.');
         return videoName + ` (${count})`; // ou toute autre logique pour gérer les doublons
     }
 }
@@ -295,7 +300,8 @@ async function downloadWithRetry(url, tmpPath, videoTitle, targetChannel, maxRet
                     filter: 'audioonly',
                 });
             } catch (error) {
-                sendMessage(targetChannel, `Erreur lors de la création du stream (tentative ${attempts}): ${error}`);
+                //targetChannel.send(returnToSendEmbed(createErrorEmbed(``)))
+                sendEmbedErrorMessage(targetChannel, `Erreur lors de la création du stream (tentative ${attempts}): ${error}`);
                 return;
             }
 
@@ -315,7 +321,7 @@ async function downloadWithRetry(url, tmpPath, videoTitle, targetChannel, maxRet
                 if (error.statusCode) {
                     console.error(`Code d'état HTTP : ${error.statusCode}`);
                 }
-                sendMessage(targetChannel, `ERROR : Impossible to download __**${videoTitle}**__, ${error.message}\n> '${filePath}'`);
+                sendEmbedErrorMessage(targetChannel, `ERROR : Impossible to download __**${videoTitle}**__, ${error.message}\n> '${filePath}'`);
 
                 // Fermer les streams
                 audioStream.destroy();
@@ -327,7 +333,7 @@ async function downloadWithRetry(url, tmpPath, videoTitle, targetChannel, maxRet
                     log(`Fichier 'corrompu de 0 octets' supprimé avec succès : ${filePath}`);
                 } catch (unlinkError) {
                     if (unlinkError.code !== 'ENOENT') {
-                        sendMessage(targetChannel, `Erreur lors de la suppression du fichier 'corrompu de 0 octets' : ${unlinkError.message}`)
+                        sendEmbedErrorMessage(targetChannel, `Erreur lors de la suppression du fichier 'corrompu de 0 octets' : ${unlinkError.message}`)
                     }
                 }
 
