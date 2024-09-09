@@ -6,21 +6,17 @@ import config from './config.json' assert { type: 'json' };
 
 // functions
 import { duplicateMessage } from './events/duplicateMessage.js'
-//import { downloadYtbVideo } from './events/downloadYoutubeVideo_old.js'
 import { downloadYtbVideo } from './events/downloadYoutubeVideo.js'
 import { recupLatestVideo } from './events/automatics/requestLatestYtbVideo.js'
 import { addReactions } from './events/reactions.js'
-import { log, switchYtbToken, recapBotsErrors } from './functions/functions.js'
+import { log, recapBotsErrors } from './functions/functions.js'
 import { checkInternetCo } from './functions/checkInternetCo.js'
 import { deployCommand } from './commands/deployCommand.js';
 import { executeSlashCommand } from './commands/executeCommand.js';
 
-let crashCount = 0
-const maxCrashCount = 5
-
 async function loginBot(client) {
 
-	var ok = 'Not Connected'
+	let ok = 'Not Connected'
 	if (config.token !== ""){
 
 		while(ok === 'Not Connected'){
@@ -63,7 +59,7 @@ function main(){
 		});
 
 		log('Trying to connect to Discord Servers')
-		var tmp = loginBot(client)
+		let tmp = loginBot(client)
 		if (tmp === "Token error")
 		{
 			log('Stopping program')
@@ -98,8 +94,8 @@ function main(){
 			recapBotsErrors(client, config)
 
 			try{
-				recupLatestVideo(client)
-				setInterval(function(){recupLatestVideo(client);}, 5400000) // 1h30 (5 minutes = 300000) (1h = 3 600 000)
+				//recupLatestVideo(client)
+				//setInterval(function(){recupLatestVideo(client);}, 5400000) // 1h30 (5 minutes = 300000) (1h = 3 600 000)
 			}
 			catch(error){
 				log(`Error when trying to retrieve latest video ${error}`)
@@ -135,7 +131,7 @@ function main(){
 			executeSlashCommand(interaction, client)
 		  });
 	});
-};
+}
 
 main()
 
