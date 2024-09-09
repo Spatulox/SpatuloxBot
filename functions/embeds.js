@@ -17,6 +17,7 @@ export function createEmbed(color = null){
         color: 0xfcfcf9,
         fields: [],
         footer:{
+            text:"Spatulox's Bot",
             icon_url:"https://cdn.discordapp.com/app-icons/1162081210693075056/4f016ba107045821e7e9ac1f88dc7abd.png"
         },
         timestamp: new Date(),
@@ -56,7 +57,8 @@ export function createEmbed(color = null){
         "chocolate": 0xD2691E,
         "crimson": 0xDC143C,
         "youtube":0xff1a1a,
-        "botColor":0xba06ae
+        "botColor":0xba06ae,
+        "minecraft": 0x006400
     }
 
     if(!colors[color]){
@@ -71,26 +73,10 @@ export function createEmbed(color = null){
 // ------------------------------------------------------------- //
 
 export function createErrorEmbed(description){
-
-    return {
-        title: "Something went Wrong",
-        description:description.toString(),
-        thumbnail: {
-            url: ""
-        },
-        /*author: {
-            name: "Spatulox",
-            icon_url: "https://cdn.discordapp.com/avatars/556461959042564098/506aa3cc0992f63c99d3ae98b36625e3"
-        },*/
-        color: 0xff1a1a,
-        fields: [],
-        footer:{
-            icon_url:"https://cdn.discordapp.com/app-icons/1162081210693075056/4f016ba107045821e7e9ac1f88dc7abd.png"
-        },
-        timestamp: new Date(),
-        url:""
-    };
-
+    const embed = createEmbed("youtube")
+    embed.title = "Something went Wrong"
+    embed.description = description.toString()
+    return embed
 }
 
 // ------------------------------------------------------------- //
