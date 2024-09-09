@@ -81,6 +81,15 @@ export function createErrorEmbed(description){
 
 // ------------------------------------------------------------- //
 
+export function createSuccessEmbed(description){
+    const embed = createEmbed("minecraft")
+    embed.title = "Success"
+    embed.description = description.toString()
+    return embed
+}
+
+// ------------------------------------------------------------- //
+
 export async function sendEmbed(targetChannel, embed){
 
     if(embed === { embeds: [embed] }){
