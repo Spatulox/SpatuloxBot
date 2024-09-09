@@ -38,7 +38,7 @@ export async function downloadYtbVideo(message, user){
             return false
         }
 
-        var urls = message.content.match(regexUrl);
+        const urls = message.content.match(regexUrl);
 
         for (let url of urls) {
             // If it's a playlist
@@ -75,8 +75,8 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
 
     log(`Retrieving info for : ${url}`)
 
-    const invalidChars = /[<>:"\\/|?*\x00-\x1F,']/g; // Expression régulière pour les caractères impossibles
-    const validChar = '-';
+    /*const invalidChars = /[<>:"\\/|?*\x00-\x1F,']/g; // Expression régulière pour les caractères impossibles
+    const validChar = '-';*/
 
     //let metadata = await ytdl.getBasicInfo(url)
     let metadata = await getBasicInfoWithRetry(url);
@@ -92,9 +92,10 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
 
     log(`Initalizing (Path, Duplicate file, ) : ${videoTitle}`)
 
-    videoTitle = videoTitle.replace(invalidChars, validChar);
+    videoTitle = checkCorrectString(videoTitle)
+    /*videoTitle = videoTitle.replace(invalidChars, validChar);
     videoTitle = videoTitle.replace(/-+/g, '-');
-    videoTitle = videoTitle.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')
+    videoTitle = videoTitle.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')*/
 
     if (videoTitle.includes(" - (Lyrics)")){
         videoTitle = videoTitle.split(' - (Lyrics)')[0].trim()
@@ -106,7 +107,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     tmpPath += author
     if (!fs.existsSync(tmpPath)) {
         sendMessage(targetChannel, `Creating folder ${tmpPath}`)
-        await fs.mkdirSync(tmpPath, { recursive: true });
+        fs.mkdirSync(tmpPath, { recursive: true });
         if (fs.existsSync(tmpPath)) {
             sendMessage(targetChannel, `Created ${tmpPath}`)
         } else {
@@ -136,27 +137,30 @@ async function downloadPlaylist(playlistId, path, message, targetChannel){
             .then(async playlist => {
 
                 // Iterate over the video IDs and download each video
-                let playTitle = playlist.title
+                let playTitle
                 let author = playlist.items[0].author.name
 
-                author = author.replace(invalidChars, validChar);
-                author = author.replace(/-+/g, '-');
-                author = author.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')
+                author = checkCorrectString(author)
 
-                playTitle = playlist.title.replace(invalidChars, validChar);
-                playTitle = playlist.title.replace(/-+/g, '-');
-                playTitle = playTitle.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')
+                /*author = author.replace(invalidChars, validChar);
+                author = author.replace(/-+/g, '-');
+                author = author.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')*/
+
+                playTitle = checkCorrectString(playlist.title)
+                /*playTitle = playlist.title.replace(invalidChars, validChar);
+                playTitle = playTitle.replace(/-+/g, '-');
+                playTitle = playTitle.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')*/
 
                 tmpPath += `${author}\\${playTitle}\\`
 
                 for (let item of playlist.items){
                     let videoTitle = item.title;
                     let videoId = item.id;
-                    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-                    videoTitle = videoTitle.replace(invalidChars, validChar);
+                    videoTitle = checkCorrectString(videoTitle)
+                    /*videoTitle = videoTitle.replace(invalidChars, validChar);
                     videoTitle = videoTitle.replace(/-+/g, '-');
-                    videoTitle = videoTitle.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')
+                    videoTitle = videoTitle.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')*/
 
                     sendMessage(targetChannel, `Downloading video ${videoId.split("/").pop()}`)
                     try{
@@ -264,6 +268,7 @@ async function askingUserAndWaitReaction(message, videoName, count) {
                     resolve(videoName + ` (${count})`);
                 }
             });
+
         });
     } catch (error) {
         log('User didn\'t react in time or Error in handleDuplicateFile:', error);
@@ -338,4 +343,16 @@ async function downloadWithRetry(url, tmpPath, videoTitle, targetChannel, maxRet
 
         attemptDownload();
     });
+}
+
+// ------------------------------------------------------------------------------------------//
+
+function checkCorrectString(string){
+    const invalidChars = /[<>:"\\/|?*\x00-\x1F,']/g; // Expression régulière pour les caractères impossibles
+    const validChar = '-';
+
+    string = string.replace(invalidChars, validChar);
+    string = string.replace(/-+/g, '-');
+    string = string.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')
+    return string
 }
