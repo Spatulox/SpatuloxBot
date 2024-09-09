@@ -40,8 +40,25 @@ export async function sendEmbed(targetChannel, embed){
 
 // ------------------------------------------------------------- //
 
-export function readyToSendEmbed(embed){
-    return { embeds: [embed] }
+export function readyToSendEmbed(embed, privateVisibility = false){
+
+    // The visibility private will not work if there is a deferReply without a epheremal waiting before
+    // you shold use the waitPrivateEmbed() inside the deferReply to have a private respons after
+    const response = { embeds: [embed] };
+    response.ephemeral = privateVisibility;
+    return response;
+}
+
+// ------------------------------------------------------------- //
+
+/**
+ * Only used like that : interaction.deferReply(waitPrivateEmbedOrMessage())
+ * @returns {{}}
+ */
+export function waitPrivateEmbedOrMessage(){
+    const response = {};
+    response.ephemeral = true;
+    return response;
 }
 
 // ------------------------------------------------------------- //
