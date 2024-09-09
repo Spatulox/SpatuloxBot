@@ -266,7 +266,7 @@ async function askingUserAndWaitReaction(message, videoName, count) {
 
             collector.on('end', collected => {
                 if (collected.size === 0) {
-                    sendEmbedErrorMessage(message.channel, "User didn\'t react in time")
+                    sendEmbedErrorMessage(message.channel, "User didn\'t react in time. Saving file without overwriting.")
                     /*log("User didn\'t react in time")
                     message.channel.send('You did not react in time. Saving file without overwriting.');*/
                     resolve(videoName + ` (${count})`);
@@ -275,9 +275,9 @@ async function askingUserAndWaitReaction(message, videoName, count) {
 
         });
     } catch (error) {
-        log('User didn\'t react in time or Error in handleDuplicateFile:', error);
-        message.channel.send(returnToSendEmbed(createErrorEmbed(`You did not react in time. Saving file without overwriting.`)))
-        //await message.channel.send('You did not react in time. Saving file without overwriting.');
+        sendEmbedErrorMessage(message.channel, `You did not react in time. Saving file without overwriting.`)
+        /*log('User didn\'t react in time or Error in handleDuplicateFile:', error);
+        message.channel.send(returnToSendEmbed(createErrorEmbed(`You did not react in time. Saving file without overwriting.`)))*/
         return videoName + ` (${count})`; // ou toute autre logique pour gérer les doublons
     }
 }
@@ -300,7 +300,6 @@ async function downloadWithRetry(url, tmpPath, videoTitle, targetChannel, maxRet
                     filter: 'audioonly',
                 });
             } catch (error) {
-                //targetChannel.send(returnToSendEmbed(createErrorEmbed(``)))
                 sendEmbedErrorMessage(targetChannel, `Erreur lors de la création du stream (tentative ${attempts}): ${error}`);
                 return;
             }
@@ -309,7 +308,7 @@ async function downloadWithRetry(url, tmpPath, videoTitle, targetChannel, maxRet
 
             audioStream.on('end', () => {
                 writeStream.end();
-                sendMessage(targetChannel, `Download complete for ${videoTitle}`);
+                sendMessage(targetChannel, `Download complete for ${videoTitle} ✅`);
                 resolve();
             });
 
