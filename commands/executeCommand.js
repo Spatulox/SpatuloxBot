@@ -4,26 +4,32 @@ import { readJsonFile } from '../functions/files.js'
 import { ytbChannelCommand } from './commandsFunctions/ytb-channel.js'
 import { setStatus } from './commandsFunctions/set-status.js'
 import { reminderCommand } from "./commandsFunctions/reminder.js";
+import {createEmbed, createErrorEmbed, createSuccessEmbed, returnToSendEmbed} from "../functions/embeds.js";
 
 export async function executeSlashCommand(interaction, client){
     if (!interaction.isCommand()) return;
 
-    if (interaction.commandName === 'ytb-channel') {
-        ytbChannelCommand(client, interaction)
-    }
-  
-    if (interaction.commandName === 'switchytbtoken') {
-        await switchYtbToken()
-        let config = await readJsonFile('./config.json')
-        await interaction.reply(`Youtube token switched from ${config.usingYtbToken} to ${config.usingYtbToken === '0' ? 1 : 0}`);
-    }
+    switch (interaction.commandName) {
+        case 'ytb-channel':
+            ytbChannelCommand(client, interaction)
+            break;
 
-    if (interaction.commandName === 'set-status') {
-        setStatus(client, interaction)
-    }
+        case 'switchytbtoken':
+            await switchYtbToken()
+            let config = await readJsonFile('./config.json')
+            await interaction.reply(returnToSendEmbed(createSuccessEmbed(`Youtube token switched from ${config.usingYtbToken} to ${config.usingYtbToken === '0' ? 1 : 0}`)));
+            break;
 
-    if(interaction.commandName === 'reminder'){
-        reminderCommand(interaction)
-    }
+        case 'set-status':
+            setStatus(client, interaction)
+            break;
 
+        case 'reminder':
+            reminderCommand(interaction)
+            break;
+
+        default:
+            interaction.reply(returnToSendEmbed(createErrorEmbed("Hmmm, what are you doing here ?? (executeSlashCommand)")))
+            break;
+    }
 }
