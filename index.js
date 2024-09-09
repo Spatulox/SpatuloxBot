@@ -13,7 +13,7 @@ import { log, recapBotsErrors } from './functions/functions.js'
 import { checkInternetCo } from './functions/checkInternetCo.js'
 import { deployCommand } from './commands/deployCommand.js';
 import { executeSlashCommand } from './commands/executeCommand.js';
-import {executeModalSubmit} from "./form/executeModalSubmit.js";
+import { executeModalSubmit } from "./form/executeModalSubmit.js";
 
 async function loginBot(client) {
 
