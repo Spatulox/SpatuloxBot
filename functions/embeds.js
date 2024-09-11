@@ -14,7 +14,7 @@ export function createEmbed(color = null){
             name: "Spatulox",
             icon_url: "https://cdn.discordapp.com/avatars/556461959042564098/506aa3cc0992f63c99d3ae98b36625e3"
         },*/
-        color: 0xfcfcf9,
+        color: 0xba06ae,
         fields: [],
         footer:{
             text:"Spatulox's Bot",
