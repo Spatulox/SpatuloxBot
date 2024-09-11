@@ -17,8 +17,8 @@
       "required": true
     },
     {
-      "type":"date",
-      "id": "date",
+      "type":"date_hour",
+      "id": "date-hour",
       "title": "Date de l'évènement",
       "style": "short",
       "required": true
