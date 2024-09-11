@@ -97,11 +97,11 @@ function main(){
 
 	        }
 
-			// Deploy Commands
-			await deployCommand(client)
-
 			// Search for the latest ERRORS and send it to the correct channel :
 			recapBotsErrors(client, config)
+
+			// Deploy Commands
+			await deployCommand(client)
 
 			try{
 				recupLatestVideo(client)
