@@ -4,15 +4,17 @@ import {createEmbed, createErrorEmbed, returnToSendEmbed} from "../../functions/
 export async function setStatus(client, interaction){
     try{
         await interaction.deferReply()
+        const newStatus = interaction.options.getString('new-status')
         client.user.setActivity({
-            name: interaction.options.getString('new-status')
+            name: newStatus
         })
+        client.user.setStatus('dnd');
 
         const embed = createEmbed("botColor")
         embed.title = "Set Status OK"
-        embed.description = `Status switched for ${interaction.options.getString('new-status')}`
+        embed.description = `Status switched for ${newStatus}`
         await interaction.editReply(returnToSendEmbed(embed));
-        log(`Status switched for ${interaction.options.getString('new-status')}`)
+        log(`Status switched for '${newStatus}'`)
         return
     }
     catch(err){
