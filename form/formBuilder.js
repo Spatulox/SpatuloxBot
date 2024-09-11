@@ -102,6 +102,16 @@ export async function loadForm(name){
                 modal.addComponents(new ActionRowBuilder().addComponents(dateInput));
                 break;
 
+            case 'date-hour':
+                const dateHourInput = new TextInputBuilder()
+                    .setCustomId(input.id)
+                    .setLabel(input.title)
+                    .setRequired(input.required || false)
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('JJ/MM/AAAA hh:mm');
+                modal.addComponents(new ActionRowBuilder().addComponents(dateHourInput));
+                break;
+
 
         }
         componentCount++;
