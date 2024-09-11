@@ -1,10 +1,11 @@
 import {log} from "./functions.js";
 import path, { dirname } from 'path'
 import fs from 'fs'
+import {createErrorEmbed, returnToSendEmbed} from "./embeds.js";
 
 //----------------------------------------------------------------------------//
 
-export async function addVideoToJsonFile(directoryPath, fileName, valueToPut){
+export async function addVideoToJsonFile(directoryPath, fileName, valueToPut, channelToSendMessage = null){
 
     log('Updating json file')
     // Read the file
@@ -19,7 +20,8 @@ export async function addVideoToJsonFile(directoryPath, fileName, valueToPut){
 
             }
             // Overwrite the file (lol)
-            writeJsonFile(directoryPath, fileName, file)
+            writeJsonFileRework(directoryPath, fileName, file, channelToSendMessage)
+            //writeJsonFile(directoryPath, fileName, file)
             return
         }
         log('Data already inside the array')
@@ -107,6 +109,38 @@ export async function writeJsonFile(directoryPath, name, array){
         log(`Data written to ${directoryPath}/${name}.json`)
     });
 }
+
+export async function writeJsonFileRework(directoryPath, name, array, channelToSendMessage = null) {
+    try {
+        const directories = directoryPath.split(path.sep);
+        let currentPath = '';
+        const json = JSON.stringify(array, null, 2);
+
+        // Créer les répertoires récursivement
+        for (const directory of directories) {
+            currentPath = path.join(currentPath, directory);
+            await fs.mkdir(currentPath, { recursive: true });
+        }
+
+        name = name.split('.json')[0];
+        const filePath = path.join(directoryPath, `${name}.json`);
+
+        // Écrire le fichier
+        await fs.writeFile(filePath, json);
+
+        log(`Data written to ${filePath}`);
+        return true;
+    } catch (err) {
+        log(`ERROR : Error while writing file ${directoryPath}/${name}.json, ${err}`);
+        if(channelToSendMessage !== null){
+            try{
+                channelToSendMessage.send(returnToSendEmbed(createErrorEmbed(`ERROR : Error when wrinting file ${directoryPath}/${name}.json : ${err}`)))
+            } catch{}
+        }
+        return false;
+    }
+}
+
 
 //----------------------------------------------------------------------------//
 
