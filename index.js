@@ -74,21 +74,28 @@ function main(){
 			client.user.setActivity({
 				name:"Seems I'm in developpement..."
 			})
-
 			client.user.setStatus('dnd');
 
-
+			// Creating the owner (Just me, if it's an array, it not gonna work)
+			let owner
 			if(config.sendToOwnerOrChannel === "0"){
-	          const owner = await client.users.fetch(config.owner);
-	          owner.send('Bot online');
+				try{
+					owner = await client.users.fetch(config.owner);
+					owner.send('Bot online');
+				} catch (e){
+					owner = null
+					log(`ERROR : Something went wrong when searching for the owner : ${e}`)
+				}
 	        }
 	        else if(config.sendToOwnerOrChannel === "1"){
-	          const channelLogin = client.channels.cache.get(config.channelPingLogin)
-	          channelLogin.send(`<@${config.owner}>, Bot is online!`);
-	        }
+	          try{
+				  const channelLogin = client.channels.cache.get(config.channelPingLogin) || (await client.channels.fetch(config.channelPingLogin))
+				  channelLogin.send(`<@${config.owner}>, Bot is online!`);
+			  } catch (e){
+				  log(`ERROR : Something went wrong when searching for the channel to send the online message : ${e}`)
+			  }
 
-			// Creating the owner (Just me, if it's an array, it not gonna work)
-			const owner = await client.users.fetch(config.owner);
+	        }
 
 			// Deploy Commands
 			await deployCommand(client)

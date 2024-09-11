@@ -128,7 +128,14 @@ export async function recapBotsErrors(client, config){
 
       let errorChannel
       if(config?.errorChannel){
-        errorChannel = await client.channels.cache.get(config.errorChannel)
+        try{
+          errorChannel = await client.channels.cache.get(config.errorChannel) || (await client.channels.fetch(config.errorChannel))
+        }
+        catch (e){
+          errorChannel = null
+          log("ERROR : Impossible to retrieve the error channel (recapBotError)")
+          return false
+        }
       } else {
         log("INFO : 'errorChannel' isn't defined inside the config file, set it with the id of the channel you want the errors to pop")
         return false

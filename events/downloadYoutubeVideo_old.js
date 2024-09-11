@@ -19,7 +19,14 @@ export async function downloadYtbVideo(message, user){
 
     let path = `C:\\Marc\\Perso\\Musics\\1-TelechargesViaDiscord\\`
 
-    const targetChannel = message.guild.channels.cache.get(message.channelId)
+    let targetChannel
+    try{
+        targetChannel = message.guild.channels.cache.get(message.channelId) || await message.guild.channels.fetch(message.channelId)
+    } catch (e){
+        targetChannel = null
+        log("ERROR : Impossible to retrieve the target channel in downloadYtbVideo()")
+        return
+    }
     let err = ''
 
     // Test if there is a link in the video

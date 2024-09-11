@@ -125,7 +125,7 @@ export async function recupLatestVideo(client){
 
               let sentence = `# 🎵 __** ${videoTitle} **__ 🎵\n> - https://www.youtu.be/${videoId}\n> - Author : ${author}\n> - Uploaded on ${date.toLocaleDateString()}, <t:${timestamp}:R>`
               log(`Posting Video ${videoTitle} - ${videoId}`)
-              postMessage(client, sentence, jsonFile.guildChannelToPostVideo)//['✅', '💾', '👀', '🎵']
+              await postMessage(client, sentence, jsonFile.guildChannelToPostVideo)//['✅', '💾', '👀', '🎵']
               addVideoIdToFile.push(videoId)
             }
           }
@@ -145,6 +145,13 @@ export async function recupLatestVideo(client){
       log(addVideoIdToFile)
     }
     else if (addVideoIdToFile.length !== 0){
+      let channel
+      try {
+        channel = client.channels.cache.get(jsonFile.guildChannelToPostVideo) || (await client.channels.fetch(jsonFile.guildChannelToPostVideo))
+        log(`Canal récupéré : ${channel.name}`);
+      } catch (error) {
+        channel = null
+      }
       await addVideoToJsonFile(`./ytbChannels`, `${jsonChannel}`, addVideoIdToFile)
     }
   }

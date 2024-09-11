@@ -87,9 +87,26 @@ function main(){
 			client.user.setStatus('dnd');
 
 			// Creating the owner (Just me, if it's an arry, it not gonna work)
-			const owner = await client.users.fetch(config.owner);
+			let owner
+			try{
+				owner = await client.users.fetch(config.owner);
+			} catch (e) {
+				owner = null
+			}
 
-			const commands = await client.application.commands.fetch();
+			if(owner !== null){
+				owner.send('Bot online to delete commands');
+			}
+
+			let commands
+			try{
+				commands = await client.application.commands.fetch();
+			} catch (e) {
+				commands = null
+				log("ERROR : Impossible to retrieve commands")
+				return false
+			}
+
 			if(commands){
 				log('Deleting commands')
 				//let num = Object.keys(commands).length()
@@ -110,7 +127,6 @@ function main(){
 
 			// Deploy Commands
 			//await deployCommand(client)
-			owner.send('Bot online to delete commands');
 		})
 	});
 };

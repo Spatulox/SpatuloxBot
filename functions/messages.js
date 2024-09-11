@@ -4,31 +4,42 @@ import {createErrorEmbed, returnToSendEmbed, sendEmbedErrorMessage} from "./embe
 
 //----------------------------------------------------------------------------//
 
-export function postMessage(client, sentence, channelId, reactions = "default") {
+export async function postMessage(client, sentence, channelId, reactions = "default") {
 
-    let targetChannel = client.channels.cache.get(channelId);
-    targetChannel.send(sentence)
-        .then(message => {
+    try{
+        let targetChannel = client.channels.cache.get(channelId) || (await client.channels.fetch(channelId));
+        targetChannel.send(sentence)
+            .then(message => {
 
-            if (reactions != null && reactions !== "default" && reactions.length !== 0) {
-                for (let i = 0; i < reactions.length; i++) {
-                    message.react(reactions[i]);
+                if (reactions != null && reactions !== "default" && reactions.length !== 0) {
+                    for (let i = 0; i < reactions.length; i++) {
+                        message.react(reactions[i]);
+                    }
                 }
-            }
 
-            log(`Message posted : ${sentence.split('\n')[0]}`)
+                log(`Message posted : ${sentence.split('\n')[0]}`)
 
-            message.crosspost()
-                .then(() => log(`Crossposted message : ${sentence.split('\n')[0]}`))
-                .catch(error => {
-                    sendEmbedErrorMessage(targetChannel, 'ERROR when posting message : '+error)
-                    log('ERROR when posting message : '+error)
-                });
+                message.crosspost()
+                    .then(() => log(`Crossposted message : ${sentence.split('\n')[0]}`))
+                    .catch(error => {
+                        sendEmbedErrorMessage(targetChannel, 'ERROR when posting message : '+error)
+                        log('ERROR when posting message : '+error)
+                    });
 
-        })
-        .catch(error => {
-            log('ERROR when crossposting message : '+error)
-        });
+            })
+            .catch(error => {
+                log('ERROR when crossposting message : '+error)
+            });
+    } catch (e){
+        let msg = `ERROR : Impossible to find the channel to send the message : \n> ${sentence}\n\n> ${e}`
+        log(msg)
+        try{
+            const errorChannel = client.channels.cache.get(config.errorChannel) || (await client.channels.fetch(config.errorChannel))
+            errorChannel.send(returnToSendEmbed(createErrorEmbed(msg)))
+        } catch (err){
+            log(`ERROR : [postMessage() - second try catch] : ${err}`)
+        }
+    }
 }
 
 //----------------------------------------------------------------------------//

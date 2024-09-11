@@ -19,7 +19,14 @@ export async function downloadYtbVideo(message, user){
 
         let path = `C:\\Marc\\Perso\\Musics\\1-TelechargesViaDiscord\\`
 
-        const targetChannel = message.guild.channels.cache.get(message.channelId) || message.channel || (await message.guild.channels.fetch(message.channelId)) // Last condition probably useless
+        let targetChannel
+        try{
+            targetChannel = message.guild.channels.cache.get(message.channelId) || message.channel || (await message.guild.channels.fetch(message.channelId))
+        } catch (e) {
+            targetChannel = null
+            log("ERROR : Impossible to retrieve the targetChannel in the dowloadYtbVideo()")
+            return false
+        }
 
         if(!targetChannel){
             log("ERROR : targetChannel to send messages can't be detected")

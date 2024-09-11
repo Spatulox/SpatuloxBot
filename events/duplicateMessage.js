@@ -17,7 +17,7 @@ export async function duplicateMessage(reaction, user) {
     // Trouver le canal cible
     let targetChannel = null;
     for (const id of config.sendDuplicateMessageChannel) {
-        targetChannel = guild.channels.cache.get(id);
+        targetChannel = guild.channels.cache.get(id)
         if (!targetChannel) {
             try {
                 targetChannel = await guild.channels.fetch(id);
@@ -35,7 +35,15 @@ export async function duplicateMessage(reaction, user) {
     }
 
     // Vérifier les réactions des utilisateurs autorisés
-    const users = await reaction.users.fetch();
+    let users
+    try{
+        users = await reaction.users.fetch();
+    } catch (e) {
+        users = null
+        log("ERROR : Impossible to fetch the user which have responded")
+        return
+    }
+
     const authorizedReactors = users.filter(u => config.userCanReact.includes(u.tag));
 
     if (authorizedReactors.size > 1) {
