@@ -168,7 +168,7 @@ export async function deleteOldReminders(client, owner){
     }
 
 
-    if(JSON.stringify(reminders) !== JSON.stringify(bkpReminders)){
+    if(JSON.stringify(reminders) === JSON.stringify(bkpReminders)){
         log("No old reminders to delete")
         return true
     }
