@@ -123,14 +123,14 @@ export function switchYtbToken(){
 
 export async function recapBotsErrors(client, config){
   try{
-    log("Recap bot errors...")
+    log("INFO : Recap bot errors...")
     // Create a today and a yesterday var to search it into the log file.
     if (config?.sendChannelErrors === "yes"){
 
       let errorChannel
       if(config?.errorChannel){
         try{
-          errorChannel = await client.channels.cache.get(config.errorChannel) || (await client.channels.fetch(config.errorChannel))
+          errorChannel = await searchClientChannel(client, config.errorChannel)
         }
         catch (e){
           errorChannel = null
