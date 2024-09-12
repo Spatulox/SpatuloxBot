@@ -1,10 +1,12 @@
+import config from '../../config.json' assert { type: 'json' };
+
 import { createEmbed, createErrorEmbed, returnToSendEmbed, waitPrivateEmbedOrMessage } from "../../functions/embeds.js";
-import { log } from "../../functions/functions.js";
+import {log, searchClientChannel} from "../../functions/functions.js";
 
 import { TextInputStyle } from 'discord.js';
 import { loadForm } from "../../form/formBuilder.js";
 import { readJsonFile, writeJsonFileRework } from "../../functions/files.js";
-import {sendInteractionError, sendInteractionReply} from "../../functions/messages.js";
+import {sendInteractionError, sendInteractionReply, sendMessage} from "../../functions/messages.js";
 
 // ------------------------------------------------------------- //
 
@@ -16,23 +18,23 @@ export async function reminderCommand(interaction){
 
         switch (subcommand) {
             case 'list':
-                log("Listing reminder")
+                log("INFO : Listing reminder")
                 await interaction.deferReply()
                 await listReminder(interaction)
                 break;
             case 'add':
-                log("ADD reminder")
+                log("INFO : Opening reminder form")
                 await openReminderForm(interaction)
                 break;
             case 'remove':
-                log("Removing reminder")
+                log("INFO : Removing reminder")
                 await interaction.deferReply(waitPrivateEmbedOrMessage())
                 await removeReminder(interaction)
                 break;
         }
     }catch (e) {
         log(`ERROR : Impossible to run the reminder command : ${e}`)
-        sendInteractionError(interaction, `ERROR : Impossible to run the reminder command : ${e}`)
+        await sendInteractionError(interaction, `ERROR : Impossible to run the reminder command : ${e}`)
     }
 }
 
@@ -145,4 +147,46 @@ async function openReminderForm(interaction){
 
 async function removeReminder(interaction){
 
+}
+
+// ------------------------------------------------------------- //
+export async function deleteOldReminders(client, owner){
+    log("INFO : Checking for old reminders")
+    const reminders = await readJsonFile("./reminders/reminder.json")
+    const bkpReminders = reminders
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0);
+    for (const reminder in reminders) {
+
+        const [day, month, year] = reminder.split('/');
+        const reminderDate = new Date(year, month - 1, day);
+
+        if(today > reminderDate){
+            delete reminders[reminder]
+        }
+    }
+
+
+    if(JSON.stringify(reminders) !== JSON.stringify(bkpReminders)){
+        log("No old reminders to delete")
+        return true
+    }
+
+    const errorChannel = await searchClientChannel(client, config.errorChannel)
+    if(await writeJsonFileRework("./reminders","reminder.json", reminders, errorChannel)){
+
+        const infoChannel = await searchClientChannel(client, config.channelPingLogin)
+        if(owner !== null && infoChannel){
+            sendMessage(infoChannel, `<@${config.owner}>, Old reminders deleted`)
+        } else {
+            log("WARNING : deleteOldCommand searchClientChannel result is false")
+        }
+        return true
+    }
+
+    if(errorChannel){
+        sendMessage(errorChannel, `<@${config.owner}>, Failed to delete old reminders`)
+    }
+    return false
 }

@@ -102,6 +102,7 @@ function main(){
 
 			// Search for the latest ERRORS and send it to the correct channel :
 			recapBotsErrors(client, config)
+			deleteOldReminders(client, owner)
 
 			// Deploy Commands
 			await deployCommand(client)
