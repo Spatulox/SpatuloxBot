@@ -172,3 +172,33 @@ export async function recapBotsErrors(client, config){
     return false
   }
 }
+
+
+
+export async function searchClientChannel(client, channelId){
+  try{
+    return client.channels.cache.get(channelId) || await client.channels.fetch(channelId)
+  } catch (e) {
+    log(`ERROR : Impossible to fetch the channel : ${channelId}\n> ${e}`)
+    return false
+  }
+}
+
+export async function searchMessageChannel(message, channelId){
+  try{
+    if (!message.guild) {
+      log("ERROR : Message n'est pas dans un serveur ????? WTH");
+      return false;
+    }
+
+    if (channelId && typeof channelId !== 'string') {
+      log(`ERROR : channelId invalide : ${channelId}`);
+      return false;
+    }
+
+    return message.guild.channels.cache.get(channelId) || (await message.guild.channels.fetch(channelId)) || message.channel
+  } catch (e) {
+    log(`ERROR : Impossible to fetch the channel : ${channelId}\n> ${e}`)
+    return false
+  }
+}
