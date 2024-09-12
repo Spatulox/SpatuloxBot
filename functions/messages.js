@@ -1,6 +1,7 @@
 import config from '../config.json' assert { type: 'json' };
 import {log, searchClientChannel} from "./functions.js";
 import {createEmbed, createErrorEmbed, returnToSendEmbed, sendEmbedErrorMessage} from "./embeds.js";
+import {returnToSendSelectMenu} from "./selectMenu.js";
 
 //----------------------------------------------------------------------------//
 
@@ -81,26 +82,54 @@ export async function sendLongMessage(channel, title, longMessage) {
     }
 }
 
+//----------------------------------------------------------------------------//
 
-export async function sendInteractionError(interaction, embedOrMessage, privateVisibility = false){
-    try{
+function returnTypeMessage(interaction, embed, embedOrMessage, privateVisibility){
+    let result = isEmbedOrSelectMenu(embed)
+    let messageOptions;
+    if(result === "embed"){
+        if(embed?.description){
+            log(`INFO : Executing ${interaction.commandName || interaction.customId} : ${embed.description}`)
+        } else {
+            log(`DEBUG : Executing ${interaction.commandName || interaction.customId}`)
+        }
+        messageOptions = returnToSendEmbed(embed, privateVisibility);
+    } else if (result === "selectMenu"){
+        if(embed?.content){
+            log(`INFO : Executing ${interaction.commandName || interaction.customId} : (${embedOrMessage.content || "No content provided"})`)
+            messageOptions = returnToSendSelectMenu(embedOrMessage, embedOrMessage.content, privateVisibility);
+        } else {
+            log(`DEBUG : Impossible to execute ${interaction.commandName || interaction.customId} || Need to placeholder (content) for the selectMenu`)
+            messageOptions = returnToSendEmbed(createErrorEmbed("No content provided, plz use the (returnToSendSelectMenu) function only for selectMenu, before calling 'sendInteractionReply'"))
+        }
+    }
+    return messageOptions
+}
+function isEmbedOrSelectMenu(responseObject) {
+    if (responseObject?.title && responseObject?.description) {
+        return "embed";
+    } else if (responseObject?.content) {
+        return "selectMenu";
+    } else {
+        return "other";
+    }
+}
+
+export async function sendInteractionError(interaction, embedOrMessage, privateVisibility = false) {
+    try {
         let message
-        if(typeof embedOrMessage === 'string'){
+        if (typeof embedOrMessage === 'string') {
             message = createErrorEmbed(embedOrMessage)
         } else {
             message = embedOrMessage
         }
 
-        if(message?.description){
-            log(`${interaction.commandName || interaction.customId} : ${message.description}`)
-        } else {
-            log(`INFO : Executing ${interaction.commandName || interaction.customId}`)
-        }
+        let messageOptions = returnTypeMessage(interaction, message, embedOrMessage, privateVisibility)
 
         if (interaction.deferred) {
-            await interaction.editReply(returnToSendEmbed(message, privateVisibility));
+            await interaction.editReply(messageOptions);
         } else if (interaction.isRepliable()) {
-            await interaction.reply(returnToSendEmbed(message, privateVisibility));
+            await interaction.reply(messageOptions);
         }
         return true
     } catch (e) {
@@ -109,6 +138,7 @@ export async function sendInteractionError(interaction, embedOrMessage, privateV
     }
 
 }
+
 export async function sendInteractionReply(interaction, embedOrMessage, privateVisibility = false) {
     try{
         let embed
@@ -120,15 +150,9 @@ export async function sendInteractionReply(interaction, embedOrMessage, privateV
             embed = embedOrMessage
         }
 
-        if(embed?.description){
-            log(`${interaction.commandName || interaction.customId} : ${embed.description}`)
-        } else {
-            log(`INFO : Executing ${interaction.commandName || interaction.customId}`)
-        }
+        let messageOptions = returnTypeMessage(interaction, embed, embedOrMessage, privateVisibility)
 
         try {
-            const messageOptions = returnToSendEmbed(embed, privateVisibility);
-
             if (interaction.deferred) {
                 await interaction.editReply(messageOptions);
             } else if (interaction.replied) {
@@ -173,3 +197,5 @@ export async function sendInteractionReply(interaction, embedOrMessage, privateV
         return false
     }
 }
+
+//----------------------------------------------------------------------------//
