@@ -139,9 +139,9 @@ export async function writeJsonFileRework(directoryPath, name, array, channelToS
         const filePath = path.join(directoryPath, `${name}.json`);
 
         // Écrire le fichier
-        fs.writeFileSync(filePath, json);
+        await fs.writeFileSync(filePath, json);
 
-        log(`Data written to ${filePath}`);
+        log(`INFO : Data written to ${filePath}`);
 
         return true;
     } catch (err) {
