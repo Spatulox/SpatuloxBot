@@ -61,8 +61,12 @@ export function createEmbed(color = null){
         "minecraft": 0x006400
     }
 
-    if(!colors[color]){
-        log("ERROR : The color specified don't exist inside the dictionnary")
+    if(color == null){
+        embed.color = colors[color]
+    }
+    else if(!colors[color]){
+        log(`ERROR : The color '${color}' specified don't exist inside the dictionnary`)
+        embed.color = colors.botColor
     } else{
         embed.color = colors[color]
     }
