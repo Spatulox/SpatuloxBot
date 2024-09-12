@@ -83,11 +83,12 @@ export async function addReminder(client, interaction){
             data = {}
         }
 
+        const formattedDate = `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+        const formattedTime = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+        
         if (!data[formattedDate]) {
             data[formattedDate] = [];
         }
-        const formattedDate = `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
-        const formattedTime = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
 
         data[formattedDate].push({
             hour: formattedTime,
