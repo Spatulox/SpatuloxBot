@@ -1,12 +1,13 @@
 import config from '../../config.json' assert { type: 'json' };
 
 import { createEmbed, createErrorEmbed, returnToSendEmbed, waitPrivateEmbedOrMessage } from "../../functions/embeds.js";
-import {log, searchClientChannel} from "../../functions/functions.js";
+import { log, searchClientChannel } from "../../functions/functions.js";
 
-import { TextInputStyle } from 'discord.js';
+import { StringSelectMenuBuilder, TextInputStyle } from 'discord.js';
 import { loadForm } from "../../form/formBuilder.js";
 import { readJsonFile, writeJsonFileRework } from "../../functions/files.js";
-import {sendInteractionError, sendInteractionReply, sendMessage} from "../../functions/messages.js";
+import { sendInteractionError, sendInteractionReply, sendMessage } from "../../functions/messages.js";
+import {createSelectMenu, returnToSendSelectMenu} from "../../functions/selectMenu.js";
 
 // ------------------------------------------------------------- //
 
@@ -123,6 +124,78 @@ export async function addReminder(client, interaction){
 // ------------------------------------------------------------- //
 
 async function listReminder(interaction){
+    try{
+        const reminders = await readJsonFile("./reminders/reminder.json")
+
+        if(Array.isArray(reminders) && reminders.includes("Error")){
+            return
+        }
+
+        const dates = Object.keys(reminders);
+        if (dates.length === 0) {
+            sendInteractionReply(interaction, "Aucun rappel")
+            return
+        }
+
+        // Créer le menu de sélection
+        const select = createSelectMenu('Sélectionnez une date', 'select_date')
+        select.content = 'Choisissez une date pour voir les rappels :'
+
+        select.addOptions(dates.map(date => ({
+            label: date,
+            value: date,
+        })));
+
+        sendInteractionReply(interaction, select)
+        /*const response = await interaction.reply({
+            content: 'Choisissez une date pour voir les rappels :',
+            components: [row],
+        });*/
+
+        // Créer un collecteur pour la réponse
+        /*const collector = response.createMessageComponentCollector({
+            componentType: ComponentType.StringSelect,
+            time: 60000
+        });
+
+        collector.on('collect', async (i) => {
+            const selectedDate = i.values[0];
+            const embed = createEmbed();
+            embed.setDescription("Liste des rappels");
+            embed.setTitle(selectedDate);
+
+            for (const reminder of reminders[selectedDate]) {
+                embed.addFields({
+                    name: reminder.hour,
+                    value: `${reminder.name}: ${reminder.description}`
+                });
+            }
+
+            await i.update({ embeds: [embed], components: [] });
+        });
+
+        collector.on('end', collected => {
+            if (collected.size === 0) {
+                let msg = "Temps écoulé. Veuillez réessayer."
+                sendInteractionError(interaction, msg)
+            }
+        });*/
+
+        /*for (const date in reminders) {
+            const embed = createEmbed()
+            embed.description = "Liste des rappels"
+            embed.title = date
+            for (const reminder of reminders[date]) {
+                embed.fields.push({
+                    name: reminder.hour,
+                    value: `${reminder.name}: ${reminder.description}`
+                });
+            }
+            interaction.followUp(returnToSendEmbed(embed))
+        }*/
+    } catch (e) {
+        sendInteractionError(interaction, e.toString())
+    }
 }
 
 // ------------------------------------------------------------- //
@@ -169,7 +242,7 @@ export async function deleteOldReminders(client, owner){
 
 
     if(JSON.stringify(reminders) === JSON.stringify(bkpReminders)){
-        log("No old reminders to delete")
+        log("INFO : No old reminders to delete")
         return true
     }
 
