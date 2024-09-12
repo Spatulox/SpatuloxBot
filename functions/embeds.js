@@ -62,7 +62,7 @@ export function createEmbed(color = null){
     }
 
     if(color == null){
-        embed.color = colors[color]
+        embed.color = colors.botColor
     }
     else if(!colors[color]){
         log(`ERROR : The color '${color}' specified don't exist inside the dictionnary`)
