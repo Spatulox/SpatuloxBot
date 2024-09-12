@@ -46,7 +46,7 @@ async function getLatestVideos() {
   
 
   try {
-    console.log(`Checking YouTube...`);
+    console.log(`INFO : Checking YouTube...`);
 
     if(channelId.includes('@')){
       var response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&forUsername=${channelId}&maxResults=${maxResults}&order=date&type=video&key=${apiKey}`);
@@ -58,7 +58,7 @@ async function getLatestVideos() {
 
     const data = await response.json();
 
-    console.log(`Total videos: ${data.items.length}`);
+    console.log(`INFO : Total videos: ${data.items.length}`);
 
     // Load the existing channel JSON file
     // let channelsList = await listJsonFile();
@@ -86,11 +86,11 @@ async function getLatestVideos() {
           console.error(err);
           return;
         }
-        console.log('JSON file has been created.');
+        console.log('INFO : JSON file has been created.');
       });
     // }
 
-    console.log(`Checking completed...`);
+    console.log(`INFO : Checking completed...`);
     return 'Ok'
   } catch (error) {
     console.error('Error:', error);
