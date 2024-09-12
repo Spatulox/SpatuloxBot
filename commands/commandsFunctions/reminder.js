@@ -86,12 +86,13 @@ export async function addReminder(client, interaction){
         })
 
         let data = await readJsonFile("./reminders/reminder.json")
-        if(data === ["Error"]){
+        if(Array.isArray(data) && data.includes("Error")){
             data = {}
         }
 
         const formattedDate = `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
         const formattedTime = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+
         
         if (!data[formattedDate]) {
             data[formattedDate] = [];
