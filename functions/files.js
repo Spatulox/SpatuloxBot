@@ -1,4 +1,4 @@
-import {log} from "./functions.js";
+import { log } from "./functions.js";
 import path, { dirname } from 'path'
 import fs from 'fs'
 import {createErrorEmbed, returnToSendEmbed} from "./embeds.js";
@@ -110,29 +110,44 @@ export async function writeJsonFile(directoryPath, name, array){
     });
 }
 
+/**
+ *
+ * @param directoryPath
+ * @param name
+ * @param array
+ * @param channelToSendMessage The object to just execute targetChannel.send()
+ * @returns {Promise<boolean>}
+ */
 export async function writeJsonFileRework(directoryPath, name, array, channelToSendMessage = null) {
+    if(array === ["Error"]){
+        log(`Impossible to save the data for ${name}, the data are 'Error'`)
+        return false
+    }
     try {
         const directories = directoryPath.split(path.sep);
         let currentPath = '';
         const json = JSON.stringify(array, null, 2);
 
-        // Créer les répertoires récursivement
-        for (const directory of directories) {
+        directories.forEach((directory) => {
             currentPath = path.join(currentPath, directory);
-            await fs.mkdir(currentPath, { recursive: true });
-        }
+            if (!fs.existsSync(currentPath)) {
+                fs.mkdirSync(currentPath);
+            }
+        });
 
         name = name.split('.json')[0];
         const filePath = path.join(directoryPath, `${name}.json`);
 
         // Écrire le fichier
-        await fs.writeFile(filePath, json);
+        fs.writeFileSync(filePath, json);
 
         log(`Data written to ${filePath}`);
+
         return true;
     } catch (err) {
+        name = name.split('.json')[0];
         log(`ERROR : Error while writing file ${directoryPath}/${name}.json, ${err}`);
-        if(channelToSendMessage !== null){
+        if(channelToSendMessage !== null && typeof channelToSendMessage !== 'string'){
             try{
                 channelToSendMessage.send(returnToSendEmbed(createErrorEmbed(`ERROR : Error when wrinting file ${directoryPath}/${name}.json : ${err}`)))
             } catch{}
