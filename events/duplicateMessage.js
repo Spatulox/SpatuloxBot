@@ -1,14 +1,14 @@
 import config from '../config.json' assert { type: 'json' }
-import {log} from '../functions/functions.js'
+import {log, searchMessageChannel} from '../functions/functions.js'
 import { sendEmbedErrorMessage } from "../functions/embeds.js";
 
 export async function duplicateMessage(reaction, user) {
     const { message, emoji } = reaction;
-    const { channelId, content, attachments, guild } = message;
+    const { content, attachments, guild } = message;
 
     // Vérifications initiales
     if (attachments.size > 0 || !content ||
-        !config.getReactionChannel.includes(channelId) ||
+        !config.getReactionChannel.includes(message.channelId) ||
         emoji.name !== config.emojiReact[0] ||
         !config.userCanReact.includes(user.tag)) {
         return;
@@ -17,16 +17,12 @@ export async function duplicateMessage(reaction, user) {
     // Trouver le canal cible
     let targetChannel = null;
     for (const id of config.sendDuplicateMessageChannel) {
-        targetChannel = guild.channels.cache.get(id)
-        if (!targetChannel) {
-            try {
-                targetChannel = await guild.channels.fetch(id);
-            } catch (error) {
-                log(`ERROR : Lors de la récupération du canal ${id}:`, error);
-                continue;
-            }
+        targetChannel = searchMessageChannel(message, id)
+        if (targetChannel) {
+            break
+        } else {
+            log(`WARNING : Lors de la récupération du canal ${id}:`, error);
         }
-        if (targetChannel) break;
     }
 
     if (!targetChannel) {

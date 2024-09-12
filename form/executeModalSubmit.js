@@ -10,7 +10,7 @@ export async function executeModalSubmit(interaction, client){
             addReminder(client, interaction)
             break;
         default:
-            sendInteractionError(interaction, "Hmmm, what are you doing here ?? (executeSlashCommand)", true)
+            await sendInteractionError(interaction, "Hmmm, what are you doing here ?? (executeSlashCommand)", true)
             //interaction.reply(returnToSendEmbed(createErrorEmbed("Hmmm, what are you doing here ?? (executeSlashCommand)")))
             break;
     }

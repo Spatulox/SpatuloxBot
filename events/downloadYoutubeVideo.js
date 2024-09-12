@@ -21,7 +21,7 @@ export async function downloadYtbVideo(message, user){
 
         let targetChannel
         try{
-            targetChannel = message.guild.channels.cache.get(message.channelId) || message.channel || (await message.guild.channels.fetch(message.channelId))
+            targetChannel = searchMessageChannel(message, message.channelId)
         } catch (e) {
             targetChannel = null
             log("ERROR : Impossible to retrieve the targetChannel in the dowloadYtbVideo()")

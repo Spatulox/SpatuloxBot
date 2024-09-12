@@ -45,7 +45,7 @@ export async function addReminder(client, interaction){
         const dateStr = interaction.fields.getTextInputValue('date-hour');
 
         if(!dateStr.includes("/") || !dateStr.includes(" ") || !dateStr.includes(":")){
-            sendInteractionError(interaction, "Date invalide. Veuillez utiliser le format 'JJ/MM/AAAA hh:mm' .", true)
+            await sendInteractionError(interaction, "Date invalide. Veuillez utiliser le format 'JJ/MM/AAAA hh:mm' .", true)
             //await interaction.reply(returnToSendEmbed(createErrorEmbed("Date invalide. Veuillez utiliser le format 'JJ/MM/AAAA hh:mm' .")))
             return
         }
@@ -58,10 +58,17 @@ export async function addReminder(client, interaction){
         const date = new Date(year, month - 1, day, hours, minutes);
 
         if (isNaN(date.getTime())) {
-            sendInteractionError(interaction, "Date invalide. Veuillez utiliser le format 'JJ/MM/AAAA hh:mm' .", true)
+            await await sendInteractionError(interaction, "Date invalide. Veuillez utiliser le format 'JJ/MM/AAAA hh:mm' .", true)
             //interaction.reply(returnToSendEmbed(createErrorEmbed("Date invalide. Veuillez utiliser le format 'JJ/MM/AAAA hh:mm' ."), true));
             return
         }
+        console.log(date, new Date())
+        if(date < new Date()){
+            await sendInteractionError(interaction, `Vous ne pouvez pas rajouter un évènement avant le ${new Date().toLocaleString()}`, true)
+            return
+        }
+
+
 
         const embed = createEmbed()
         embed.title = "Événement créé :"
@@ -98,14 +105,14 @@ export async function addReminder(client, interaction){
 
         if(await writeJsonFileRework("./reminders", "reminder.json", data, interaction.channel)){
             //interaction.reply(returnToSendEmbed(embed, true));
-            sendInteractionReply(interaction, embed, true)
+            await sendInteractionReply(interaction, embed, true)
         } else {
-            sendInteractionReply(interaction, createErrorEmbed(`Impossible to save the reminder, plz check the writeJsonFileRework() function...}`))
+            await sendInteractionReply(interaction, createErrorEmbed(`Impossible to save the reminder, plz check the writeJsonFileRework() function...}`))
             //interaction.reply(returnToSendEmbed(createErrorEmbed(`Impossible to save the reminder, plz check the writeJsonFileRework() function...}`)))
         }
     } catch (e) {
         log(`ERROR : Impossible to execute the addReminder function : ${e}`)
-        sendInteractionError(interaction, `ERROR : Impossible to execute the addReminder function : ${e}`)
+        await sendInteractionError(interaction, `ERROR : Impossible to execute the addReminder function : ${e}`)
         //interaction.reply(returnToSendEmbed(createErrorEmbed(e)))
     }
 }
@@ -121,14 +128,14 @@ async function openReminderForm(interaction){
     try {
         const modal = await loadForm("reminderForm")
         if (!modal) {
-            sendInteractionError(interaction, "Impossible to create the reminder form")
+            await sendInteractionError(interaction, "Impossible to create the reminder form")
             //interaction.reply(returnToSendEmbed(createErrorEmbed("Impossible to create the reminder form")))
             return
         }
         await interaction.showModal(modal);
     } catch (e) {
         log(`ERROR :  Crashed addReminder: ${e}`);
-        sendInteractionError(interaction, `ERROR :  Crashed addReminder: ${e}`)
+        await sendInteractionError(interaction, `ERROR :  Crashed addReminder: ${e}`)
         //await interaction.reply(returnToSendEmbed(createErrorEmbed(e)));
     }
 }

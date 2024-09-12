@@ -46,10 +46,10 @@ export async function ytbChannelCommand(client, interaction){
         let res = await addYtbChannel(ytbChannel, discordChannel)
 
         if(res === 'Error'){
-          sendInteractionError(interaction, `Error when adding the ytb channel ${ytbChannel}`)
+          await sendInteractionError(interaction, `Error when adding the ytb channel ${ytbChannel}`)
           //interaction.editReply(`Error when adding the ytb channel ${ytbChannel}`)
         } else {
-          sendInteractionReply(interaction, `Added ${res} : ${ytbChannel}`)
+          await sendInteractionReply(interaction, `Added ${res} : ${ytbChannel}`)
           //interaction.editReply(`Added ${res} : ${ytbChannel}`)
         }
 
@@ -61,10 +61,10 @@ export async function ytbChannelCommand(client, interaction){
         break
 
       default:
-        sendInteractionError(interaction, "Something went wrong, but what are you doing here ?")
+        await sendInteractionError(interaction, "Something went wrong, but what are you doing here ?")
     }
   } catch (e){
-    sendInteractionError(interaction, `ERROR : Crash when ytbChannelCommand : ${e}`)
+    await sendInteractionError(interaction, `ERROR : Crash when ytbChannelCommand : ${e}`)
     return false
   }
 }
@@ -76,7 +76,7 @@ async function listYtbChannel(interaction){
     const listFile = await listJsonFile("./ytbChannels/")
 
     if (listFile === "Error") {
-      sendInteractionError(interaction, "Something went wrong when listing channels")
+      await sendInteractionError(interaction, "Something went wrong when listing channels")
       return false
     }
 
@@ -88,7 +88,7 @@ async function listYtbChannel(interaction){
     for (const file of listFile) {
       const data = readJsonFile(`./ytbChannels/${file}`)
       if (data === ["Error"]) {
-        sendInteractionError(interaction, `Something went wrong when reading the file ${file}`)
+        await sendInteractionError(interaction, `Something went wrong when reading the file ${file}`)
         return false
       }
 
@@ -100,12 +100,12 @@ async function listYtbChannel(interaction){
         value: `.\n**${numberVideoPosted} Vidéos postées** dans <#${channelWhereitPost}>`
       })
     }
-    sendInteractionReply(interaction, embed)
+    await sendInteractionReply(interaction, embed)
     return true
   }
   catch (e){
     log(`ERROR : Crash when listYtbChannel : ${e}`)
-    sendInteractionError(interaction, e)
+    await sendInteractionError(interaction, e)
     return false
   }
 }
@@ -171,7 +171,7 @@ async function addYtbChannel(channelId, channelToPost) {
     return data.items[0].snippet.channelTitle
   } catch (error) {
     log(`ERROR : Crash when addYtbchannel : ${error}`)
-    sendInteractionError(interaction, error)
+    await sendInteractionError(interaction, error)
     //await interaction.editReply(returnToSendEmbed(createErrorEmbed(error)))
     return 'Error'
   }

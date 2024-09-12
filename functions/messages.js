@@ -1,5 +1,5 @@
 import config from '../config.json' assert { type: 'json' };
-import {log} from "./functions.js";
+import {log, searchClientChannel} from "./functions.js";
 import {createEmbed, createErrorEmbed, returnToSendEmbed, sendEmbedErrorMessage} from "./embeds.js";
 
 //----------------------------------------------------------------------------//
@@ -7,7 +7,10 @@ import {createEmbed, createErrorEmbed, returnToSendEmbed, sendEmbedErrorMessage}
 export async function postMessage(client, sentence, channelId, reactions = "default") {
 
     try{
-        let targetChannel = client.channels.cache.get(channelId) || (await client.channels.fetch(channelId));
+        let targetChannel = await searchClientChannel(client, channelId)
+        if(!targetChannel){
+            return false
+        }
         targetChannel.send(sentence)
             .then(message => {
 
@@ -34,8 +37,12 @@ export async function postMessage(client, sentence, channelId, reactions = "defa
         let msg = `ERROR : Impossible to find the channel to send the message : \n> ${sentence}\n\n> ${e}`
         log(msg)
         try{
-            const errorChannel = client.channels.cache.get(config.errorChannel) || (await client.channels.fetch(config.errorChannel))
-            errorChannel.send(returnToSendEmbed(createErrorEmbed(msg)))
+            const errorChannel = await searchClientChannel(client, config.errorChannel)
+            if(errorChannel){
+                errorChannel.send(returnToSendEmbed(createErrorEmbed(msg)))
+            } else {
+                log("ERROR : Impossible to execute the postMessage function, channel is false")
+            }
         } catch (err){
             log(`ERROR : [postMessage() - second try catch] : ${err}`)
         }

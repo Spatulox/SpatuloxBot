@@ -147,7 +147,7 @@ export async function recupLatestVideo(client){
     else if (addVideoIdToFile.length !== 0){
       let channel
       try {
-        channel = client.channels.cache.get(jsonFile.guildChannelToPostVideo) || (await client.channels.fetch(jsonFile.guildChannelToPostVideo))
+        channel = await searchClientChannel(client, jsonFile.guildChannelToPostVideo)
         log(`Canal récupéré : ${channel.name}`);
       } catch (error) {
         channel = null

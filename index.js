@@ -9,11 +9,12 @@ import { duplicateMessage } from './events/duplicateMessage.js'
 import { downloadYtbVideo } from './events/downloadYoutubeVideo.js'
 import { recupLatestVideo } from './events/automatics/requestLatestYtbVideo.js'
 import { addReactions } from './events/reactions.js'
-import { log, recapBotsErrors } from './functions/functions.js'
+import {log, recapBotsErrors, searchClientChannel} from './functions/functions.js'
 import { checkInternetCo } from './functions/checkInternetCo.js'
 import { deployCommand } from './commands/deployCommand.js';
 import { executeSlashCommand } from './commands/executeCommand.js';
 import { executeModalSubmit } from "./form/executeModalSubmit.js";
+import {deleteOldReminders} from "./commands/commandsFunctions/reminder.js";
 
 async function loginBot(client) {
 
@@ -89,8 +90,10 @@ function main(){
 	        }
 	        else if(config.sendToOwnerOrChannel === "1"){
 	          try{
-				  const channelLogin = client.channels.cache.get(config.channelPingLogin) || (await client.channels.fetch(config.channelPingLogin))
-				  channelLogin.send(`<@${config.owner}>, Bot is online!`);
+				  const channelLogin = await searchClientChannel(client, config.channelPingLogin)
+				  if(channelLogin){
+					  channelLogin.send(`<@${config.owner}>, Bot is online!`);
+				  }
 			  } catch (e){
 				  log(`ERROR : Something went wrong when searching for the channel to send the online message : ${e}`)
 			  }

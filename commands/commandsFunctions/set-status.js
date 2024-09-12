@@ -14,9 +14,9 @@ export async function setStatus(client, interaction){
         const embed = createEmbed("botColor")
         embed.title = "Set Status OK"
         embed.description = `Status switched for ${newStatus}`
-        sendInteractionReply(interaction, embed)
+        await sendInteractionReply(interaction, embed)
         //await interaction.editReply(returnToSendEmbed(embed));
-        log(`Status switched for '${newStatus}'`)
+        log(`INFO : Status switched for '${newStatus}'`)
         return
     }
     catch(err){
@@ -25,7 +25,7 @@ export async function setStatus(client, interaction){
             const embed = createEmbed("red")
             embed.title = "Set Status CRASH"
             embed.description = `Impossible to set the activity of the bot : ${err}`
-            sendInteractionError(interaction, embed)
+            await sendInteractionError(interaction, embed)
             //await interaction.editReply(returnToSendEmbed(embed))
             return
         } catch{

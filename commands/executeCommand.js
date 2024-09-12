@@ -18,7 +18,7 @@ export async function executeSlashCommand(interaction, client){
         case 'switchytbtoken':
             await switchYtbToken()
             let config = await readJsonFile('./config.json')
-            sendInteractionReply(interaction, createSuccessEmbed(`Youtube token switched from ${config.usingYtbToken} to ${config.usingYtbToken === '0' ? 1 : 0}`))
+            await sendInteractionReply(interaction, createSuccessEmbed(`Youtube token switched from ${config.usingYtbToken} to ${config.usingYtbToken === '0' ? 1 : 0}`))
             //await interaction.reply(returnToSendEmbed(createSuccessEmbed(`Youtube token switched from ${config.usingYtbToken} to ${config.usingYtbToken === '0' ? 1 : 0}`)));
             break;
 
@@ -31,7 +31,7 @@ export async function executeSlashCommand(interaction, client){
             break;
 
         default:
-            sendInteractionError(interaction, "Hmmm, what are you doing here ?? (executeSlashCommand)")
+            await sendInteractionError(interaction, "Hmmm, what are you doing here ?? (executeSlashCommand)")
             //interaction.reply(returnToSendEmbed(createErrorEmbed("Hmmm, what are you doing here ?? (executeSlashCommand)")))
             break;
     }
