@@ -19,7 +19,7 @@ async function loginBot(client) {
 		while(ok == 'Not Connected'){
 			ok = await client.login(config.token)
 				.then(() => {
-					log('Logged in successfully!');
+					log('INFO : Logged in successfully!');
 					return 'Connected'
 				})
 				.catch(async (err) => {
@@ -42,13 +42,13 @@ async function loginBot(client) {
 
 function main(){
 
-	log('----------------------------------------------------')
-	log('Starting Program');
+	log('INFO : ----------------------------------------------------')
+	log('INFO : Starting Program');
 
 	checkInternetCo()
     .then(() => {
 
-		log('Creating Client')
+		log('INFO : Creating Client')
 		//Créer un "client"
 		const client = new Client({ intents: [
 			GatewayIntentBits.Guilds,
@@ -61,7 +61,7 @@ function main(){
 
 		//console.log(config);
 
-		log('Trying to connect to Discord Servers')
+		log('INFO : Trying to connect to Discord Servers')
 		// let ok = "Not Connected"
 		// while(ok == 'Not Connected'){
 		// 	ok = loginBot(client)
@@ -72,14 +72,14 @@ function main(){
 		var tmp = loginBot(client)
 		if (tmp == "Token error")
 		{
-			log('Stopping program')
+			log('INFO : Stopping program')
 			process.exit()
 		}
 		
 
 		// Evènement qui attent deux chose (nom évènements, fonction associée)
 		client.on('ready', async () => {
-			log(`${client.user.username} has logged in, waiting...`)
+			log(`INFO : ${client.user.username} has logged in, waiting...`)
 			client.user.setActivity({
 				name:"Seems I'm in developpement..."
 			})
@@ -108,19 +108,19 @@ function main(){
 			}
 
 			if(commands){
-				log('Deleting commands')
+				log('INFO : Deleting commands')
 				//let num = Object.keys(commands).length()
 				let num = commands.size
 				let tmp = 1
 
 				for (const command of commands.values()) {
-					log(`${tmp} of ${num}`)
+					log(`INFO : ${tmp} of ${num}`)
 				  	await command.delete();
 				  	tmp++
 				}	
 			}
 			else{
-				log('No commands to delete')
+				log('INFO : No commands to delete')
 			}
 			
 

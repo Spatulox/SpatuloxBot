@@ -43,13 +43,13 @@ export async function duplicateMessage(reaction, user) {
     const authorizedReactors = users.filter(u => config.userCanReact.includes(u.tag));
 
     if (authorizedReactors.size > 1) {
-        log('Un utilisateur autorisé a déjà réagi à ce message.')
+        log('INFO : Un utilisateur autorisé a déjà réagi à ce message.')
         return;
     }
 
     // Dupliquer le message
     try {
-        log(`Message dupliqué : ${content.split('\n')[0]}`);
+        log(`INFO : Message dupliqué : ${content.split('\n')[0]}`);
         await targetChannel.send(content);
     } catch (error) {
         sendEmbedErrorMessage(message.channel, `Erreur lors de la duplication : ${error}`)

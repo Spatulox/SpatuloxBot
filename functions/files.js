@@ -7,7 +7,7 @@ import {createErrorEmbed, returnToSendEmbed} from "./embeds.js";
 
 export async function addVideoToJsonFile(directoryPath, fileName, valueToPut, channelToSendMessage = null){
 
-    log('Updating json file')
+    log('INFO : Updating json file')
     // Read the file
     const file = await readJsonFile(`${directoryPath}/${fileName}`)
     //Check if the value is already in the file.videosId
@@ -24,10 +24,10 @@ export async function addVideoToJsonFile(directoryPath, fileName, valueToPut, ch
             //writeJsonFile(directoryPath, fileName, file)
             return
         }
-        log('Data already inside the array')
+        log('INFO : Data already inside the array')
     }
     catch{
-        log('Error when writing datas')
+        log('ERROR : Error when writing datas')
     }
 }
 
@@ -65,7 +65,7 @@ export function replaceValueJsonFile(fileName, keyOfValue, valueToReplace) {
                 return;
             }
 
-            log(`Valeur changé pour ${keyOfValue}, valeur ${valueToReplace} avec succès pour le fichier JSON ${fileName}.`);
+            log(`INFO : Valeur changé pour ${keyOfValue}, valeur ${valueToReplace} avec succès pour le fichier JSON ${fileName}.`);
         })
     })
 }
@@ -106,7 +106,7 @@ export async function writeJsonFile(directoryPath, name, array){
             return;
         }
         // console.log('Data written to file');
-        log(`Data written to ${directoryPath}/${name}.json`)
+        log(`INFO : Data written to ${directoryPath}/${name}.json`)
     });
 }
 

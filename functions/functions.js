@@ -4,6 +4,7 @@ import path, { dirname } from 'path'
 import fs from 'fs'
 import readline from 'readline';
 import {readJsonFile, replaceValueJsonFile} from "./files.js";
+import config from '../config.json' assert { type: 'json' };
 
 //----------------------------------------------------------------------------//
 
@@ -38,7 +39,7 @@ export function log(str) {
       
       let fileList = fs.readdirSync(logDir, (err, files) => {
         if (err) {
-          console.error('Erreur lors de la lecture du répertoire : ' + err);
+          console.error('ERROR : Erreur lors de la lecture du répertoire : ' + err);
           return 'Error';
         }
         return files
@@ -47,9 +48,9 @@ export function log(str) {
       if (fileList !== 'Error'){
         fs.renameSync(filePath, filePath.split('.txt')[0]+`${fileList.length}.txt`, (err) => {
           if (err) {
-            console.error('Erreur lors du renommage du fichier de log : ' + err);
+            console.error('ERROR : Erreur lors du renommage du fichier de log : ' + err);
           } else {
-            console.log('Fichier renommé avec succès.');
+            console.log('INFO : Fichier renommé avec succès.');
           }
         });
 
@@ -57,12 +58,12 @@ export function log(str) {
           fs.appendFileSync(filePath.split('.txt')[0]+`${fileList.length}.txt`, `Fichier renommé avec succès.\nSuite du fichier au fichier log.txt ou log${fileList.length+1}.txt`)
         }
         catch{
-          console.log('Impossible to write in the renamed file...')
+          console.log('ERROR : Impossible to write in the renamed file...')
         }
       }
     }
   } catch (err) {
-    console.error('Erreur lors de la récupération de la taille du fichier : ' + err);
+    console.error('ERROR : Erreur lors de la récupération de la taille du fichier : ' + err);
   }
   
   // Write the log.txt file
@@ -74,7 +75,7 @@ export function log(str) {
     fs.appendFileSync(filePath, previousStr+str+'\n');
   }
   catch(error){
-    console.log('Impossible to write the log file... ', error)
+    console.log('ERROR : Impossible to write the log file... ', error)
   }
   
 }

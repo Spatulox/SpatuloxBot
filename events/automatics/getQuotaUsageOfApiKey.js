@@ -41,7 +41,7 @@ async function getQuotaUsageOfApiKey() {
 
   const quotaUsage = response.data.quotaDetails;
 
-  console.log(`Nombre de demandes effectuées : ${quotaUsage.total}`);
+  console.log(`INFO : Nombre de demandes effectuées : ${quotaUsage.total}`);
 }
 
 getQuotaUsageOfApiKey();

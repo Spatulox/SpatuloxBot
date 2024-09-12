@@ -20,10 +20,10 @@ export async function postMessage(client, sentence, channelId, reactions = "defa
                     }
                 }
 
-                log(`Message posted : ${sentence.split('\n')[0]}`)
+                log(`INFO : Message posted : ${sentence.split('\n')[0]}`)
 
                 message.crosspost()
-                    .then(() => log(`Crossposted message : ${sentence.split('\n')[0]}`))
+                    .then(() => log(`INFO : Crossposted message : ${sentence.split('\n')[0]}`))
                     .catch(error => {
                         sendEmbedErrorMessage(targetChannel, 'ERROR when posting message : '+error)
                         log('ERROR when posting message : '+error)
@@ -52,7 +52,7 @@ export async function postMessage(client, sentence, channelId, reactions = "defa
 //----------------------------------------------------------------------------//
 
 export async function sendMessage(targetChannel, message){
-    log(message)
+    log("INFO : "+message)
     targetChannel.send(message)
 }
 
@@ -92,7 +92,7 @@ export async function sendInteractionError(interaction, embedOrMessage, privateV
         }
 
         if(message?.description){
-            log(`${interaction.commandName} : ${message.description}`)
+            log(`${interaction.commandName || interaction.customId} : ${message.description}`)
         } else {
             log(`INFO : Executing ${interaction.commandName || interaction.customId}`)
         }
@@ -121,7 +121,7 @@ export async function sendInteractionReply(interaction, embedOrMessage, privateV
         }
 
         if(embed?.description){
-            log(`${interaction.commandName} : ${embed.description}`)
+            log(`${interaction.commandName || interaction.customId} : ${embed.description}`)
         } else {
             log(`INFO : Executing ${interaction.commandName || interaction.customId}`)
         }

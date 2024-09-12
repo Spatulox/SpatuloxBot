@@ -1,9 +1,10 @@
-import { switchYtbToken } from '../../functions/functions.js'
+import {searchClientChannel, switchYtbToken} from '../../functions/functions.js'
 import { readJsonFile, addVideoToJsonFile, listJsonFile } from '../../functions/files.js'
 import { postMessage } from '../../functions/messages.js'
 import { log } from '../../functions/functions.js'
 import fetch from 'node-fetch'
 import { checkXTimesInternetCo } from '../../functions/checkInternetCo.js'
+import config from '../../config.json' assert { type: 'json' };
 
 export async function recupLatestVideo(client){
 
@@ -27,7 +28,7 @@ export async function recupLatestVideo(client){
     return
   }
   let apiKey = config.ytbToken[config.usingYtbToken];
-  log(`Using youtube api key : ${apiKey}, ${config.usingYtbToken}` )
+  log(`INFO : Using youtube api key : ${apiKey}, ${config.usingYtbToken}` )
 
   // Set the number of latest videos to retrieve
   const maxResults = 30;
@@ -36,7 +37,7 @@ export async function recupLatestVideo(client){
   const nbJsonFile = await listJsonFile('ytbChannels/')
 
   if (nbJsonFile === 'Error'){
-    log(`Impossible to list the JSON file ./ytbChannels/`)
+    log(`WARNING : Impossible to list the JSON file ./ytbChannels/`)
     return
   }
 
@@ -45,7 +46,7 @@ export async function recupLatestVideo(client){
     let jsonFile = await readJsonFile(`./ytbChannels/${jsonChannel}`)
 
     if (jsonFile ==='Error'){
-      log(`Impossible to read the JSON file ./ytbChannels/${jsonChannel}`)
+      log(`WARNING : Impossible to read the JSON file ./ytbChannels/${jsonChannel}`)
       return
     }
 
@@ -53,7 +54,7 @@ export async function recupLatestVideo(client){
     let author = jsonFile.name
     //console.log(channelId)
 
-    log(`Checking youtube...`)
+    log(`INFO : Checking youtube...`)
 
     // if(channelId.includes('@')){
     //   console.log('coucou')
@@ -74,7 +75,7 @@ export async function recupLatestVideo(client){
     .then( async data => {
       
       if (data.error){
-        log(data.error.message)
+        log(`ERROR : ${data.error.message}`)
         let message = data.error.message.split('<')[0]+data.error.message.split('>')[1].split('<')[0] + ` using ${config.usingYtbToken} ytbToken`
         await postMessage(client, message, jsonFile.guildChannelToPostVideo, [])
 
@@ -82,18 +83,18 @@ export async function recupLatestVideo(client){
           let lastYtbToken = config.usingYtbToken
 
           try {
-            log('Try to switch the ytbToken')
+            log('INFO : Try to switch the ytbToken')
             await switchYtbToken()
-            log('YtbToken switched, reading config.json...')
+            log('INFO : YtbToken switched, reading config.json...')
             config = await readJsonFile('./config.json')
 
             if(config === 'Error'){
               log('ERROR : Impossible to read the JSON file, aborded recupLAtestVideo()')
               return
             }
-            log('Config.json read')
+            log('INFO : Config.json read')
             apiKey = config.ytbToken[config.usingYtbToken];
-            log(`Youtube token switched successfully, using youtube api key : ${apiKey}, ${config.usingYtbToken}` )
+            log(`INFO : Youtube token switched successfully, using youtube api key : ${apiKey}, ${config.usingYtbToken}` )
             await postMessage(client, `Youtube token switched for ${config.usingYtbToken}`, jsonFile.guildChannelToPostVideo, [])
           }
           catch (err){

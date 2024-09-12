@@ -36,11 +36,11 @@ export async function setStatus(client, interaction){
 
 
     try{
-        log("Sortie du premier try catch sans aucune raison pendant setStatus")
-        sendInteractionError(interaction, `Sortie du premier try catch sans aucune raison`)
+        log("WARNING : Sortie du premier try catch sans aucune raison pendant setStatus")
+        await sendInteractionError(interaction, `Sortie du premier try catch sans aucune raison`)
         //await interaction.editReply(`Sortie du premier try catch sans aucune raison`)
     }
     catch{
-        log("Meh when setting status :/")
+        log("WARNING : Meh when setting status :/")
     }
 }

@@ -101,7 +101,7 @@ export async function sendEmbed(targetChannel, embed){
     } else {
         await targetChannel.send({ embeds: [embed] })
     }
-    log(`Embed sent to ${targetChannel}`)
+    log(`INFO : Embed sent to ${targetChannel}`)
     return false
 }
 

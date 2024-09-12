@@ -127,7 +127,7 @@ async function addYtbChannel(channelId, channelToPost) {
   const apiKey = config.ytbToken[config.usingYtbToken];
 
   try {
-    log(`Checking YouTube...`);
+    log(`INFO : Checking YouTube...`);
 
     let response
     if(channelId.includes('@')){
@@ -161,13 +161,13 @@ async function addYtbChannel(channelId, channelToPost) {
 
       fs.writeFile(`./ytbChannels/${data.items[0].snippet.channelTitle.split('|')[0].trim()}.json`, jsonData, (err) => {
         if (err) {
-          log(err);
+          log(`ERROR : ${err}`);
           return 'Error';
         }
-        log('JSON file has been created.');
+        log('INFO : JSON file has been created (addYtbChannel).');
       });
 
-    log(`Checking completed...`);
+    log(`INFO : Checking completed...`);
     return data.items[0].snippet.channelTitle
   } catch (error) {
     log(`ERROR : Crash when addYtbchannel : ${error}`)

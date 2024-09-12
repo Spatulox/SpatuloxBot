@@ -24,7 +24,7 @@ async function loginBot(client) {
 		while(ok === 'Not Connected'){
 			ok = await client.login(config.token)
 				.then(() => {
-					log('Logged in successfully!');
+					log('INFO : Logged in successfully!');
 					return 'Connected'
 				})
 				.catch(async (err) => {
@@ -44,14 +44,14 @@ function main(){
 
 	process.env.YTDL_NO_UPDATE = '1';
 
-	log('----------------------------------------------------')
-	log('Starting Program');
+	log('INFO : ----------------------------------------------------')
+	log('INFO : Starting Program');
 
 	checkInternetCo()
     .then(() => {
 
-		log(`Using discord.js version: ${Discord.version}`);
-		log('Creating Client')
+		log(`INFO : Using discord.js version: ${Discord.version}`);
+		log('INFO : Creating Client')
 		//Créer un "client"
 		const client = new Client({ intents: [
 			GatewayIntentBits.Guilds,
@@ -62,16 +62,16 @@ function main(){
 			],
 		});
 
-		log('Trying to connect to Discord Servers')
+		log('INFO : Trying to connect to Discord Servers')
 		let tmp = loginBot(client)
 		if (tmp === "Token error")
 		{
-			log('Stopping program')
+			log('INFO : Stopping program')
 			process.exit()
 		}
 
 		client.on('ready', async () => {
-			log(`${client.user.username} has logged in, waiting...`)
+			log(`INFO : ${client.user.username} has logged in, waiting...`)
 			client.user.setActivity({
 				name:"Seems I'm in developpement..."
 			})
@@ -122,11 +122,11 @@ function main(){
 			})
 
 			client.on('channelCreate', (channel) => {
-				log(channel.name+" has been created")
+				log("INFO : "+channel.name+" has been created")
 			})
 
 			client.on('channelDelete', (channel) => {
-				log(channel.name+" has been deleted")
+				log("INFO : "+channel.name+" has been deleted")
 			})
 
 			// Listen for the messageReactionAdd event

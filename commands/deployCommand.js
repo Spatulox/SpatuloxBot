@@ -4,7 +4,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { PermissionFlagsBits } from 'discord-api-types/v10';
 
 export async function deployCommand(client){
-  log('Deploying slashes commands')
+  log('INFO : Deploying slashes commands')
   // Import commands files
   const listFile = await listJsonFile('./commands/json/')
 
@@ -60,7 +60,7 @@ export async function deployCommand(client){
               break;
 
             default:
-              console.log(`Permission non reconnue : ${permission}`);
+              console.log(`INFO : Permission non reconnue : ${permission}`);
               break;
           }
         }
@@ -86,7 +86,7 @@ export async function deployCommand(client){
       log(`ERROR : Impossible to create the ${file.split('.json')[0]} command : ${err}`)
     }
   }
-  log(`Created global command ${createdCommand.length}/${listFile.length} : ${createdCommand.join(', ')}`)
+  log(`INFO : Created global command ${createdCommand.length}/${listFile.length} : ${createdCommand.join(', ')}`)
 }
 
 

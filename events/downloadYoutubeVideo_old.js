@@ -1,5 +1,5 @@
 import config from '../config.json' assert { type: 'json' };
-import { log } from '../functions/functions.js'
+import {log, searchMessageChannel} from '../functions/functions.js'
 import { listFile } from '../functions/files.js'
 import ytdl from 'ytdl-core'
 import ytpl from 'ytpl'
@@ -31,7 +31,7 @@ export async function downloadYtbVideo(message, user){
 
     // Test if there is a link in the video
     if (regexUrl.test(message.content) && config.userCanReact.includes(user.tag)){
-        log('Begin function to download video...')
+        log('INFO : Begin function to download video...')
 
         if(message.author.bot){
 
@@ -130,15 +130,15 @@ export async function downloadYtbVideo(message, user){
 
                         let messageReply = collected.message
                         try {
-                            log('Reactions collected !')
+                            log('INFO : Reactions collected !')
                             const reaction = collected//[0]
                             let messageBack = ''
 
                             if (reaction.emoji.name === '☠️') {
-                                log('Overwrite file');
+                                log('INFO : Overwrite file');
                                 messageBack = 'Overwrite file'
                             } else if (reaction.emoji.name === '💾') {
-                                log('Save file without overwriting');
+                                log('INFO : Save file without overwriting');
                                 messageBack = 'Save file without overwriting'
                                 videoName += count
                             }
@@ -155,7 +155,7 @@ export async function downloadYtbVideo(message, user){
                     // Retrieve last part of the link
                     url = url.split('/').pop();
 
-                    log(`Download begin for __**${videoName}**__`);
+                    log(`INFO : Download begin for __**${videoName}**__`);
                     targetChannel.send(`Download begin for __**${videoName}**__`)
 
                     //try{
@@ -169,7 +169,7 @@ export async function downloadYtbVideo(message, user){
                     audioStream.pipe(fs.createWriteStream(`${path}${videoName}.mp3`));
 
                     audioStream.on('end', () => {
-                        log(`Download complete for __**${videoName}**__`);
+                        log(`INFO : Download complete for __**${videoName}**__`);
                         targetChannel.send(`Download complete for __**${videoName}**__`)
                     });
 

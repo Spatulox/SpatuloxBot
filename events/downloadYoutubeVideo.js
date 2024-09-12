@@ -1,7 +1,7 @@
 import config from '../config.json' assert {type: 'json'};
 import { sendMessage } from '../functions/messages.js'
 import { sendEmbedErrorMessage } from "../functions/embeds.js";
-import { log } from '../functions/functions.js'
+import {log, searchMessageChannel} from '../functions/functions.js'
 import { listFile } from "../functions/files.js";
 //import ytdl from 'ytdl-core'
 import ytdl from '@distube/ytdl-core'
@@ -62,13 +62,13 @@ export async function downloadYtbVideo(message, user){
                         sendMessage(targetChannel, "Downloaded successful")
                     }
                 } catch {
-                    log(`Impossible de télécharger ${url}`)
+                    log(`ERROR : Impossible de télécharger ${url}`)
                 }
             }
         }
     }
     catch (e){
-        log(`Error when executing downloadYtbVideo : ${e}`)
+        log(`ERROR : Error when executing downloadYtbVideo : ${e}`)
     }
 }
 
@@ -82,7 +82,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
         url = url.split('watch?v=')[1]
     }
 
-    log(`Retrieving info for : ${url}`)
+    log(`INFO : Retrieving info for : ${url}`)
 
     /*const invalidChars = /[<>:"\\/|?*\x00-\x1F,']/g; // Expression régulière pour les caractères impossibles
     const validChar = '-';*/
@@ -99,7 +99,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     let videoTitle = metadata.player_response.videoDetails.title
     let author = metadata.player_response.videoDetails.author
 
-    log(`Initalizing (Path, Duplicate file, ) : ${videoTitle}`)
+    log(`INFO : Initalizing (Path, Duplicate file, ) : ${videoTitle}`)
 
     videoTitle = checkCorrectString(videoTitle)
     /*videoTitle = videoTitle.replace(invalidChars, validChar);
@@ -126,7 +126,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     }
     videoTitle = await getUserAnswerIfDuplicateFile(message, videoTitle, tmpPath)
 
-    log(`Downloading Audio : ${videoUrl}`)
+    log(`INFO : Downloading Audio : ${videoUrl}`)
 
     try {
         await downloadWithRetry(videoUrl, tmpPath, videoTitle, targetChannel);
@@ -177,7 +177,7 @@ async function downloadPlaylist(playlistId, path, message, targetChannel){
                             sendMessage(targetChannel, "Downloaded successful")
                         }
                     } catch {
-                        log(`Impossible de télécharger ${videoId}`)
+                        log(`ERROR : Impossible de télécharger ${videoId}`)
                     }
 
                 }
