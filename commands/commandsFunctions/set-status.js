@@ -1,5 +1,6 @@
 import {log} from "../../functions/functions.js";
 import {createEmbed, createErrorEmbed, returnToSendEmbed} from "../../functions/embeds.js";
+import {sendInteractionError, sendInteractionReply} from "../../functions/messages.js";
 
 export async function setStatus(client, interaction){
     try{
@@ -13,7 +14,8 @@ export async function setStatus(client, interaction){
         const embed = createEmbed("botColor")
         embed.title = "Set Status OK"
         embed.description = `Status switched for ${newStatus}`
-        await interaction.editReply(returnToSendEmbed(embed));
+        sendInteractionReply(interaction, embed)
+        //await interaction.editReply(returnToSendEmbed(embed));
         log(`Status switched for '${newStatus}'`)
         return
     }
@@ -23,7 +25,8 @@ export async function setStatus(client, interaction){
             const embed = createEmbed("red")
             embed.title = "Set Status CRASH"
             embed.description = `Impossible to set the activity of the bot : ${err}`
-            await interaction.editReply(returnToSendEmbed(embed))
+            sendInteractionError(interaction, embed)
+            //await interaction.editReply(returnToSendEmbed(embed))
             return
         } catch{
             
@@ -34,7 +37,8 @@ export async function setStatus(client, interaction){
 
     try{
         log("Sortie du premier try catch sans aucune raison pendant setStatus")
-        await interaction.editReply(`Sortie du premier try catch sans aucune raison`)
+        sendInteractionError(interaction, `Sortie du premier try catch sans aucune raison`)
+        //await interaction.editReply(`Sortie du premier try catch sans aucune raison`)
     }
     catch{
         log("Meh when setting status :/")

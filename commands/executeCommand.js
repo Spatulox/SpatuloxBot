@@ -5,6 +5,7 @@ import { ytbChannelCommand } from './commandsFunctions/ytb-channel.js'
 import { setStatus } from './commandsFunctions/set-status.js'
 import { reminderCommand } from "./commandsFunctions/reminder.js";
 import { createEmbed, createErrorEmbed, createSuccessEmbed, returnToSendEmbed } from "../functions/embeds.js";
+import {sendInteractionError, sendInteractionReply} from "../functions/messages.js";
 
 export async function executeSlashCommand(interaction, client){
     if (!interaction.isCommand()) return;
@@ -17,7 +18,8 @@ export async function executeSlashCommand(interaction, client){
         case 'switchytbtoken':
             await switchYtbToken()
             let config = await readJsonFile('./config.json')
-            await interaction.reply(returnToSendEmbed(createSuccessEmbed(`Youtube token switched from ${config.usingYtbToken} to ${config.usingYtbToken === '0' ? 1 : 0}`)));
+            sendInteractionReply(interaction, createSuccessEmbed(`Youtube token switched from ${config.usingYtbToken} to ${config.usingYtbToken === '0' ? 1 : 0}`))
+            //await interaction.reply(returnToSendEmbed(createSuccessEmbed(`Youtube token switched from ${config.usingYtbToken} to ${config.usingYtbToken === '0' ? 1 : 0}`)));
             break;
 
         case 'set-status':
@@ -29,7 +31,8 @@ export async function executeSlashCommand(interaction, client){
             break;
 
         default:
-            interaction.reply(returnToSendEmbed(createErrorEmbed("Hmmm, what are you doing here ?? (executeSlashCommand)")))
+            sendInteractionError(interaction, "Hmmm, what are you doing here ?? (executeSlashCommand)")
+            //interaction.reply(returnToSendEmbed(createErrorEmbed("Hmmm, what are you doing here ?? (executeSlashCommand)")))
             break;
     }
 }

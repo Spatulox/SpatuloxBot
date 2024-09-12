@@ -7,7 +7,7 @@ import {
   returnToSendEmbed,
   waitPrivateEmbedOrMessage
 } from "../../functions/embeds.js";
-import {sendMessage} from "../../functions/messages.js";
+import {sendInteractionError, sendInteractionReply, sendMessage} from "../../functions/messages.js";
 
 // How to have Id channel ?
 // Clique droit => Code source de la page
@@ -34,7 +34,6 @@ import {sendMessage} from "../../functions/messages.js";
 
 export async function ytbChannelCommand(client, interaction){
   try{
-    //interaction.reply('Searching on internet and adding ytbChannel...')
     const subcommand = interaction.options.getSubcommand()
 
     switch (subcommand) {
@@ -47,9 +46,11 @@ export async function ytbChannelCommand(client, interaction){
         let res = await addYtbChannel(ytbChannel, discordChannel)
 
         if(res === 'Error'){
-          interaction.editReply(`Error when adding the ytb channel ${ytbChannel}`)
+          sendInteractionError(interaction, `Error when adding the ytb channel ${ytbChannel}`)
+          //interaction.editReply(`Error when adding the ytb channel ${ytbChannel}`)
         } else {
-          interaction.editReply(`Added ${res} : ${ytbChannel}`)
+          sendInteractionReply(interaction, `Added ${res} : ${ytbChannel}`)
+          //interaction.editReply(`Added ${res} : ${ytbChannel}`)
         }
 
         break;
@@ -60,12 +61,10 @@ export async function ytbChannelCommand(client, interaction){
         break
 
       default:
-        log("WARNING : Default case for ytb-channel function")
-        interaction.reply("Something went wrong, but what are you doing here ?")
+        sendInteractionError(interaction, "Something went wrong, but what are you doing here ?")
     }
   } catch (e){
-    log(`ERROR : Crash when ytbChannelCommand : ${e}`)
-    try{interaction.editReply(returnToSendEmbed(createErrorEmbed(e)))}catch(e2){log(`ERROR : Impossible to edit reply when error in ytbChannelCommand : ${e2}`)}
+    sendInteractionError(interaction, `ERROR : Crash when ytbChannelCommand : ${e}`)
     return false
   }
 }
@@ -77,7 +76,7 @@ async function listYtbChannel(interaction){
     const listFile = await listJsonFile("./ytbChannels/")
 
     if (listFile === "Error") {
-      interaction.editReply("Something went wrong when listing channels")
+      sendInteractionError(interaction, "Something went wrong when listing channels")
       return false
     }
 
@@ -89,7 +88,7 @@ async function listYtbChannel(interaction){
     for (const file of listFile) {
       const data = readJsonFile(`./ytbChannels/${file}`)
       if (data === ["Error"]) {
-        interaction.editReply(`Something went wrong when reading the file ${file}`)
+        sendInteractionError(interaction, `Something went wrong when reading the file ${file}`)
         return false
       }
 
@@ -101,12 +100,12 @@ async function listYtbChannel(interaction){
         value: `.\n**${numberVideoPosted} Vidéos postées** dans <#${channelWhereitPost}>`
       })
     }
-    interaction.editReply(returnToSendEmbed(embed));
+    sendInteractionReply(interaction, embed)
     return true
   }
   catch (e){
     log(`ERROR : Crash when listYtbChannel : ${e}`)
-    await interaction.editReply(returnToSendEmbed(createErrorEmbed(e)))
+    sendInteractionError(interaction, e)
     return false
   }
 }
@@ -172,7 +171,8 @@ async function addYtbChannel(channelId, channelToPost) {
     return data.items[0].snippet.channelTitle
   } catch (error) {
     log(`ERROR : Crash when addYtbchannel : ${error}`)
-    await interaction.editReply(returnToSendEmbed(createErrorEmbed(error)))
+    sendInteractionError(interaction, error)
+    //await interaction.editReply(returnToSendEmbed(createErrorEmbed(error)))
     return 'Error'
   }
 }
