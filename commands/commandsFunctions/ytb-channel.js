@@ -105,7 +105,7 @@ async function listYtbChannel(interaction){
   }
   catch (e){
     log(`ERROR : Crash when listYtbChannel : ${e}`)
-    await sendInteractionError(interaction, e)
+    await sendInteractionError(interaction, e.toString())
     return false
   }
 }
@@ -171,7 +171,7 @@ async function addYtbChannel(channelId, channelToPost) {
     return data.items[0].snippet.channelTitle
   } catch (error) {
     log(`ERROR : Crash when addYtbchannel : ${error}`)
-    await sendInteractionError(interaction, error)
+    await sendInteractionError(interaction, error.toString())
     //await interaction.editReply(returnToSendEmbed(createErrorEmbed(error)))
     return 'Error'
   }
