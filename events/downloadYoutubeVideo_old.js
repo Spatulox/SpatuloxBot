@@ -5,6 +5,11 @@ import ytdl from 'ytdl-core'
 import ytpl from 'ytpl'
 import fs from 'fs'
 import { auth } from 'googleapis/build/src/apis/abusiveexperiencereport/index.js';
+import {
+    createSimpleEmbed,
+    sendEmbed,
+    sendEmbedErrorMessage
+} from "../functions/embeds.js";
 
 
 export async function downloadYtbVideo(message, user){
@@ -21,7 +26,7 @@ export async function downloadYtbVideo(message, user){
 
     let targetChannel
     try{
-        targetChannel = searchMessageChannel(message, message.channelId)
+        targetChannel = await searchMessageChannel(message, message.channelId)
     } catch (e){
         targetChannel = null
         log("ERROR : Impossible to retrieve the target channel in downloadYtbVideo()")
@@ -158,7 +163,7 @@ export async function downloadYtbVideo(message, user){
                     log(`INFO : Download begin for __**${videoName}**__`);
                     targetChannel.send(`Download begin for __**${videoName}**__`)
 
-                    //try{
+                    try{
 
                     const audioStream = ytdl(url, { quality: 'highestaudio', filter: 'audioonly' });
 
@@ -169,20 +174,21 @@ export async function downloadYtbVideo(message, user){
                     audioStream.pipe(fs.createWriteStream(`${path}${videoName}.mp3`));
 
                     audioStream.on('end', () => {
-                        log(`INFO : Download complete for __**${videoName}**__`);
-                        targetChannel.send(`Download complete for __**${videoName}**__`)
+                        sendEmbed(targetChannel, createSimpleEmbed(`INFO : Download complete for __**${videoName}**__`, "minecraft"))
+                        /*log(`INFO : Download complete for __**${videoName}**__`);
+                        targetChannel.send(`Download complete for __**${videoName}**__`)*/
                     });
 
                     audioStream.on('error', (error) => {
-                        console.error(error);
-                        targetChannel.send(`ERROR : Error when downloading video __**${videoName}**__ into audio : ${error}`)
-                        log(`ERROR : ${error}`)
+                        sendEmbedErrorMessage(targetChannel, `ERROR : Error when downloading video __**${videoName}**__ into audio : ${error}`)
+                        /*targetChannel.send(`ERROR : Error when downloading video __**${videoName}**__ into audio : ${error}`)
+                        log(`ERROR : ${error}`)*/
                     });
-                    //}
-                    /*catch{
+                    }
+                    catch{
                         log(`ERROR : Error when downloading video __**${videoName}**__ into audio`)
                         targetChannel.send(`ERROR : Error when downloading video __**${videoName}**__ into audio`)
-                    }*/
+                    }
                 }
                 else{
                     log(`ERROR : Impossible to retrieve ${err} in the message`)
