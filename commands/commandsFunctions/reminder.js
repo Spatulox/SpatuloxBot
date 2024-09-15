@@ -146,55 +146,73 @@ async function listReminder(interaction){
             value: date,
         })));
 
-        sendInteractionReply(interaction, select)
-        /*const response = await interaction.reply({
-            content: 'Choisissez une date pour voir les rappels :',
-            components: [row],
-        });*/
+        const embed = createEmbed()
+        embed.title = "Liste des rappels"
+        embed.description = ""
+        embed.fields = dates.map(date => ({
+            name: date,
+            value: `Nombres d'évènements : ${reminders[date].length}`,
+        }))
+
+        sendInteractionReply(interaction, embed)
+        await sendInteractionReply(interaction, select)
 
         // Créer un collecteur pour la réponse
-        /*const collector = response.createMessageComponentCollector({
-            componentType: ComponentType.StringSelect,
+        const collector = interaction.channel.createMessageComponentCollector({
+            filter: i => i.customId === 'select_date' && i.user.id === interaction.user.id,
             time: 60000
         });
 
         collector.on('collect', async (i) => {
-            const selectedDate = i.values[0];
-            const embed = createEmbed();
-            embed.setDescription("Liste des rappels");
-            embed.setTitle(selectedDate);
+            try {
+                const selectedDate = i.values[0];
+                const embed = createEmbed();
+                embed.description = "Liste des rappels"
+                embed.title = selectedDate
 
-            for (const reminder of reminders[selectedDate]) {
-                embed.addFields({
-                    name: reminder.hour,
-                    value: `${reminder.name}: ${reminder.description}`
-                });
+                for (const reminder of reminders[selectedDate]) {
+                    embed.fields.push({
+                        name: reminder.hour,
+                        value: `${reminder.name}: ${reminder.description}`
+                    });
+                }
+
+                await i.update({ embeds: [embed], components: [] });
+            } catch (error) {
+                if(!(error.toString()).includes("Connect Timeout Error")){
+                    log(`ERROR : Erreur lors de la mise à jour de l'interaction : (listReminder collector) : ${error}`);
+                    try {
+                        await i.followUp(returnToSendEmbed(createErrorEmbed(`Une erreur s'est produite. Veuillez réessayer.\n${error}`)));
+                    } catch (followUpError) {
+                        log(`ERROR : Impossible d'envoyer un message de suivi (listReminder collector) : ${followUpError}`);
+                    }
+                }
             }
-
-            await i.update({ embeds: [embed], components: [] });
         });
 
         collector.on('end', collected => {
-            if (collected.size === 0) {
-                let msg = "Temps écoulé. Veuillez réessayer."
-                sendInteractionError(interaction, msg)
+            try{
+                let embed = createErrorEmbed()
+                embed.description = "Temps écoulé. Veuillez réessayer."
+                if (collected.size === 0) {
+                    sendInteractionError(interaction, {
+                        content: "",
+                        embeds: [embed],
+                        components: []
+                    });
+                }
+            } catch (e) {
+                log("ERROR : Impossible d'envoyer un message de suivi (listReminder collector) :", e);
             }
-        });*/
+        });
 
-        /*for (const date in reminders) {
-            const embed = createEmbed()
-            embed.description = "Liste des rappels"
-            embed.title = date
-            for (const reminder of reminders[date]) {
-                embed.fields.push({
-                    name: reminder.hour,
-                    value: `${reminder.name}: ${reminder.description}`
-                });
-            }
-            interaction.followUp(returnToSendEmbed(embed))
-        }*/
     } catch (e) {
-        sendInteractionError(interaction, e.toString())
+        try{
+            log(`ERROR : Crash when listReminder : ${e}`)
+            sendInteractionError(interaction, e.toString())
+        } catch (e) {
+            log('ERROR : Crash when listReminder2 : ' + e)
+        }
     }
 }
 
