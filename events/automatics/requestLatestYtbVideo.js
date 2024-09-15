@@ -110,7 +110,7 @@ export async function recupLatestVideo(client){
         // If found
         if(!(data.pageInfo.totalResults == 0)){
 
-          log(`Latest video for ${data.items[0].snippet.channelTitle}: ${data.items[0].snippet.title} - ${data.items[0].id.videoId}`)
+          log(`INFO : Latest video for ${data.items[0].snippet.channelTitle}: ${data.items[0].snippet.title} - ${data.items[0].id.videoId}`)
 
           for (let i = 0; i < data.items.length; i++) {
 
@@ -125,7 +125,7 @@ export async function recupLatestVideo(client){
             if (!(jsonFile.videosId.includes(videoId))){
 
               let sentence = `# 🎵 __** ${videoTitle} **__ 🎵\n> - https://www.youtu.be/${videoId}\n> - Author : ${author}\n> - Uploaded on ${date.toLocaleDateString()}, <t:${timestamp}:R>`
-              log(`Posting Video ${videoTitle} - ${videoId}`)
+              log(`INFO : Posting Video ${videoTitle} - ${videoId}`)
               await postMessage(client, sentence, jsonFile.guildChannelToPostVideo)//['✅', '💾', '👀', '🎵']
               addVideoIdToFile.push(videoId)
             }
