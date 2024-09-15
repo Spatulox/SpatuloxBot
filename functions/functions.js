@@ -197,7 +197,7 @@ export async function searchMessageChannel(message, channelId){
       return false;
     }
 
-    return message.guild.channels.cache.get(channelId) || (await message.guild.channels.fetch(channelId)) || message.channel
+    return message.guild.channels.cache.get(channelId) || (await message.guild.channels.fetch(channelId))// || message.channel
   } catch (e) {
     log(`ERROR : Impossible to fetch the channel : ${channelId}\n> ${e}`)
     return false
