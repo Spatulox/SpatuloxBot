@@ -86,6 +86,7 @@ export async function sendLongMessage(channel, title, longMessage) {
 
 function returnTypeMessage(interaction, embed, embedOrMessage, privateVisibility){
     let result = isEmbedOrSelectMenu(embed)
+
     let messageOptions;
     if(result === "embed"){
         if(embed?.description){
@@ -94,6 +95,7 @@ function returnTypeMessage(interaction, embed, embedOrMessage, privateVisibility
             log(`DEBUG : Executing ${interaction.commandName || interaction.customId}`)
         }
         messageOptions = returnToSendEmbed(embed, privateVisibility);
+
     } else if (result === "selectMenu"){
         if(embed?.content){
             log(`INFO : Executing ${interaction.commandName || interaction.customId} : (${embedOrMessage.content || "No content provided"})`)
@@ -102,11 +104,13 @@ function returnTypeMessage(interaction, embed, embedOrMessage, privateVisibility
             log(`DEBUG : Impossible to execute ${interaction.commandName || interaction.customId} || Need to placeholder (content) for the selectMenu`)
             messageOptions = returnToSendEmbed(createErrorEmbed("No content provided, plz use the (returnToSendSelectMenu) function only for selectMenu, before calling 'sendInteractionReply'"))
         }
+    } else {
+        messageOptions = embed
     }
     return messageOptions
 }
 function isEmbedOrSelectMenu(responseObject) {
-    if (responseObject?.title && responseObject?.description) {
+    if (responseObject?.title && (responseObject?.description || responseObject.description === "" )) {
         return "embed";
     } else if (responseObject?.content) {
         return "selectMenu";
@@ -128,9 +132,15 @@ export async function sendInteractionError(interaction, embedOrMessage, privateV
 
         if (interaction.deferred) {
             await interaction.editReply(messageOptions);
+        } else if (interaction.replied) {
+            await interaction.followUp(messageOptions);
         } else if (interaction.isRepliable()) {
             await interaction.reply(messageOptions);
+        } else {
+            log(`L'interaction ${interaction.commandName} n'est pas dans un état permettant une réponse.`)
+            return false
         }
+
         return true
     } catch (e) {
         log(`ERROR : Impossible to execute the sendInteractionError for ${interaction.commandName || interaction.customId} : ${e}`)
@@ -154,17 +164,15 @@ export async function sendInteractionReply(interaction, embedOrMessage, privateV
 
         try {
             if (interaction.deferred) {
-                await interaction.editReply(messageOptions);
+                return await interaction.editReply(messageOptions);
             } else if (interaction.replied) {
-                await interaction.followUp(messageOptions);
+                return await interaction.followUp(messageOptions);
             } else if (interaction.isRepliable()) {
-                await interaction.reply(messageOptions);
+                return await interaction.reply(messageOptions);
             } else {
                 log(`L'interaction ${interaction.commandName} n'est pas dans un état permettant une réponse.`)
                 return false
             }
-
-            return true;
         } catch (error) {
             log(`ERROR : Erreur lors de la réponse à l'interaction (${interaction.commandName}): ${error}`);
 
@@ -172,18 +180,19 @@ export async function sendInteractionReply(interaction, embedOrMessage, privateV
                 const errorEmbed = returnToSendEmbed(createErrorEmbed(`${error.message}`));
 
                 if (interaction.deferred) {
-                    await interaction.editReply(errorEmbed);
+                    return await interaction.editReply(errorEmbed);
                 } else if (interaction.replied) {
-                    await interaction.followUp(errorEmbed);
+                    return await interaction.followUp(errorEmbed);
                 } else if (interaction.isRepliable()) {
-                    await interaction.reply(errorEmbed);
+                    return await interaction.reply(errorEmbed);
                 } else {
                     // Tentative d'envoi dans le canal si l'interaction ne peut pas être utilisée
                     const channel = interaction.channel;
                     if (channel) {
-                        await channel.send(errorEmbed);
+                        return await channel.send(errorEmbed);
                     } else {
                         log(`ERROR : Impossible d'envoyer un message dans le canal (${interaction.commandName})`);
+                        return false
                     }
                 }
             } catch (finalError) {
