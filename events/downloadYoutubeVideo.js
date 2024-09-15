@@ -1,6 +1,5 @@
 import config from '../config.json' assert {type: 'json'};
-import { sendMessage } from '../functions/messages.js'
-import { sendEmbedErrorMessage } from "../functions/embeds.js";
+import {createSimpleEmbed, createSuccessEmbed, sendEmbed, sendEmbedErrorMessage} from "../functions/embeds.js";
 import {log, searchMessageChannel} from '../functions/functions.js'
 import { listFile } from "../functions/files.js";
 //import ytdl from 'ytdl-core'
@@ -8,7 +7,6 @@ import ytdl from '@distube/ytdl-core'
 
 import ytpl from 'ytpl'
 import fs from 'fs'
-import {createEmbed, createErrorEmbed, returnToSendEmbed} from "../functions/embeds.js";
 
 // ------------------------------------------------------------------------------------------//
 
@@ -21,7 +19,7 @@ export async function downloadYtbVideo(message, user){
 
         let targetChannel
         try{
-            targetChannel = searchMessageChannel(message, message.channelId)
+            targetChannel = await searchMessageChannel(message, message.channelId)
         } catch (e) {
             targetChannel = null
             log("ERROR : Impossible to retrieve the targetChannel in the dowloadYtbVideo()")
@@ -52,14 +50,14 @@ export async function downloadYtbVideo(message, user){
         for (let url of urls) {
             // If it's a playlist
             if (url.includes('&list=')) {
-                sendMessage(targetChannel, "Downloading Playlist(s)")
+                sendEmbed(targetChannel, createSuccessEmbed("Downloading Playlist(s)"))
                 const playlistId = url.split('&list=')[1].split('&')[0]
                 await downloadPlaylist(playlistId, path, message, targetChannel)
             } else {
-                sendMessage(targetChannel, `Downloading video ${url.split("/").pop()}`)
+                sendEmbed(targetChannel, createSimpleEmbed(`Downloading video ${url.split("/").pop()}`))
                 try {
                     if (await downloadAudio(url, path, targetChannel, message)) {
-                        sendMessage(targetChannel, "Downloaded successful")
+                        sendEmbed(targetChannel, createSuccessEmbed("Downloaded successful"))
                     }
                 } catch {
                     log(`ERROR : Impossible de télécharger ${url}`)
@@ -84,10 +82,6 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
 
     log(`INFO : Retrieving info for : ${url}`)
 
-    /*const invalidChars = /[<>:"\\/|?*\x00-\x1F,']/g; // Expression régulière pour les caractères impossibles
-    const validChar = '-';*/
-
-    //let metadata = await ytdl.getBasicInfo(url)
     let metadata = await getBasicInfoWithRetry(url);
     if(metadata === false){
         sendEmbedErrorMessage(targetChannel, `Impossible to retrieve informations for '${url}' (getBasicInfoWithRetry() = false), plz try again later..`)
@@ -102,9 +96,6 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     log(`INFO : Initalizing (Path, Duplicate file, ) : ${videoTitle}`)
 
     videoTitle = checkCorrectString(videoTitle)
-    /*videoTitle = videoTitle.replace(invalidChars, validChar);
-    videoTitle = videoTitle.replace(/-+/g, '-');
-    videoTitle = videoTitle.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')*/
 
     if (videoTitle.includes(" - (Lyrics)")){
         videoTitle = videoTitle.split(' - (Lyrics)')[0].trim()
@@ -115,17 +106,38 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
 
     tmpPath += author
     if (!fs.existsSync(tmpPath)) {
-        sendMessage(targetChannel, `Creating folder ${tmpPath}`)
+        sendEmbed(targetChannel, createSimpleEmbed(`Creating folder ${tmpPath}`))
         fs.mkdirSync(tmpPath, { recursive: true });
         if (fs.existsSync(tmpPath)) {
-            sendMessage(targetChannel, `Created ${tmpPath}`)
+            sendEmbed(targetChannel, createSimpleEmbed(`Created ${tmpPath}`))
         } else {
             sendEmbedErrorMessage(targetChannel, `Error when creating ${tmpPath}`)
             return false
         }
     }
-    videoTitle = await getUserAnswerIfDuplicateFile(message, videoTitle, tmpPath)
 
+    let messageAsked
+    try{
+        let result
+        result = await getUserAnswerIfDuplicateFile(message, videoTitle, tmpPath);
+        messageAsked = result.message;
+
+        if (result.value === "cancel") {
+            await sendEmbed(targetChannel, createSimpleEmbed(`You cancelled the download`, 'youtube'))
+            messageAsked.delete()
+            return;
+        } else if (result.value === false) {
+            await sendEmbed(targetChannel, createSimpleEmbed("You didn't react in time :/", 'youtube'))
+            messageAsked.delete()
+            return
+        } else {
+            videoTitle = result.value;
+        }
+
+    } catch (error) {
+        log(`ERROR : An error occurred (downloadAudio) : ${error}`);
+        return
+    }
     log(`INFO : Downloading Audio : ${videoUrl}`)
 
     try {
@@ -150,15 +162,7 @@ async function downloadPlaylist(playlistId, path, message, targetChannel){
                 let author = playlist.items[0].author.name
 
                 author = checkCorrectString(author)
-
-                /*author = author.replace(invalidChars, validChar);
-                author = author.replace(/-+/g, '-');
-                author = author.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')*/
-
                 playTitle = checkCorrectString(playlist.title)
-                /*playTitle = playlist.title.replace(invalidChars, validChar);
-                playTitle = playTitle.replace(/-+/g, '-');
-                playTitle = playTitle.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')*/
 
                 tmpPath += `${author}\\${playTitle}\\`
 
@@ -167,14 +171,11 @@ async function downloadPlaylist(playlistId, path, message, targetChannel){
                     let videoId = item.id;
 
                     videoTitle = checkCorrectString(videoTitle)
-                    /*videoTitle = videoTitle.replace(invalidChars, validChar);
-                    videoTitle = videoTitle.replace(/-+/g, '-');
-                    videoTitle = videoTitle.replace(/[\u{1F000}-\u{1F6FF}]/gu, '')*/
 
-                    sendMessage(targetChannel, `Downloading video ${videoId.split("/").pop()}`)
+                    sendEmbed(targetChannel, createSimpleEmbed(`Downloading video ${videoId.split("/").pop()}`))
                     try{
                         if(await downloadAudio(videoId, tmpPath, targetChannel, message)){
-                            sendMessage(targetChannel, "Downloaded successful")
+                            sendEmbed(targetChannel, createSimpleEmbed(`Downloaded successful for ${videoId.split("/").pop()}`))
                         }
                     } catch {
                         log(`ERROR : Impossible de télécharger ${videoId}`)
@@ -225,18 +226,20 @@ async function getUserAnswerIfDuplicateFile(message, videoName, tmpPath){
     let listDownloadVid = await listFile(`${tmpPath}\\`, 'mp3')
 
     if (listDownloadVid.includes(videoName+'.mp3')){
-        log("This video already exist")
+        log("INFO : This video already exist")
         // Detect the number of files with the same name
-        let regex = new RegExp(videoName + '\\d*\\.mp3');
+        let regex = new RegExp(videoName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ' \\((\\d+)\\)\\.mp3');
 
         let count = listDownloadVid.reduce((acc, curr) => {
-            if (regex.test(curr)) {
-                return acc + 1;
+            let match = curr.match(regex);
+            if (match) {
+                return Math.max(acc, parseInt(match[1], 10));
             } else {
                 return acc;
             }
         }, 0);
-        videoName = await askingUserAndWaitReaction(message, videoName, count)
+
+        videoName = await askingUserAndWaitReaction(message, videoName, count + 1)
     }
     return videoName
 }
@@ -246,38 +249,45 @@ async function getUserAnswerIfDuplicateFile(message, videoName, tmpPath){
 async function askingUserAndWaitReaction(message, videoName, count) {
     try {
         // Envoyer le message et ajouter les réactions
-        log("Asking user, and waiting for his reaction")
-        const replyMessage = await message.reply('This video is already downloaded. What do you want to do?\n> - ☠️ = Overwrite file\n> - 💾 = Save the file without overwriting it');
+        log("INFO : Asking user, and waiting for his reaction")
+        const replyMessage = await message.reply('This video is already downloaded. What do you want to do?\n> - ☠️ = Overwrite file\n> - 💾 = Save the file without overwriting it\n> - ❌ = Cancel');
         await replyMessage.react('☠️');
         await replyMessage.react('💾');
+        await replyMessage.react('❌');
 
         // Configurer le collecteur de réactions
-        const filter = (reaction, user) => ['☠️', '💾'].includes(reaction.emoji.name) && !user.bot;
+        const filter = (reaction, user) => ['☠️', '💾', '❌'].includes(reaction.emoji.name) && !user.bot;
 
         const collector = replyMessage.createReactionCollector({ filter, max: 1, time: 60000 });
         return new Promise((resolve, reject) => {
             collector.on('collect', (reaction, user) => {
-                log("User reacted in time")
+                log("INFO : User reacted in time (askingUserAndWaitReaction)")
                 let messageBack = '';
                 if (reaction.emoji.name === '☠️') {
-                    log('Overwrite file');
+                    log('INFO : Overwrite file (askingUserAndWaitReaction)');
                     messageBack = 'Overwrite file';
                 } else if (reaction.emoji.name === '💾') {
-                    log('Save file without overwriting');
+                    log('INFO : Save file without overwriting (askingUserAndWaitReaction)');
                     messageBack = 'Save file without overwriting';
                     videoName += ` (${count})`;
+                } else if (reaction.emoji.name === '❌') {
+                    messageBack = 'Cancel';
+                    log('INFO : User cancelled (askingUserAndWaitReaction)');
                 }
 
                 replyMessage.edit(`Your choice: ${messageBack}`);
-                resolve(videoName);
+                if(messageBack === "Cancel"){
+                    resolve({value:"cancel", message:replyMessage})
+                }
+                resolve({value:videoName, message:replyMessage});
             });
 
             collector.on('end', collected => {
                 if (collected.size === 0) {
-                    sendEmbedErrorMessage(message.channel, "User didn\'t react in time. Saving file without overwriting.")
-                    /*log("User didn\'t react in time")
-                    message.channel.send('You did not react in time. Saving file without overwriting.');*/
-                    resolve(videoName + ` (${count})`);
+                    //sendEmbedErrorMessage(message.channel, "User didn\'t react in time. Saving file without overwriting.")
+                    log("INFO : User didn\'t react in time (askingUserAndWaitReaction)")
+                    //message.channel.send('You did not react in time. Saving file without overwriting.');
+                    resolve({value:false, message:replyMessage})
                 }
             });
 
@@ -316,7 +326,7 @@ async function downloadWithRetry(url, tmpPath, videoTitle, targetChannel, maxRet
 
             audioStream.on('end', () => {
                 writeStream.end();
-                sendMessage(targetChannel, `Download complete for ${videoTitle} ✅`);
+                sendEmbed(targetChannel, createSimpleEmbed(`Download complete for ${videoTitle} ✅`))
                 resolve();
             });
 
@@ -345,8 +355,8 @@ async function downloadWithRetry(url, tmpPath, videoTitle, targetChannel, maxRet
                 }
 
                 if (attempts < maxRetries) {
-                    console.log(`Nouvelle tentative de téléchargement (${attempts + 1}/${maxRetries})...`);
-                    sendMessage(targetChannel, `Nouvelle tentative de téléchargement (${attempts + 1}/${maxRetries})...`);
+                    log(`INFO : Nouvelle tentative de téléchargement (${attempts + 1}/${maxRetries}) for ${url}...`);
+                    sendEmbed(targetChannel,createSimpleEmbed(`Nouvelle tentative de téléchargement (${attempts + 1}/${maxRetries})...`))
                     setTimeout(attemptDownload, 5000); // Attendre 5 secondes avant de réessayer
                 } else {
                     reject(new Error(`Échec du téléchargement après ${maxRetries} tentatives.`));
