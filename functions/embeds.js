@@ -74,12 +74,25 @@ export function createEmbed(color = null){
     return embed
 }
 
+export function createSimpleEmbed(description, color = "botColor"){
+    const embed = createEmbed(color)
+    embed.title = ""
+    embed.description = description
+    embed.footer = {}
+    embed.timestamp = ""
+    return embed
+}
+
 // ------------------------------------------------------------- //
 
 export function createErrorEmbed(description){
     const embed = createEmbed("youtube")
     embed.title = "Something went Wrong"
-    embed.description = description.toString()
+    try{
+        embed.description = description.toString()
+    } catch (e){
+        //console.log("embed.description.toString impossible")
+    }
     return embed
 }
 
@@ -95,21 +108,50 @@ export function createSuccessEmbed(description){
 // ------------------------------------------------------------- //
 
 export async function sendEmbed(targetChannel, embed){
-
-    if(embed === { embeds: [embed] }){
-        await targetChannel.send(embed)
-    } else {
-        await targetChannel.send({ embeds: [embed] })
+    if(!targetChannel || !embed){
+        log("WARNING : Impossible to execute the fonction, one of the two (or the two) parameter are null : (sendEmbed)")
+        return false
     }
-    log(`INFO : Embed sent to ${targetChannel}`)
-    return false
+
+    try{
+        if(typeof embed !== 'string'){
+            // Déjà un embed
+            await targetChannel.send(returnToSendEmbed(embed))
+        } else {
+            // C'est un string parceque
+            await targetChannel.send(returnToSendEmbed(createSimpleEmbed(embed)))
+        }
+        log(`INFO : Embed '${embed?.title || embed?.description || 'without title :/'}' sent to '${targetChannel?.name || 'No name'}'`)
+        return true
+    } catch (e) {
+        log(`ERROR : Impossible to send the embed '${embed?.title || embed?.description || 'without title :/'}' sent to '${targetChannel?.name || 'No name'}' : ${e}`)
+        return false
+    }
 }
 
 //----------------------------------------------------------------------------//
 
-export async function sendEmbedErrorMessage(targetChannel, message){
-    log(message)
-    targetChannel.send(returnToSendEmbed(createErrorEmbed(message)))
+export async function sendEmbedErrorMessage(targetChannel, embed){
+    if(!targetChannel || !embed){
+        log("WARNING : Impossible to execute the fonction, one of the two (or the two) parameter are null : (sendEmbedErrorMessage)")
+        return false
+    }
+
+    try{
+        if(typeof embed !== 'string'){
+            // Déjà un embed
+            await targetChannel.send(returnToSendEmbed(embed))
+        } else {
+            // C'est un string parceque
+            log(embed)
+            await targetChannel.send(returnToSendEmbed(createErrorEmbed(embed)))
+        }
+        log(`INFO : Embed '${embed?.title || embed?.description || 'without title :/'}' sent to '${targetChannel?.name || 'No name'}'`)
+        return true
+    } catch (e){
+        log(`ERROR : Error when sendEmbedErrorMessage : ${e}`)
+        return false
+    }
 }
 
 // ------------------------------------------------------------- //
