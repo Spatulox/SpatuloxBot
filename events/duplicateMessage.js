@@ -17,7 +17,7 @@ export async function duplicateMessage(reaction, user) {
     // Trouver le canal cible
     let targetChannel = null;
     for (const id of config.sendDuplicateMessageChannel) {
-        targetChannel = searchMessageChannel(message, id)
+        targetChannel = await searchMessageChannel(message, id)
         if (targetChannel) {
             break
         } else {
