@@ -1,3 +1,3 @@
 # Personal bot
 <hr>
-Bot qui récupère données de youtube et qui les post dans un serveur Discord
+Bot qui récupère données de youtube (RSS feed) et qui les posts dans un serveur Discord
