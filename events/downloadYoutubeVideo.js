@@ -56,9 +56,7 @@ export async function downloadYtbVideo(message, user){
             } else {
                 sendEmbed(targetChannel, createSimpleEmbed(`Downloading video ${url.split("/").pop()}`))
                 try {
-                    if (await downloadAudio(url, path, targetChannel, message)) {
-                        sendEmbed(targetChannel, createSuccessEmbed("Downloaded successful"))
-                    }
+                    downloadAudio(url, path, targetChannel, message)
                 } catch {
                     log(`ERROR : Impossible de télécharger ${url}`)
                 }
@@ -85,13 +83,15 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     let metadata = await getBasicInfoWithRetry(url);
     if(metadata === false){
         sendEmbedErrorMessage(targetChannel, `Impossible to retrieve informations for '${url}' (getBasicInfoWithRetry() = false), plz try again later..`)
-        return false
+        return
     }
 
     const videoUrl = `https://www.youtube.com/watch?v=${url}`;
 
     let videoTitle = metadata.player_response.videoDetails.title
+    videoTitle = videoTitle.replaceAll("/", "-").replaceAll("\\", "-")
     let author = metadata.player_response.videoDetails.author
+    author = author.replaceAll("/", "-").replaceAll("\\", "-")
 
     log(`INFO : Initalizing (Path, Duplicate file, ) : ${videoTitle}`)
 
@@ -112,7 +112,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
             sendEmbed(targetChannel, createSimpleEmbed(`Created ${tmpPath}`))
         } else {
             sendEmbedErrorMessage(targetChannel, `Error when creating ${tmpPath}`)
-            return false
+            return
         }
     }
 
@@ -130,8 +130,6 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
             await sendEmbed(targetChannel, createSimpleEmbed("You didn't react in time :/", 'youtube'))
             messageAsked.delete()
             return
-        } else {
-            videoTitle = result.value;
         }
 
     } catch (error) {
@@ -174,9 +172,7 @@ async function downloadPlaylist(playlistId, path, message, targetChannel){
 
                     sendEmbed(targetChannel, createSimpleEmbed(`Downloading video ${videoId.split("/").pop()}`))
                     try{
-                        if(await downloadAudio(videoId, tmpPath, targetChannel, message)){
-                            sendEmbed(targetChannel, createSimpleEmbed(`Downloaded successful for ${videoId.split("/").pop()}`))
-                        }
+                        downloadAudio(url, path, targetChannel, message)
                     } catch {
                         log(`ERROR : Impossible de télécharger ${videoId}`)
                     }
@@ -189,8 +185,6 @@ async function downloadPlaylist(playlistId, path, message, targetChannel){
             });
     }
     catch{
-        /*targetChannel.send(returnToSendEmbed(createErrorEmbed(`ERROR, impossible to download the playlist ${playlistId}, or retrieve informations`)))
-        log(`ERROR, impossible to download the playlist ${playlistId}, or retrieve informations`)*/
         sendEmbedErrorMessage(targetChannel, `ERROR, impossible to download the playlist ${playlistId}, or retrieve informations`)
         return false
     }
@@ -284,9 +278,7 @@ async function askingUserAndWaitReaction(message, videoName, count) {
 
             collector.on('end', collected => {
                 if (collected.size === 0) {
-                    //sendEmbedErrorMessage(message.channel, "User didn\'t react in time. Saving file without overwriting.")
                     log("INFO : User didn\'t react in time (askingUserAndWaitReaction)")
-                    //message.channel.send('You did not react in time. Saving file without overwriting.');
                     resolve({value:false, message:replyMessage})
                 }
             });
@@ -294,9 +286,7 @@ async function askingUserAndWaitReaction(message, videoName, count) {
         });
     } catch (error) {
         sendEmbedErrorMessage(message.channel, `You did not react in time. Saving file without overwriting.`)
-        /*log('User didn\'t react in time or Error in handleDuplicateFile:', error);
-        message.channel.send(returnToSendEmbed(createErrorEmbed(`You did not react in time. Saving file without overwriting.`)))*/
-        return videoName + ` (${count})`; // ou toute autre logique pour gérer les doublons
+        return videoName + ` (${count})`;
     }
 }
 
