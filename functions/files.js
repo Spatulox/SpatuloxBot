@@ -119,7 +119,7 @@ export async function writeJsonFile(directoryPath, name, array){
  * @returns {Promise<boolean>}
  */
 export async function writeJsonFileRework(directoryPath, name, array, channelToSendMessage = null) {
-    if(array === ["Error"]){
+    if(array == ["Error"]){
         log(`Impossible to save the data for ${name}, the data are 'Error'`)
         return false
     }
