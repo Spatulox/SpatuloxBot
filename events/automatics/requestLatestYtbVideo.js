@@ -5,11 +5,9 @@ import Parser from 'rss-parser'
 
 export async function recupLatestVideo(client){
   const files = await listJsonFile("./ytbChannels/")
-  console.log(files)
   for (let i = 0; i < files.length; i++) {
     const fileName = files[i];
     const data = await readJsonFile(`ytbChannels/${fileName}`)
-    console.log(data)
     checkYoutubeFeed(client, data, fileName)
   }
 }
