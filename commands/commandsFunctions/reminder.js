@@ -29,7 +29,7 @@ export async function reminderCommand(interaction){
                 break;
             case 'remove':
                 log("INFO : Removing reminder")
-                await interaction.deferReply(waitPrivateEmbedOrMessage())
+                await interaction.deferReply()
                 await removeReminder(interaction)
                 break;
         }
@@ -101,23 +101,28 @@ export async function addReminder(client, interaction){
             data[formattedDate] = [];
         }
 
+        // Need to count the number of reminders (personnal reminders, so not more than 20 at the same time you know)
+        const eventCountData = await readJsonFile("./reminders/reminder.json")
+        let eventCount = 0
+        for (const element of eventCountData) {
+            eventCount += element.length
+        }
+
         data[formattedDate].push({
+            id:eventCount,
             hour: formattedTime,
             name: nom,
             description: description
         });
 
         if(await writeJsonFileRework("./reminders", "reminder.json", data, interaction.channel)){
-            //interaction.reply(returnToSendEmbed(embed, true));
             await sendInteractionReply(interaction, embed, true)
         } else {
             await sendInteractionReply(interaction, createErrorEmbed(`Impossible to save the reminder, plz check the writeJsonFileRework() function...}`))
-            //interaction.reply(returnToSendEmbed(createErrorEmbed(`Impossible to save the reminder, plz check the writeJsonFileRework() function...}`)))
         }
     } catch (e) {
         log(`ERROR : Impossible to execute the addReminder function : ${e}`)
         await sendInteractionError(interaction, `ERROR : Impossible to execute the addReminder function : ${e}`)
-        //interaction.reply(returnToSendEmbed(createErrorEmbed(e)))
     }
 }
 
@@ -151,7 +156,7 @@ async function listReminder(interaction){
         embed.description = ""
         embed.fields = dates.map(date => ({
             name: date,
-            value: `Nombres d'évènements : ${reminders[date].length}`,
+            value: `> Nombres d'évènements : ${reminders[date].length}`,
         }))
 
         sendInteractionReply(interaction, embed)
@@ -173,7 +178,7 @@ async function listReminder(interaction){
                 for (const reminder of reminders[selectedDate]) {
                     embed.fields.push({
                         name: reminder.hour,
-                        value: `${reminder.name}: ${reminder.description}`
+                        value: `> **ID**: ${reminder.id}\n> **Title**: ${reminder.name}\n> **Description**: ${reminder.description}`
                     });
                 }
 
@@ -244,7 +249,7 @@ async function removeReminder(interaction){
 export async function deleteOldReminders(client, owner){
     log("INFO : Checking for old reminders")
     const reminders = await readJsonFile("./reminders/reminder.json")
-    const bkpReminders = reminders
+    const bkpReminders = JSON.parse(JSON.stringify(reminders));
 
     const today = new Date()
     today.setHours(0, 0, 0, 0);
@@ -257,7 +262,6 @@ export async function deleteOldReminders(client, owner){
             delete reminders[reminder]
         }
     }
-
 
     if(JSON.stringify(reminders) === JSON.stringify(bkpReminders)){
         log("INFO : No old reminders to delete")
