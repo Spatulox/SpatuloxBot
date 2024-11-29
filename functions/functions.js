@@ -149,8 +149,8 @@ export async function recapBotsErrors(client, config){
       yesterday.setDate(yesterday.getDate() -1)
 
       // asyncSearchInLines (fileToSaearch [arrayOfStringToSearch], [arrayOfStringToAvoid])
-      let resYesterday = await asyncSearchInLines('./log/log.txt', [yesterday.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
-      let resToday = await asyncSearchInLines('./log/log.txt', [today.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError'])
+      let resYesterday = await asyncSearchInLines('./log/log.txt', [yesterday.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError', 'Connect Timeout Error'])
+      let resToday = await asyncSearchInLines('./log/log.txt', [today.toLocaleDateString(), 'ERROR'], ['ConnectTimeoutError', 'Connect Timeout Error'])
 
       if (typeof(resYesterday) !== 'string' && resYesterday.length !== 0){
         resYesterday = resYesterday.join('\n')

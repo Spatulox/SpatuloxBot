@@ -13,26 +13,33 @@ export async function postMessage(client, sentence, channelId, reactions = "defa
             return false
         }
         targetChannel.send(sentence)
-            .then(message => {
+            .then(async message => {
 
-                if (reactions != null && reactions !== "default" && reactions.length !== 0) {
+                /*if (reactions != null && reactions !== "default" && reactions.length !== 0) {
                     for (let i = 0; i < reactions.length; i++) {
-                        message.react(reactions[i]);
+                        await message.react(reactions[i]);
                     }
-                }
+                }*/
 
                 log(`INFO : Message posted : ${sentence.split('\n')[0]}`)
+
+                try{
+                    // Waiting 1 seconde before crossposting the message
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } catch (e) {
+                    log("WARNING : Problème lors de la promise d'attente d'une secondes (postMessage)")
+                }
 
                 message.crosspost()
                     .then(() => log(`INFO : Crossposted message : ${sentence.split('\n')[0]}`))
                     .catch(error => {
-                        sendEmbedErrorMessage(targetChannel, 'ERROR when posting message : '+error)
-                        log('ERROR when posting message : '+error)
+                        sendEmbedErrorMessage(targetChannel, 'ERROR when posting message : '+error+`\n> - Message : ${message}\n> - TargetChannel : ${targetChannel}`)
+                        log('ERROR : Error when posting message : '+error)
                     });
 
             })
             .catch(error => {
-                log('ERROR when crossposting message : '+error)
+                log('ERROR : Error when crossposting message : '+error)
             });
     } catch (e){
         let msg = `ERROR : Impossible to find the channel to send the message : \n> ${sentence}\n\n> ${e}`
