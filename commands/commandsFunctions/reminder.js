@@ -242,6 +242,37 @@ async function openReminderForm(interaction){
 // ------------------------------------------------------------- //
 
 async function removeReminder(interaction){
+    try {
+        const data = await readJsonFile("./reminders/reminder.json");
+        const idToRemove = await interaction.options.getInteger("id");
+        let reminderRemoved = false;
+
+        for (const date in data) {
+            if (Array.isArray(data[date])) {
+                data[date] = data[date].filter(reminder => reminder.id !== idToRemove);
+                
+                if (data[date].length === 0) {
+                    delete data[date];
+                }
+                
+                reminderRemoved = true;
+            }
+        }
+
+        if (reminderRemoved) {
+            // Sauvegarder les modifications dans le fichier
+            await writeJsonFileRework("./reminders", "reminder.json", data);
+            await sendInteractionReply(interaction, "Reminder supprimé avec succès");
+        } else {
+            await sendInteractionReply(interaction, "Aucun reminder trouvé avec cet ID");
+        }
+    } catch (e){
+        try{
+            await sendInteractionError(interaction, `Error : ${e}`)
+        } catch (e){
+            log(`ERROR : ${e}`)
+        }
+    }
 
 }
 
