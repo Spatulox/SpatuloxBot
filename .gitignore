@@ -7,3 +7,5 @@ ytbChannels/*.json
 ytbChannels/BKP/
 
 config.json.backup
+
+reminders/reminder.json
