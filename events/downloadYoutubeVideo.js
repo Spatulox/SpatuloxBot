@@ -91,7 +91,7 @@ async function downloadAudio(url, tmpPath, targetChannel, message){
     let videoTitle = metadata.player_response.videoDetails.title
     videoTitle = videoTitle.replaceAll("/", "-").replaceAll("\\", "-")
     let author = metadata.player_response.videoDetails.author
-    author = author.replaceAll("/", "-").replaceAll("\\", "-")
+    author = author.replaceAll("/", "-").replaceAll("\\", "-").replaceAll("*", "-").replaceAll(":", "-").replaceAll("?", "-").replaceAll("<", "-").replaceAll(">", "-").replaceAll("|", "-")
 
     log(`INFO : Initalizing (Path, Duplicate file, ) : ${videoTitle}`)
 
