@@ -22,7 +22,7 @@ export async function downloadYtbVideo(message, user){
     const regexName = /(🎵  [a-zA-Z-_:.\/0-9 ()]*  🎵)/
     const regexAuthor = /(Author :[ a-zA-Z0-9()/\\:.-_]*)/
 
-    let path = `C:\\Marc\\Perso\\Musics\\1-TelechargesViaDiscord\\`
+    let path = `D:\\Music\\1-TelechargesViaDiscord\\`
 
     let targetChannel
     try{

@@ -15,7 +15,7 @@ export async function downloadYtbVideo(message, user){
 
         const regexUrl = /https?:\/\/(www\.)?youtu(\.be\.com\/watch\?v=|\.be\/)[\w-]{11}/g
 
-        let path = `C:\\Marc\\Perso\\Musics\\1-TelechargesViaDiscord\\`
+        let path = `D:\\Music\\1-TelechargesViaDiscord\\`
 
         let targetChannel
         try{
