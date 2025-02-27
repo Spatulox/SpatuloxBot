@@ -4,7 +4,7 @@ import path, { dirname } from 'path'
 import fs from 'fs'
 import readline from 'readline';
 import {readJsonFile, replaceValueJsonFile} from "./files.js";
-import config from '../config.json' assert { type: 'json' };
+import config from '../config.json' with { type: 'json' };
 
 //----------------------------------------------------------------------------//
 

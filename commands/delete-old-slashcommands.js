@@ -2,7 +2,7 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 
 // Files
-import config from '../config.json' assert { type: 'json' };
+import config from '../config.json' with { type: 'json' };
 
 // functions
 import { log, switchYtbToken, recapBotsErrors } from '../functions/functions.js'

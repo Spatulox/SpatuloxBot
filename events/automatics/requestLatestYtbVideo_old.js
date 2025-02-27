@@ -4,7 +4,7 @@ import { postMessage } from '../../functions/messages.js'
 import { log } from '../../functions/functions.js'
 import fetch from 'node-fetch'
 import { checkXTimesInternetCo } from '../../functions/checkInternetCo.js'
-import config from '../../config.json' assert { type: 'json' };
+import config from '../../config.json' with { type: 'json' };
 
 export async function recupLatestVideo(client){
 

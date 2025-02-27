@@ -1,4 +1,4 @@
-import config from '../config.json' assert { type: 'json' };
+import config from '../config.json' with { type: 'json' };
 import {log, searchClientChannel} from "./functions.js";
 import {createEmbed, createErrorEmbed, returnToSendEmbed, sendEmbedErrorMessage} from "./embeds.js";
 import {returnToSendSelectMenu} from "./selectMenu.js";

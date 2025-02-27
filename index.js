@@ -2,7 +2,7 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import Discord from 'discord.js'
 // Files
-import config from './config.json' assert { type: 'json' };
+import config from './config.json' with { type: 'json' };
 
 // functions
 import { duplicateMessage } from './events/duplicateMessage.js'

@@ -1,4 +1,4 @@
-import config from '../config.json' assert { type: 'json' }
+import config from '../config.json' with { type: 'json' }
 import {log, searchMessageChannel} from '../functions/functions.js'
 import { sendEmbedErrorMessage } from "../functions/embeds.js";
 

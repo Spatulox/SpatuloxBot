@@ -1,4 +1,4 @@
-import config from '../config.json' assert { type: 'json' };
+import config from '../config.json' with { type: 'json' };
 import fetch from 'node-fetch'
 import { listJsonFile } from '../functions/files.js'
 import fs from 'fs'

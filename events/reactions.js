@@ -1,5 +1,5 @@
 import { log } from '../functions/functions.js'
-import config from '../config.json' assert { type: 'json' };
+import config from '../config.json' with { type: 'json' };
 
 export async function addReactions(message){
 
