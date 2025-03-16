@@ -7,6 +7,7 @@
   "emojiReact": [
     "✅",
     "💾",
+    "👀",
     "🎵"
   ],
   "errorChannel": "",
@@ -24,10 +25,5 @@
   "userCanReact": [
     "globalUsername1",
     "globalUsername2"
-  ],
-  "usingYtbToken": "1",
-  "ytbToken": [
-    "",
-    ""
   ]
 }
