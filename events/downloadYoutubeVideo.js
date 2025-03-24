@@ -14,14 +14,14 @@ import fs from 'fs'
 export async function downloadYtbVideo(message, user){
     try {
 
-        const regexUrl = /(https?:\/\/(www\.)?(youtu\.be\/|youtube\.com\/(watch\?v=|embed\/))([\w-]{11}))/g
+        //const regexUrl = /(https?:\/\/(www\.)?(youtu\.be\/|youtube\.com\/(watch\?v=|embed\/|))([\w-]{11}))/g
+        const regexUrl = /(https?:\/\/(www\.)?(youtube\.com\/(watch\?v=|playlist\?list=)|youtu\.be\/)([\w-]{11})(&.*)?)/g
 
-        //let path = `D:\\Music\\1-TelechargesViaDiscord\\`
-        let musicPath; // Utilisez un nom différent pour éviter le conflit avec le module path
+        let path;
         if (process.platform === 'win32') {
-            musicPath = pathModule.join('D:', 'Music', '1-TelechargesViaDiscord');
+            path = pathModule.join('D:', 'Music', '1-TelechargesViaDiscord');
         } else {
-            musicPath = pathModule.join(process.env.HOME, 'Musique', '1-TelechargesViaDiscord');
+            path = pathModule.join(process.env.HOME, 'Musique', '1-TelechargesViaDiscord');
         }
 
         let targetChannel
