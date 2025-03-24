@@ -4,6 +4,7 @@ import {log, searchMessageChannel} from '../functions/functions.js'
 import { listFile } from "../functions/files.js";
 //import ytdl from 'ytdl-core'
 import ytdl from '@distube/ytdl-core'
+import * as pathModule from 'path';
 
 import ytpl from 'ytpl'
 import fs from 'fs'
@@ -13,9 +14,15 @@ import fs from 'fs'
 export async function downloadYtbVideo(message, user){
     try {
 
-        const regexUrl = /https?:\/\/(www\.)?youtu(\.be\.com\/watch\?v=|\.be\/)[\w-]{11}/g
+        const regexUrl = /(https?:\/\/(www\.)?(youtu\.be\/|youtube\.com\/(watch\?v=|embed\/))([\w-]{11}))/g
 
-        let path = `D:\\Music\\1-TelechargesViaDiscord\\`
+        //let path = `D:\\Music\\1-TelechargesViaDiscord\\`
+        let musicPath; // Utilisez un nom différent pour éviter le conflit avec le module path
+        if (process.platform === 'win32') {
+            musicPath = pathModule.join('D:', 'Music', '1-TelechargesViaDiscord');
+        } else {
+            musicPath = pathModule.join(process.env.HOME, 'Musique', '1-TelechargesViaDiscord');
+        }
 
         let targetChannel
         try{
