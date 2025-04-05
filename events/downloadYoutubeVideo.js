@@ -20,8 +20,10 @@ export async function downloadYtbVideo(message, user){
         let path;
         if (process.platform === 'win32') {
             path = pathModule.join('D:', 'Music', '1-TelechargesViaDiscord');
+            path += "\\"
         } else {
             path = pathModule.join(process.env.HOME, 'Musique', '1-TelechargesViaDiscord');
+            path += "/"
         }
 
         let targetChannel
@@ -169,7 +171,12 @@ async function downloadPlaylist(playlistId, path, message, targetChannel){
                 author = checkCorrectString(author)
                 playTitle = checkCorrectString(playlist.title)
 
-                tmpPath += `${author}\\${playTitle}\\`
+                if(process.platform === 'win32'){
+                    tmpPath += `${author}\\${playTitle}\\`
+                } else {
+                    tmpPath += `${author}/${playTitle}/`
+                }
+                
 
                 for (let item of playlist.items){
                     let videoTitle = item.title;
@@ -223,8 +230,18 @@ async function getBasicInfoWithRetry(url, maxRetries = 2) {
 // ------------------------------------------------------------------------------------------//
 
 async function getUserAnswerIfDuplicateFile(message, videoName, tmpPath){
+    let listDownloadVid
 
-    let listDownloadVid = await listFile(`${tmpPath}\\`, 'mp3')
+    if(process.platform === 'win32'){
+        listDownloadVid = await listFile(`${tmpPath}\\`, 'mp3')
+    } else {
+        listDownloadVid = await listFile(`${tmpPath}/`, 'mp3')
+    }
+
+    if(listDownloadVid == 'Error'){
+        sendEmbedErrorMessage(message.channel, `Error when reading ${path}`)
+        return
+    }
 
     if (listDownloadVid.includes(videoName+'.mp3')){
         log("INFO : This video already exist")
@@ -305,7 +322,13 @@ async function downloadWithRetry(url, tmpPath, videoTitle, targetChannel, maxRet
 
         async function attemptDownload() {
             attempts++;
-            const filePath = `${tmpPath}\\${videoTitle}.mp3`;
+            let filePath
+            if(process.platform === 'win32'){
+                filePath = `${tmpPath}\\${videoTitle}.mp3`;
+            } else {
+                filePath = `${tmpPath}/${videoTitle}.mp3`;
+            }
+            
             const writeStream = fs.createWriteStream(filePath);
 
             let audioStream;
