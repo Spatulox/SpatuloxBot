@@ -7,7 +7,8 @@ import { checkXTimesInternetCo } from '../../functions/checkInternetCo.js'
 import config from '../../config.js'
 
 export async function recupLatestVideo(client){
-
+  console.log("THIS FUNCTION IS DEPRECATED (recupLatestVideo_old) !!!!")
+  return
   // Checking if internet is still available
   let res = await checkXTimesInternetCo(5)
 
@@ -16,7 +17,7 @@ export async function recupLatestVideo(client){
     return
   }
 
-  let config = await readJsonFile('./config.json')
+  //let config = await readJsonFile('./config.json')
 
   // Need to create a function that retrieve the number of api ytb key used to use :
   // switchYtbToken()

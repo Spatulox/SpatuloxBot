@@ -107,6 +107,8 @@ export async function asyncSearchInLines(pathToFile, arrayToSearch, arrayToAvoid
 //----------------------------------------------------------------------------//
 
 export function switchYtbToken(){
+  console.log("THIS FUNCTION IS DEPRECATED (switchYtbToken) !!!!")
+  return
   const jsonFile = readJsonFile('./config.json')
 
   if (jsonFile === ['Error']){

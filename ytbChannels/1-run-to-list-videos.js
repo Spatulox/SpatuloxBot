@@ -32,6 +32,8 @@ import fs from 'fs'
 async function getLatestVideos() {
 
   // console.log(string, ytbChannelId, discordChannelToPost)
+  console.log("THIS FUNCTION IS DEPRECATED !!!!")
+  process.exit()
 
   const maxResults = 5000;
   
