@@ -3,7 +3,7 @@ import { sendLongMessage } from './messages.js';
 import path from 'path';
 import fs from 'fs';
 import readline from 'readline';
-import type { Client, Message, TextChannel, DMChannel, ThreadChannel } from 'discord.js';
+import type { Client, Message, TextChannel, DMChannel, ThreadChannel, GuildBasedChannel } from 'discord.js';
 
 //----------------------------------------------------------------------------//
 
@@ -166,25 +166,21 @@ export async function searchClientChannel(client: Client, channelId: string): Pr
 
 //----------------------------------------------------------------------------//
 
-export async function searchMessageChannel(message: Message, channelId: string): Promise<TextChannel | false> {
-  try {
+export async function searchMessageChannel(message: Message, channelId: string): Promise<GuildBasedChannel | null>{
+  try{
     if (!message.guild) {
       log("ERROR : Message n'est pas dans un serveur ????? WTH");
-      return false;
+      return null;
     }
 
     if (channelId && typeof channelId !== 'string') {
       log(`ERROR : channelId invalide : ${channelId}`);
-      return false;
+      return null;
     }
 
-    return (
-      message.guild.channels.cache.get(channelId) ||
-      (await message.guild.channels.fetch(channelId))
-      // || message.channel
-    ) as TextChannel;
+    return message.guild.channels.cache.get(channelId) || (await message.guild.channels.fetch(channelId))// || message.channel
   } catch (e) {
-    log(`ERROR : Impossible to fetch the channel : ${channelId}\n> ${e}`);
-    return false;
+    log(`ERROR : Impossible to fetch the channel : ${channelId}\n> ${e}`)
+    return null
   }
 }
