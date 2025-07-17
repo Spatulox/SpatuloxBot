@@ -2,6 +2,7 @@ import { DMChannel, EmbedBuilder, InteractionDeferReplyOptions, TextChannel, Thr
 import { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "@discordjs/builders";
 import config from "../config.js";
 import { log, searchClientChannel } from "./functions.js";
+import { client } from "../client.js";
 //import { client } from "../client";
 //import config from "../../config.json";
 
@@ -114,7 +115,7 @@ export function createEmbed(color:  EmbedColor | null = null): Embed{
     return embed
 }
 
-export function createSimpleEmbed(description: string, color: EmbedColor | null): Embed{
+export function createSimpleEmbed(description: string, color?: EmbedColor | null): Embed{
     const embed = createEmbed(color ? color : EmbedColor.botColor)
     embed.title = ""
     embed.description = description
@@ -142,7 +143,7 @@ export function createSuccessEmbed(description: string): Embed{
 
 // ------------------------------------------------------------- //
 
-export async function sendEmbed(embed: Embed, targetChannel: TextChannel | DMChannel | ThreadChannel): Promise<boolean>{
+export async function sendEmbed(targetChannel: TextChannel | DMChannel | ThreadChannel, embed: Embed): Promise<boolean>{
     if(!targetChannel || !embed){
         log("WARNING : Impossible to execute the fonction, one of the two (or the two) parameter are null : (sendEmbed)")
         return false
@@ -164,7 +165,7 @@ export async function sendEmbedToInfoChannel(embed: Embed){
     try{
         const channel = await searchClientChannel(client, config.errorChannel)
         if(channel){
-            sendEmbed(embed, channel)
+            sendEmbed(channel, embed)
         }
     } catch(e){
         console.error(e)
@@ -175,7 +176,7 @@ export async function sendEmbedToAdminChannel(embed: Embed){
     try{
         const channel = await searchClientChannel(client, config.errorChannel)
         if(channel){
-            sendEmbed(embed, channel)
+            sendEmbed(channel, embed)
         }
     } catch(e){
         console.error(e)
@@ -226,14 +227,14 @@ export async function sendInteractionEmbed(interaction: CommandInteraction | Mod
 
 //----------------------------------------------------------------------------//
 
-export async function sendEmbedErrorMessage(message: string, targetChannel: TextChannel | DMChannel | ThreadChannel): Promise<boolean>{
+export async function sendEmbedErrorMessage(targetChannel: TextChannel | DMChannel | ThreadChannel, message: string): Promise<boolean>{
     
     if(!targetChannel || !message){
         log("WARNING : Impossible to execute the fonction, one of the two (or the two) parameter are null : (sendEmbedErrorMessage)")
         return false
     }
     const embed = createErrorEmbed(message)
-    sendEmbed(embed, targetChannel)
+    sendEmbed(targetChannel, embed)
     return true
 }
 
