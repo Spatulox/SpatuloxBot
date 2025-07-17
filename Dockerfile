@@ -28,7 +28,4 @@ COPY --from=builder /usr/src/app/package*.json ./
 # Installe uniquement les dépendances de production, avec le lockfile correcte
 RUN npm ci --only=production
 
-# Copie dossier ytbChannels
-COPY ./ytbChannels ./ytbChannels
-
 CMD ["node", "./dist/index.js"]
