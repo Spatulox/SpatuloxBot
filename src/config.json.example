@@ -1,4 +1,5 @@
 {
+  "appId": "",
   "channelPingLogin": "",
   "downloadChannel": [
     "",
@@ -12,16 +13,14 @@
   ],
   "errorChannel": "",
   "getReactionChannel": [
-    "",
     ""
   ],
   "owner": "ownerID",
+  "sendToOwnerOrChannel":"1",
   "sendChannelErrors": "yes",
   "sendDuplicateMessageChannel": [
     ""
   ],
-  "sendToOwnerOrChannel": "1",
-  "token": "",
   "userCanReact": [
     "globalUsername1",
     "globalUsername2"
