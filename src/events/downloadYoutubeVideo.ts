@@ -403,7 +403,7 @@ async function downloadWithRetry(
         sendEmbed(targetChannel, createSimpleEmbed(`Nouvelle tentative de téléchargement (${attempts + 1}/${maxRetries})...`));
         setTimeout(attemptDownload, 5000);
       } else {
-        throw new Error(`Échec du téléchargement après ${maxRetries} tentatives.`);
+        sendEmbed(targetChannel, createSimpleEmbed(`Échec du téléchargement après ${maxRetries} tentatives.`))
       }
     };
 

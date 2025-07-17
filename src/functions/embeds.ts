@@ -43,7 +43,7 @@ export enum EmbedColor {
   chocolate = 0xD2691E,   // Chocolat
   crimson = 0xDC143C,     // Cramoisi
   youtube = 0xFF1A1A,     // Rouge Youtube
-  botColor = 0x5C8AD8,    // Couleur personnalisée (bleu clair)
+  botColor = 0xba06ae,    // Couleur personnalisée (violet)
   minecraft = 0x006400    // Vert Minecraft
 }
 
