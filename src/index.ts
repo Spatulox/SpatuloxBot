@@ -1,5 +1,5 @@
 // Librairies
-import { Client, GatewayIntentBits, User, Channel, Interaction, MessageReaction, Message, version, PartialMessageReaction, PartialUser } from 'discord.js';
+import { User, Channel, Interaction, MessageReaction, Message, version, PartialMessageReaction, PartialUser } from 'discord.js';
 // Files
 // import config from './config.json' with { type: 'json' };
 import config from './config.js';
@@ -9,7 +9,6 @@ import { downloadYtbVideo } from './events/downloadYoutubeVideo.js';
 import { recupLatestVideo } from './events/automatics/requestLatestYtbVideo.js';
 import { executeSlashCommand } from './commands/executeCommand.js';
 import { executeModalSubmit } from './form/executeModalSubmit.js';
-import { deleteOldReminders } from './commands/commandsFunctions/reminder.js';
 import { client } from './client.js';
 import { log, recapBotsErrors, searchClientChannel } from './functions/functions.js';
 import { checkInternetCo } from './functions/checkInternetCo.js';
@@ -17,6 +16,7 @@ import { duplicateMessage } from './events/duplicateMessage.js';
 import { addReactions } from './events/reactions.js';
 import { deployCommand } from './commands/deployCommand.js';
 import { loginBot } from './functions/login.js';
+import { deleteOldReminders } from './commands/commandsFunctions/reminder.js';
 
 async function main(): Promise<void> {
   process.env.YTDL_NO_UPDATE = '1';
@@ -71,7 +71,7 @@ async function main(): Promise<void> {
     deleteOldReminders(client, owner);
 
     // Deploy Commands
-    await deployCommand(client);
+    await deployCommand();
 
     try {
       recupLatestVideo();
@@ -133,11 +133,13 @@ async function main(): Promise<void> {
   });
 
   client.on('interactionCreate', async (interaction: Interaction) => {
-    executeSlashCommand(interaction, client);
+    if(!interaction.isCommand()) return
+    executeSlashCommand(interaction);
   });
 
   client.on('interactionCreate', async (interaction: Interaction) => {
-    executeModalSubmit(interaction, client);
+    if(!interaction.isModalSubmit()) return
+    executeModalSubmit(interaction);
   });
 }
 

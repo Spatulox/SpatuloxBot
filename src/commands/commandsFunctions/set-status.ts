@@ -1,8 +1,9 @@
-import type { ChatInputCommandInteraction, Client } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import { log } from '../../functions/functions.js';
 import { createEmbed, createErrorEmbed, EmbedColor, sendInteractionEmbed } from '../../functions/embeds.js';
+import { client } from '../../client.js';
 
-export async function setStatus(client: Client, interaction: ChatInputCommandInteraction): Promise<void> {
+export async function setStatus(interaction: ChatInputCommandInteraction): Promise<void> {
   try {
     await interaction.deferReply();
 

@@ -1,5 +1,5 @@
 import { createErrorEmbed, sendInteractionEmbed } from '../functions/embeds.js';
-import { ChatInputCommandInteraction, Client, CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, CommandInteraction } from 'discord.js';
 
 import { ytbChannelCommand } from './commandsFunctions/ytb-channel.js';
 import { setStatus } from "./commandsFunctions/set-status.js";
@@ -9,7 +9,7 @@ import ytb from "./json/addytbchannel.json" with {type: "json"}
 import status from "./json/setstatus.json" with {type: "json"}
 import reminder from "./json/reminder.json" with {type: "json"}
 
-export async function executeSlashCommand(interaction: CommandInteraction, client: Client){
+export async function executeSlashCommand(interaction: CommandInteraction){
     if (!interaction.isCommand()) return;
 
     switch (interaction.commandName) {
@@ -18,7 +18,7 @@ export async function executeSlashCommand(interaction: CommandInteraction, clien
             break;
 
         case status.name:
-            setStatus(client, interaction as ChatInputCommandInteraction)
+            setStatus(interaction as ChatInputCommandInteraction)
             break;
 
         case reminder.name:
