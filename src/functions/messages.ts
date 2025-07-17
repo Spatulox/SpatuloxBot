@@ -28,7 +28,7 @@ export async function crosspostMessage(client: Client, sentence: string, channel
                 log(`INFO : Crossposted message : ${sentence.split('\n')[0]}`)
                 return true
             } catch(error){
-                sendEmbedErrorMessage('ERROR when posting message : '+error+`\n> - Message : ${message}\n> - TargetChannel : ${targetChannel}`, targetChannel)
+                sendEmbedErrorMessage(targetChannel, 'ERROR when posting message : '+error+`\n> - Message : ${message}\n> - TargetChannel : ${targetChannel}`)
                 log('ERROR : Error when posting message : '+error)
                 return false
             }
@@ -43,7 +43,7 @@ export async function crosspostMessage(client: Client, sentence: string, channel
         try{
             const errorChannel = await searchClientChannel(client, config.errorChannel)
             if(errorChannel){
-                sendEmbed(createErrorEmbed(msg), errorChannel)
+                sendEmbed(errorChannel, createErrorEmbed(msg))
             } else {
                 log("ERROR : Impossible to execute the postMessage function, channel is false")
             }
@@ -113,7 +113,7 @@ export async function sendMessage(messageContent: string, targetChannel: TextCha
 export async function sendMessageError(message: string){
     const channel = await searchClientChannel(client, config.errorChannel)
     if(channel){
-        sendEmbedErrorMessage(`${message}`, channel)
+        sendEmbedErrorMessage(channel, `${message}`)
     } else {
         sendMessage(`${message}`)
     }

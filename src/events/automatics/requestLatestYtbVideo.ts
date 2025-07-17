@@ -40,7 +40,7 @@ async function checkYoutubeFeed(client: Client, data: ChannelData, filename: str
         const sentence = `# 🎵 __** ${entry.title} **__ 🎵\n> - https://www.youtu.be/${videoId}\n> - Author : ${data.name}\n> - Uploaded on ${date.toLocaleDateString()}, <t:${timestamp}:R>`;
 
         log(`INFO : Posting Video ${entry.title} - ${videoId}`);
-        await postMessage(client, sentence, data.guildChannelToPostVideo);
+        await sendMessage(sentence, data.guildChannelToPostVideo);
         addVideoIdToFile.push(videoId);
       }
     }

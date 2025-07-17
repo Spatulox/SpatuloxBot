@@ -66,7 +66,7 @@ export async function duplicateMessage(reaction: MessageReaction, user: User): P
             log(`INFO : Message dupliqué : ${content.split('\n')[0]}`);
             await targetChannel.send(content);
         } catch (error) {
-            sendEmbedErrorMessage(`Erreur lors de la duplication : ${error}`, message.channel as TextChannel);
+            sendEmbedErrorMessage(message.channel as TextChannel, `Erreur lors de la duplication : ${error}`);
         }
     }
     log('Le channel cible n\'est pas textuel, impossible d\'envoyer le message');
