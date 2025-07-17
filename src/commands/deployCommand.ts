@@ -7,7 +7,7 @@ import { Time } from "../functions/UnitTime.js";
 import { log } from "../functions/functions.js";
 import { listJsonFile, readJsonFile } from "../functions/files.js";
 import { client } from '../client.js';
-import { loginBot } from '../functions/login.js';
+import { isLogged, loginBot } from '../functions/login.js';
 
 export interface Command {
     name: string;
@@ -22,7 +22,7 @@ export interface Command {
 client.rest = new REST({ version: '10' }).setToken(config.token);
 
 export async function deployCommand(): Promise<void> {
-    if (!(await loginBot(client))) {
+    if (!isLogged && !(await loginBot(client))) {
         log("Erreur : Impossible de connecter le bot");
         return;
     }
@@ -31,11 +31,11 @@ export async function deployCommand(): Promise<void> {
         log('INFO : Déploiement des commandes slash et menus contextuels');
 
         // 1. Lire les commandes slash
-        const slashFiles = await listJsonFile('./commands/');
+        const slashFiles = await listJsonFile('./dist/commands/');
         // 2. Lire les menus contextuels
-        const contextFiles = await listJsonFile('./context-menu/');
+        //const contextFiles = await listJsonFile('./dist/context-menu/');
 
-        if (!slashFiles || !contextFiles) {
+        if (!slashFiles) {// || !contextFiles) {
             log('ERREUR : Impossible de lire les fichiers de commandes ou de menus contextuels');
             return;
         }
@@ -107,9 +107,9 @@ export async function deployCommand(): Promise<void> {
         }
 
         // Traiter les commandes slash
-        await processCommands('./commands/');
+        await processCommands('./dist/commands/');
         // Traiter les menus contextuels
-        await processCommands('./context-menu/', true);
+        //await processCommands('./dist/context-menu/', true);
 
         // Déploiement global des commandes sans guildID
         if (globalCommands.length > 0) {

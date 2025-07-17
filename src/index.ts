@@ -14,7 +14,7 @@ import { log, recapBotsErrors, searchClientChannel } from './functions/functions
 import { checkInternetCo } from './functions/checkInternetCo.js';
 import { duplicateMessage } from './events/duplicateMessage.js';
 import { addReactions } from './events/reactions.js';
-import { deployCommand } from './commands/deployCommand.js';
+//import { deployCommand } from './commands/deployCommand.js';
 import { loginBot } from './functions/login.js';
 import { deleteOldReminders } from './commands/commandsFunctions/reminder.js';
 
@@ -71,7 +71,7 @@ async function main(): Promise<void> {
     deleteOldReminders(client, owner);
 
     // Deploy Commands
-    await deployCommand();
+    //await deployCommand();
 
     try {
       recupLatestVideo();

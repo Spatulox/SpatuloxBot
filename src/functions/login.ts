@@ -2,6 +2,7 @@ import { Client } from "discord.js";
 import config from "../config.js";
 import { log } from "./functions.js";
 
+export let isLogged = false
 export async function loginBot(client: Client): Promise<string | undefined> {
   let ok = 'Not Connected';
 
@@ -10,6 +11,7 @@ export async function loginBot(client: Client): Promise<string | undefined> {
       ok = await client.login(config.token)
         .then(() => {
           log('INFO : Logged in successfully!');
+          isLogged = true
           return 'Connected';
         })
         .catch(async (err: any) => {

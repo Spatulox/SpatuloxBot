@@ -82,13 +82,13 @@ export async function sendLongMessage(channel: TextChannel | DMChannel | ThreadC
 //----------------------------------------------------------------------------//
 
 export async function sendMessage(messageContent: string, targetChannel: TextChannel | DMChannel | ThreadChannel | string | null = "") {
-    log("INFO : "+messageContent)
+    //log("INFO : "+messageContent)
     let channelId: string = config.errorChannel
     let channel: TextChannel | DMChannel | ThreadChannel | null
 
     if(targetChannel){
         if(typeof(targetChannel) === "string"){
-            channel = await searchClientChannel(client, channelId)    
+            channel = await searchClientChannel(client, targetChannel)    
         } else {
             channel = targetChannel
         }
