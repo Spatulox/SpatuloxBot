@@ -9,7 +9,12 @@ import { log, searchMessageChannel } from '../functions/functions.js';
 import { createSimpleEmbed, createSuccessEmbed, EmbedColor, sendEmbed, sendEmbedErrorMessage } from '../functions/embeds.js';
 
 // ------------------------------------------------------------------------------------------//
-
+/**
+ * 
+ * @param message Message where the ytb url is
+ * @param user The user which sent the message
+ * @returns 
+ */
 export async function downloadYtbVideo(message: Message, user: User): Promise<boolean | void> {
   try {
     // Regex pour url Youtube (vidéo ou playlist)
@@ -87,6 +92,14 @@ export async function downloadYtbVideo(message: Message, user: User): Promise<bo
 
 // ------------------------------------------------------------------------------------------//
 
+/**
+ * 
+ * @param url https://youtube.com/watch?v={11}
+ * @param basePath Location where to save the audio file
+ * @param targetChannel Channel to send updates
+ * @param message The original message where the url is
+ * @returns void
+ */
 async function downloadAudio(url: string, basePath: string, targetChannel: TextChannel, message: Message): Promise<void> {
   // Nettoyage de l'url pour récupérer l'ID vidéo
   if (url.includes('watch?v=')) {
