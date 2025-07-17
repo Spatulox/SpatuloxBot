@@ -79,7 +79,7 @@ export type Embed = {
         icon_url: string;
     };
 
-    timestamp: string | Date;
+    timestamp: string;
     url?: string;
 };
   
@@ -109,7 +109,7 @@ export function createEmbed(color:  EmbedColor | null = null): Embed{
             text:"Helldivers [FR] Bot",
             icon_url:"https://cdn.discordapp.com/app-icons/1358119106087358675/2b09d868914dc494b0ce375a9c4e184f.png"
         },
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         url:""
     };
     return embed
@@ -407,7 +407,7 @@ export async function fillEmbed(embed: Embed): Promise<void>{
     }
 
     if(!embed?.timestamp){
-        embed.timestamp = new Date();
+        embed.timestamp = new Date().toISOString();
     }
 }
 
