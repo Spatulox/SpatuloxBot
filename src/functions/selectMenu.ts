@@ -1,4 +1,4 @@
-import {ActionRowBuilder, StringSelectMenuBuilder, AnyComponentBuilder, AnySelectMenuInteraction, InteractionReplyOptions, InteractionEditReplyOptions, MessageFlags } from 'discord.js';
+import {ActionRowBuilder, StringSelectMenuBuilder, AnyComponentBuilder, AnySelectMenuInteraction, InteractionReplyOptions, InteractionEditReplyOptions, MessageFlags, ChatInputCommandInteraction } from 'discord.js';
 import { log } from './functions.js';
 type SelectMenuType = {
     name: string,
@@ -29,18 +29,18 @@ export class SelectMenu{
     }
 }
 
-function returnToSendSelectMenu(selectMenu: StringSelectMenuBuilder, content: string, privateVisibility = false): any {
-    const row = new ActionRowBuilder().addComponents(selectMenu);
+function returnToSendSelectMenu(selectMenu: StringSelectMenuBuilder, content: string, privateVisibility = false): InteractionReplyOptions {
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
     return {
         content: content,
         components: [row],
-        flags: MessageFlags.Ephemeral
+        flags: privateVisibility ? MessageFlags.Ephemeral : undefined,
     };
 }
 
-function returnToSendSelectMenuForEditInteraction(selectMenu: StringSelectMenuBuilder, content: string): any {
-    const row = new ActionRowBuilder().addComponents(selectMenu);
+function returnToSendSelectMenuForEditInteraction(selectMenu: StringSelectMenuBuilder, content: string): InteractionEditReplyOptions {
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
     return {
         content: content,
@@ -48,12 +48,14 @@ function returnToSendSelectMenuForEditInteraction(selectMenu: StringSelectMenuBu
     };
 }
 
-export async function sendInteractionSelectMenu(interaction: AnySelectMenuInteraction, selectMenu: SelectMenuType, privateVisibility: boolean){
+export async function sendInteractionSelectMenu(interaction: AnySelectMenuInteraction | ChatInputCommandInteraction, selectMenuClass: SelectMenu, privateVisibility: boolean = false){
 
     if (!interaction.isRepliable()) {
         console.log("WARNING : L'interaction ne peut pas recevoir de réponse : (sendInteractionSelectMenu)");
         return false;
     }
+
+    const selectMenu = selectMenuClass.menu
 
     try {
             const replyOptions: InteractionReplyOptions = returnToSendSelectMenu(selectMenu.select_menu, selectMenu.content, privateVisibility);
