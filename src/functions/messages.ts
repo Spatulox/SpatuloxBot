@@ -6,7 +6,7 @@ import { log, searchClientChannel } from "./functions.js";
 import { client } from "../client.js";
 //----------------------------------------------------------------------------//
 
-export async function crosspostMessage(client: Client, sentence: string, channelId: string, reactions = "default"): Promise<boolean> {
+export async function crosspostMessage(client: Client, sentence: string, channelId: string): Promise<boolean> {
 
     try{
         let targetChannel = await searchClientChannel(client, channelId)
