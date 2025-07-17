@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+        "target": "es2021",
+        "module": "nodenext",
+        "forceConsistentCasingInFileNames": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "noUncheckedIndexedAccess": true,
+        "skipLibCheck": true,
+        "outDir": "dist",
+
+        "lib": ["es2021", "dom"],
+
+        /*JSON*/
+         "moduleResolution": "nodenext",
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+
+        /*Liting*/
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "erasableSyntaxOnly": false,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedSideEffectImports": true
+    },
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "dist"
+    ]
+}
