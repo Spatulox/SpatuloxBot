@@ -1,28 +1,28 @@
-import {readJsonFile} from "../functions/files.js";
-import {log} from "../functions/functions.js";
 import {ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle} from "discord.js";
+import { readJsonFile } from "../functions/files.js";
+import { log } from "../functions/functions.js";
 
-export async function loadForm(name){
+export async function loadForm(name: string){
     let componentCount = 0;
     const MAX_COMPONENTS = 5;
 
-    const form = await readJsonFile(`./form/json/${name}.json`)
+    const form = await readJsonFile(`./form/${name}.json`)
 
-    if(form === ['Error']){
+    if(form === 'Error'){
         return false
     }
 
-    if(!form?.title){
+    if(!form.hasOwnProperty("title")){
         log(`ERROR : Need a 'title' for the form ${name}.json`)
         return false
     }
 
-    if(!form?.id){
+    if(!form.hasOwnProperty("id")){
         log(`ERROR : Need a 'id' for the form ${name}.json`)
         return false
     }
 
-    if(!form?.inputs){
+    if(!form.hasOwnProperty("inputs")){
         log(`ERROR : Need a 'inputs' for the form ${name}.json`)
         return false
     }
@@ -55,7 +55,7 @@ export async function loadForm(name){
                     .setRequired(input.required || false)
                     .setStyle(input.style === "short" ? TextInputStyle.Short : TextInputStyle.Paragraph);
 
-                modal.addComponents(new ActionRowBuilder().addComponents(textInput));
+                modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(textInput));
 
                 break;
 
@@ -66,7 +66,7 @@ export async function loadForm(name){
                     .setRequired(input.required || false)
                     .setStyle(input.style === "short" ? TextInputStyle.Short : TextInputStyle.Paragraph)
                     .setPlaceholder(input.placeholder || '');
-                modal.addComponents(new ActionRowBuilder().addComponents(textInputWithPlaceholder));
+                modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(textInputWithPlaceholder));
                 break;
 
             case 'text_minmax_length':
@@ -77,7 +77,7 @@ export async function loadForm(name){
                     .setStyle(input.style === "short" ? TextInputStyle.Short : TextInputStyle.Paragraph)
                     .setMinLength(input.minLength || 0)
                     .setMaxLength(input.maxLength || 4000);
-                modal.addComponents(new ActionRowBuilder().addComponents(textInputWithLength));
+                modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(textInputWithLength));
                 break;
 
 
@@ -88,7 +88,7 @@ export async function loadForm(name){
                     .setRequired(input.required || false)
                     .setStyle(TextInputStyle.Short)
                     .setPlaceholder('Entrez un nombre');
-                modal.addComponents(new ActionRowBuilder().addComponents(numberInput));
+                modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(numberInput));
                 break;
 
 
@@ -99,7 +99,7 @@ export async function loadForm(name){
                     .setRequired(input.required || false)
                     .setStyle(TextInputStyle.Short)
                     .setPlaceholder('JJ/MM/AAAA');
-                modal.addComponents(new ActionRowBuilder().addComponents(dateInput));
+                modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(dateInput));
                 break;
 
             case 'date-hour':
@@ -109,7 +109,7 @@ export async function loadForm(name){
                     .setRequired(input.required || false)
                     .setStyle(TextInputStyle.Short)
                     .setPlaceholder('JJ/MM/AAAA hh:mm');
-                modal.addComponents(new ActionRowBuilder().addComponents(dateHourInput));
+                modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(dateHourInput));
                 break;
 
 
