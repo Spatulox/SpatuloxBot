@@ -3,7 +3,7 @@ import { sendLongMessage } from './messages.js';
 import path from 'path';
 import fs from 'fs';
 import readline from 'readline';
-import type { Client, Message, TextChannel, Channel } from 'discord.js';
+import type { Client, Message, TextChannel, DMChannel, ThreadChannel } from 'discord.js';
 
 //----------------------------------------------------------------------------//
 
@@ -97,7 +97,7 @@ export async function recapBotsErrors(client: Client, config: any): Promise<bool
     log('INFO : Recap bot errors...');
 
     if (config?.sendChannelErrors === 'yes') {
-      let errorChannel: Channel | null | false = null;
+      let errorChannel: TextChannel | DMChannel | ThreadChannel | null | false = null;
 
       if (config?.errorChannel) {
         try {
@@ -150,13 +150,18 @@ export async function recapBotsErrors(client: Client, config: any): Promise<bool
 
 //----------------------------------------------------------------------------//
 
-export async function searchClientChannel(client: Client, channelId: string): Promise<Channel | false> {
-  try {
-    return await client.channels.cache.get(channelId) || (await client.channels.fetch(channelId)) || false;
-  } catch (e) {
-    log(`ERROR : Impossible to fetch the channel : ${channelId}\n> ${e}`);
-    return false;
-  }
+export async function searchClientChannel(client: Client, channelId: string): Promise<TextChannel | DMChannel | ThreadChannel | null>{
+    try{
+      const channel = client.channels.cache.get(channelId) || (await client.channels.fetch(channelId));
+  
+      if (channel?.isTextBased() && 'send' in channel) {
+        return channel as TextChannel | DMChannel | ThreadChannel;
+      }
+      return null
+    } catch (e) {
+      (`ERROR : Impossible to fetch the channel : ${channelId}\n> ${e}`)
+      return null
+    }
 }
 
 //----------------------------------------------------------------------------//
