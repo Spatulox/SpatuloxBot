@@ -1,12 +1,12 @@
 import config from '../config.js';
-import { createSimpleEmbed, createSuccessEmbed, sendEmbed, sendEmbedErrorMessage } from '../functions/embeds.js';
-import { log, searchMessageChannel } from '../functions/functions.js';
-import { listFile } from '../functions/files.js';
 import ytdl from '@distube/ytdl-core';
 import * as pathModule from 'path';
 import ytpl from 'ytpl';
 import fs from 'fs';
 import type { Message, User, TextChannel } from 'discord.js';
+import { listFile } from '../functions/files.js';
+import { log, searchMessageChannel } from '../functions/functions.js';
+import { createSimpleEmbed, createSuccessEmbed, EmbedColor, sendEmbed, sendEmbedErrorMessage } from '../functions/embeds.js';
 
 // ------------------------------------------------------------------------------------------//
 
@@ -152,11 +152,11 @@ async function downloadAudio(url: string, basePath: string, targetChannel: TextC
     messageAsked = result?.message;
 
     if (result?.value === 'cancel') {
-      await sendEmbed(targetChannel, createSimpleEmbed(`You cancelled the download`, 'youtube'));
+      await sendEmbed(targetChannel, createSimpleEmbed(`You cancelled the download`, EmbedColor.youtube));
       await messageAsked?.delete();
       return;
     } else if (result?.value === false) {
-      await sendEmbed(targetChannel, createSimpleEmbed("You didn't react in time :/", 'youtube'));
+      await sendEmbed(targetChannel, createSimpleEmbed("You didn't react in time :/", EmbedColor.youtube));
       await messageAsked?.delete();
       return;
     }
@@ -225,9 +225,9 @@ async function getBasicInfoWithRetry(url: string, maxRetries = 2) {
   while (attempts <= maxRetries) {
     try {
       return await ytdl.getBasicInfo(url);
-    } catch (error: any) {
+    } catch (error) {
       attempts++;
-      log(`Tentative ${attempts} échouée:`, error.message);
+      log(`Tentative ${attempts} échouée: ${error}`);
 
       if (attempts > maxRetries) {
         log('Nombre maximal de tentatives atteint. Abandon.');
@@ -246,13 +246,22 @@ interface UserAnswer {
 }
 
 async function getUserAnswerIfDuplicateFile(message: Message, videoName: string, basePath: string): Promise<UserAnswer | void> {
-  let listDownloadVid: string[];
+  let listDownloadVid: string[] | string;
 
   try {
     listDownloadVid = await listFile(basePath, 'mp3');
+    if( typeof(listDownloadVid) === "string"){
+      log(listDownloadVid)
+      return
+    }
   } catch {
     sendEmbedErrorMessage(message.channel as TextChannel, `Error when reading ${basePath}`);
     return;
+  }
+
+  if(listDownloadVid.includes("Error")){
+    log("ERROR : Impossible to list files")
+    return
   }
 
   if (listDownloadVid.includes(videoName + '.mp3')) {
