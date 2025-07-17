@@ -25,11 +25,13 @@ function parseConfig(json: typeof configJson): Config {
     throw new Error('sendChannelErrors must be "yes" or "no"');
   }
 
+  const musicPathResolved = expandPath(MUSIC_PATH || '');
+
   return {
     ...json,
     token: DISCORD_TOKEN || '',
     sendChannelErrors: json.sendChannelErrors,
-    music_path: MUSIC_PATH || ''
+    music_path: musicPathResolved
   };
 }
 
@@ -48,4 +50,22 @@ type Config = {
   userCanReact: string[],
   token: string,
   music_path: string,
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function expandPath(path: string): string {
+  if (!path) return path;
+  return path.replace(/^\$HOME/, process.env.HOME || '');
 }
