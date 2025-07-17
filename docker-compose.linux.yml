@@ -3,10 +3,7 @@ services:
     build: .
     container_name: discord_bot
     restart: always
-    environment:
-      - DISCORD_TOKEN=<ton-token>
-      - MUSIC_PATH=$HOME/Musique
+    env_file:
+      - .env
     volumes:
-      - D:/Musiques:/usr/src/app/Musique
-    # ports: # à décommenter uniquement si ton bot doit écouter des ports entrants, souvent inutile pour un bot Discord
-    #   - "12345:12345"
+      - $HOME\Musiques:/usr/src/app/Musique
