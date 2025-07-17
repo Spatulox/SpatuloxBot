@@ -1,7 +1,7 @@
 import config from '../config.js';
 import { log, searchMessageChannel } from '../functions/functions.js';
 import { sendEmbedErrorMessage } from '../functions/embeds.js';
-import type { MessageReaction, User, TextChannel, Message, DMChannel, ThreadChannel, GuildBasedChannel } from 'discord.js';
+import type { MessageReaction, User, TextChannel, GuildBasedChannel } from 'discord.js';
 
 export async function duplicateMessage(reaction: MessageReaction, user: User): Promise<void> {
     let { message, emoji } = reaction;
