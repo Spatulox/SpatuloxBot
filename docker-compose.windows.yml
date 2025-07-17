@@ -5,5 +5,9 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      - MUSIC_PATH=/usr/src/app/Musique
     volumes:
-      - D:/Musiques:/usr/src/app/Musique
+      - D:/Musique:/usr/src/app/Musique
+      - ./ytbChannels:/usr/src/app/ytbChannels
+      
