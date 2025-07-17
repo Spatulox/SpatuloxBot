@@ -1,0 +1,28 @@
+{
+  "appId": "",
+  "channelPingLogin": "",
+  "downloadChannel": [
+    "",
+    ""
+  ],
+  "emojiReact": [
+    "✅",
+    "💾",
+    "👀",
+    "🎵"
+  ],
+  "errorChannel": "",
+  "getReactionChannel": [
+    ""
+  ],
+  "owner": "ownerID",
+  "sendToOwnerOrChannel":"1",
+  "sendChannelErrors": "yes",
+  "sendDuplicateMessageChannel": [
+    ""
+  ],
+  "userCanReact": [
+    "globalUsername1",
+    "globalUsername2"
+  ]
+}

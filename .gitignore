@@ -1,7 +1,6 @@
 .idea/
 node_modules/
 log/
-config.json
 ytbChannels/*.json
 
 ytbChannels/BKP/
@@ -11,5 +10,5 @@ config.json.backup
 reminders/reminder.json
 
 *-base.js
-
+dist/
 .env
