@@ -11,3 +11,5 @@ config.json.backup
 reminders/reminder.json
 
 *-base.js
+
+.env
