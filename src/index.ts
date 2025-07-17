@@ -114,17 +114,42 @@ async function main(): Promise<void> {
     });
 
     client.on('messageReactionAdd', async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
-      if (
-        reaction.emoji.name === '💾' &&
-        reaction.message.channelId !== undefined &&
-        Array.isArray(config.downloadChannel) &&
-        config.downloadChannel.includes(reaction.message.channelId) &&
-        !user.bot
-      ) {
-        downloadYtbVideo(reaction.message, user);
-      } else if (reaction.emoji.name === '✅') {
-        duplicateMessage(reaction, user);
-      }
+        if (reaction.partial) {
+            try {
+            await reaction.fetch();
+            } catch (e) {
+            console.error('Failed to fetch reaction:', e);
+            return;
+            }
+        }
+        if (reaction.message.partial) {
+            try {
+            await reaction.message.fetch();
+            } catch (e) {
+            console.error('Failed to fetch message:', e);
+            return;
+            }
+        }
+        if (user.partial) {
+            try {
+            await user.fetch();
+            } catch (e) {
+            console.error('Failed to fetch user:', e);
+            return;
+            }
+        }
+
+        if (
+            reaction.emoji.name === '💾' &&
+            reaction.message.channelId !== undefined &&
+            Array.isArray(config.downloadChannel) &&
+            config.downloadChannel.includes(reaction.message.channelId) &&
+            !user.bot
+        ) {
+            downloadYtbVideo(reaction.message as Message, user as User);
+        } else if (reaction.emoji.name === '✅') {
+            duplicateMessage(reaction, user as User);
+        }
     });
   });
 
