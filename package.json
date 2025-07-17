@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "nodemon index.js",
+    "start:dev": "nodemon -e ts --exec ts-node src/index.ts",
     "build": "tsc",
-    "start": "node dist/main.js",
-    "dev": "nodemon -e ts --exec ts-node src/main.ts"
+    "start": "tsc && node dist/index.js",
+    "dev": "nodemon -e ts --exec ts-node src/index.ts"
   },
   "author": "Spatulox",
   "license": "ISC",
