@@ -1,7 +1,7 @@
 //import config from '../config.json' with { type: 'json' };
 import config from '../../config.js';
 import fetch from 'node-fetch'
-import { listJsonFile } from '../functions/files.js'
+import { listJsonFile } from '../src/functions/files.js'
 import fs from 'fs'
 
 // How to have Id channel ?
