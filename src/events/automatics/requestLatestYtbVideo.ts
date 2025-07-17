@@ -30,7 +30,7 @@ async function checkYoutubeFeed(data: ChannelData, filename: string): Promise<vo
     // Tableau des vidéos à ajouter à la JSON
     const addVideoIdToFile: string[] = [];
 
-    for (const entry of feed.items) {
+    for (const entry of feed.items.reverse()) {
       // entry.id est normalement de la forme "yt:video:VIDEO_ID"
       const videoId = entry.id?.split(':')[2];
       if (!videoId) continue;
