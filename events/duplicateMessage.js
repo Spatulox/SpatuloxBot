@@ -1,4 +1,5 @@
-import config from '../config.json' with { type: 'json' }
+//import config from '../config.json' with { type: 'json' }
+import config from '../config.js';
 import {log, searchMessageChannel} from '../functions/functions.js'
 import { sendEmbedErrorMessage } from "../functions/embeds.js";
 

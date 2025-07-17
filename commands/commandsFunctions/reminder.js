@@ -1,4 +1,5 @@
-import config from '../../config.json' with { type: 'json' };
+//import config from '../../config.json' with { type: 'json' };
+import config from '../../config.js';
 
 import { createEmbed, createErrorEmbed, returnToSendEmbed, waitPrivateEmbedOrMessage } from "../../functions/embeds.js";
 import { log, searchClientChannel } from "../../functions/functions.js";

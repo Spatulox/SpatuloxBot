@@ -2,10 +2,11 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 
 // Files
-import config from '../config.json' with { type: 'json' };
+//import config from '../config.json' with { type: 'json' };
+import config from '../config.js';
 
 // functions
-import { log, switchYtbToken, recapBotsErrors } from '../functions/functions.js'
+import { log } from '../functions/functions.js'
 import { checkInternetCo } from '../functions/checkInternetCo.js'
 
 let crashCount = 0
