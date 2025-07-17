@@ -15,6 +15,7 @@ import { deployCommand } from './commands/deployCommand.js';
 import { executeSlashCommand } from './commands/executeCommand.js';
 import { executeModalSubmit } from './form/executeModalSubmit.js';
 import { deleteOldReminders } from './commands/commandsFunctions/reminder.js';
+import { client } from './client.js';
 
 async function loginBot(client: Client): Promise<string | undefined> {
   let ok = 'Not Connected';
@@ -47,17 +48,6 @@ async function main(): Promise<void> {
   await checkInternetCo();
 
   log(`INFO : Using discord.js version: ${version}`);
-  log('INFO : Creating Client');
-
-  const client = new Client({
-    intents: [
-      GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent,
-      GatewayIntentBits.GuildMessageReactions,
-      GatewayIntentBits.DirectMessageReactions,
-    ],
-  });
 
   log('INFO : Trying to connect to Discord Servers');
   const tmp = await loginBot(client);
