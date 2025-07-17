@@ -5,17 +5,17 @@ import { Client, GatewayIntentBits, User, Channel, Interaction, MessageReaction,
 import config from './config.js';
 
 // fonctions
-import { duplicateMessage } from './events/duplicateMessage.js';
 import { downloadYtbVideo } from './events/downloadYoutubeVideo.js';
 import { recupLatestVideo } from './events/automatics/requestLatestYtbVideo.js';
-import { addReactions } from './events/reactions.js';
-import { log, recapBotsErrors, searchClientChannel } from './functions/functions.js';
-import { checkInternetCo } from './functions/checkInternetCo.js';
 import { deployCommand } from './commands/deployCommand.js';
 import { executeSlashCommand } from './commands/executeCommand.js';
 import { executeModalSubmit } from './form/executeModalSubmit.js';
 import { deleteOldReminders } from './commands/commandsFunctions/reminder.js';
 import { client } from './client.js';
+import { log, recapBotsErrors, searchClientChannel } from './functions/functions.js';
+import { checkInternetCo } from './functions/checkInternetCo.js';
+import { duplicateMessage } from './events/duplicateMessage.js';
+import { addReactions } from './events/reactions.js';
 
 async function loginBot(client: Client): Promise<string | undefined> {
   let ok = 'Not Connected';
@@ -95,8 +95,8 @@ async function main(): Promise<void> {
     await deployCommand(client);
 
     try {
-      recupLatestVideo(client);
-      setInterval(() => recupLatestVideo(client), 300000); // every 5 minutes
+      recupLatestVideo();
+      setInterval(() => recupLatestVideo(), 300000); // every 5 minutes
     } catch (error) {
       log(`Error when trying to retrieve latest video ${error}`);
     }
@@ -148,7 +148,7 @@ async function main(): Promise<void> {
         ) {
             downloadYtbVideo(reaction.message as Message, user as User);
         } else if (reaction.emoji.name === '✅') {
-            duplicateMessage(reaction, user as User);
+            duplicateMessage(reaction as MessageReaction, user as User);
         }
     });
   });

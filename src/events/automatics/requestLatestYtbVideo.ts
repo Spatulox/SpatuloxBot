@@ -1,8 +1,7 @@
-import { readJsonFile, addVideoToJsonFile, listJsonFile } from '../../functions/files.js';
-import { postMessage } from '../../functions/messages.js';
+import { sendMessage } from '../../functions/messages.js';
+import Parser from 'rss-parser';
 import { log } from '../../functions/functions.js';
-import Parser, { Item } from 'rss-parser';
-import { Client } from 'discord.js';
+import { addVideoToJsonFile, listJsonFile, readJsonFile } from '../../functions/files.js';
 
 interface ChannelData {
   ytbChannel: string;
@@ -11,15 +10,18 @@ interface ChannelData {
   guildChannelToPostVideo: string;
 }
 
-export async function recupLatestVideo(client: Client): Promise<void> {
+export async function recupLatestVideo(): Promise<void> {
   const files = await listJsonFile('./ytbChannels/');
   for (const fileName of files) {
     const data = await readJsonFile<ChannelData>(`ytbChannels/${fileName}`);
-    await checkYoutubeFeed(client, data, fileName);
+    if(!data){
+      return
+    }
+    await checkYoutubeFeed(data, fileName);
   }
 }
 
-async function checkYoutubeFeed(client: Client, data: ChannelData, filename: string): Promise<void> {
+async function checkYoutubeFeed(data: ChannelData, filename: string): Promise<void> {
   let YOUTUBE_RSS_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + data.ytbChannel;
   const parser = new Parser();
   try {

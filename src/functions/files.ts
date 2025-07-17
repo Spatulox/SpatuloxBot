@@ -65,13 +65,13 @@ export function replaceValueJsonFile(fileName: string, keyOfValue: string, value
 
 //----------------------------------------------------------------------------//
 
-export function readJsonFile<T = any>(fileName: string): T | ['Error'] {
+export function readJsonFile<T = any>(fileName: string): T | false {
   try {
     const data = fs.readFileSync(fileName, 'utf8');
     return JSON.parse(data) as T;
   } catch (error) {
     log(`ERROR : Erreur de lecture du fichier JSON ${fileName}: ${error}`);
-    return ['Error'];
+    return false;
   }
 }
 
