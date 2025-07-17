@@ -8,5 +8,5 @@ services:
     environment:
       - MUSIC_PATH=/usr/src/app/Musique
     volumes:
-      - ${HOME}/Musique:/usr/src/app/Musique
+      - ${HOME}/Music/1-TelechargesViaDiscord:/usr/src/app/Musique
       - ./ytbChannels:/usr/src/app/ytbChannels
