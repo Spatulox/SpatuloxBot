@@ -3,7 +3,7 @@ import { Client, GatewayIntentBits } from 'discord.js';
 
 // Files
 //import config from '../config.json' with { type: 'json' };
-import config from '../config.js';
+import config from '../../config.js';
 
 // functions
 import { log } from '../functions/functions.js'

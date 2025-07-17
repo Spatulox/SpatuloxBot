@@ -1,4 +1,4 @@
-import config from '../config.json' with {type: 'json'};
+import config from '../../config.json' with {type: 'json'};
 import {createSimpleEmbed, createSuccessEmbed, sendEmbed, sendEmbedErrorMessage} from "../functions/embeds.js";
 import {log, searchMessageChannel} from '../functions/functions.js'
 import { listFile } from "../functions/files.js";
