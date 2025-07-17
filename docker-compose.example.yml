@@ -1,0 +1,12 @@
+services:
+  discord-bot:
+    build: .
+    container_name: discord_bot
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - MUSIC_PATH=/usr/src/app/Musique # Don't touch it
+    volumes:
+      - ${HOME}/Musique:/usr/src/app/Musique # Your music folder
+      - ./ytbChannels:/usr/src/app/ytbChannels # Where the datas will be stored, likely next to the code, you can change the path if you want to delete the code
