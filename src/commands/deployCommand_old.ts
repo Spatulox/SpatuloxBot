@@ -10,6 +10,7 @@ import { client } from '../client.js';
 import { isLogged, loginBot } from '../functions/login.js';
 
 export interface Command {
+    id: string,
     name: string;
     description: string;
     options?: any[];
@@ -48,7 +49,7 @@ export async function deployCommand(): Promise<void> {
         // Fonction pour traiter un dossier de commandes
         async function processCommands(folderPath: string, isContextMenu: boolean = false): Promise<void> {
             const files = await listJsonFile(folderPath);
-            if (!Array.isArray(files)) return;
+            if (!files) return;
 
             const filteredFiles = files.filter(f => !f.includes("example"));
             totalFiles += filteredFiles.length;

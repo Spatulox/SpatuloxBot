@@ -58,7 +58,7 @@ async function listYtbChannel(interaction: CommandInteraction): Promise<boolean>
   try {
     const listFile = await listJsonFile('./ytbChannels/');
 
-    if (listFile === 'Error') {
+    if (!listFile) {
       await sendInteractionEmbed(interaction, createErrorEmbed('Something went wrong when listing channels'));
       return false;
     }

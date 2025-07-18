@@ -162,13 +162,13 @@ export async function writeJsonFileRework(
 
 //----------------------------------------------------------------------------//
 
-export async function listJsonFile(directoryPath: string): Promise<string[] | 'Error'> {
+export async function listJsonFile(directoryPath: string): Promise<string[] | false> {
   try {
     const files = await fs.promises.readdir(directoryPath);
     return files.filter((file) => path.extname(file) === '.json');
   } catch (err) {
     log('ERROR : impossible to read the directory: ' + err);
-    return 'Error';
+    return false;
   }
 }
 

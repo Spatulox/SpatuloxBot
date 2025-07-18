@@ -12,6 +12,7 @@ interface ChannelData {
 
 export async function recupLatestVideo(): Promise<void> {
   const files = await listJsonFile('./ytbChannels/');
+  if(!files) return
   for (const fileName of files) {
     const data = await readJsonFile<ChannelData>(`ytbChannels/${fileName}`);
     if(!data){
