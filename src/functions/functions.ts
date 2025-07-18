@@ -118,12 +118,12 @@ export async function recapBotsErrors(client: Client, config: any): Promise<bool
       yesterday.setDate(yesterday.getDate() - 1);
 
       const resYesterday = await asyncSearchInLines(
-        './dist/log/log.txt',
+        './log/log.txt',
         [yesterday.toLocaleDateString(), 'ERROR'],
         ['ConnectTimeoutError', 'Connect Timeout Error'],
       );
       const resToday = await asyncSearchInLines(
-        './dist/log/log.txt',
+        './log/log.txt',
         [today.toLocaleDateString(), 'ERROR'],
         ['ConnectTimeoutError', 'Connect Timeout Error'],
       );

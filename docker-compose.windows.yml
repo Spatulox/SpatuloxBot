@@ -10,4 +10,6 @@ services:
     volumes:
       - D:\\Music\\1-TelechargesViaDiscord:/usr/src/app/Musique
       - ./ytbChannels:/usr/src/app/ytbChannels
+      - ./commands:/usr/src/app/commands
+      - ./log:/usr/src/app/log
       
