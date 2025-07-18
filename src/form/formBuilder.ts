@@ -6,8 +6,7 @@ export async function loadForm(name: string){
     let componentCount = 0;
     const MAX_COMPONENTS = 5;
 
-    const form = await readJsonFile(`./form/${name}.json`)
-
+    const form = await readJsonFile(`./dist/form/json/${name}.json`)
     if(form === 'Error'){
         return false
     }
