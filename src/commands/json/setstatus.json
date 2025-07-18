@@ -1,7 +1,9 @@
 {
     "name": "set-status",
-    "type": 1,
     "description": "Set the status of the bot",
+    "dmPermission": true,
+    "integration_types":[0],
+    "contexts": [0,1,2],
     "options": [
         {
           "type": 3,

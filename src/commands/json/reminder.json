@@ -1,7 +1,9 @@
 {
     "name":"reminder",
-    "type": 1,
     "description": "Manage the reminders",
+    "dmPermission": false,
+    "integration_types":[0,1],
+    "contexts": [0,1,2],
     "options": [
         {
             "type": 1,
