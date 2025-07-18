@@ -122,8 +122,9 @@ export async function addReminder(interaction: ModalSubmitInteraction): Promise<
 
     let data: RemindersByDate | false = await readJsonFile('./reminders/reminder.json');
     if(!data){
-        log("No reminder, or impossible to read the file")
-        return
+        log("No reminder, or impossible to read the file, the file will be created")
+        data = {}
+        //return
     }
     if(!day || !month || !hours || !minutes){
         throw new Error("Pas de création de date possible")
@@ -301,15 +302,20 @@ async function removeReminder(interaction: ChatInputCommandInteraction): Promise
     }
 
     for (const date in data) {
-      if (Array.isArray(data[date])) {
-        const beforeLength = data[date].length;
-        data[date] = data[date].filter((reminder) => reminder.id !== idToRemove);
+      const reminders = data[date];
 
-        if (data[date].length === 0) {
-          delete data[date];
-        }
-        if (data[date].length !== beforeLength) {
+      if (Array.isArray(reminders)) {
+        const beforeLength = reminders.length;
+        const filtered = reminders.filter((reminder) => reminder.id !== idToRemove);
+
+        if (filtered.length !== beforeLength) {
           reminderRemoved = true;
+        }
+
+        if (filtered.length > 0) {
+          data[date] = filtered;
+        } else {
+          delete data[date];
         }
       }
     }

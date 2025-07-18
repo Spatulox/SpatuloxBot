@@ -1,6 +1,6 @@
 import { ModalSubmitInteraction } from "discord.js";
 import { createErrorEmbed, sendInteractionEmbed } from "../functions/embeds.js";
-import add_reminder from "./json/reminderForm.json"  with { type: 'json' }
+import add_reminder from "../../form/reminderForm.json"  with { type: 'json' }
 import { addReminder } from "../commands/commandsFunctions/reminder.js";
 
 export async function executeModalSubmit(interaction: ModalSubmitInteraction){

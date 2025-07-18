@@ -31,9 +31,9 @@ export async function deployCommand(): Promise<void> {
         log('INFO : Déploiement des commandes slash et menus contextuels');
 
         // 1. Lire les commandes slash
-        const slashFiles = await listJsonFile('./dist/commands/json');
+        const slashFiles = await listJsonFile('./commands');
         // 2. Lire les menus contextuels
-        //const contextFiles = await listJsonFile('./dist/context-menu/');
+        //const contextFiles = await listJsonFile('./context-menu/');
 
         if (!slashFiles) {// || !contextFiles) {
             log('ERREUR : Impossible de lire les fichiers de commandes ou de menus contextuels');
@@ -107,9 +107,10 @@ export async function deployCommand(): Promise<void> {
         }
 
         // Traiter les commandes slash
-        await processCommands('./dist/commands/json/');
+        await processCommands('./commands/');
         // Traiter les menus contextuels
-        //await processCommands('./dist/context-menu/', true);
+        //await processCommands('./context-menu/', true);
+        
 
         // Déploiement global des commandes sans guildID
         if (globalCommands.length > 0) {
