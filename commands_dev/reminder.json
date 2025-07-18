@@ -1,0 +1,40 @@
+{
+  "name": "reminder",
+  "description": "Manage the reminders",
+  "dmPermission": false,
+  "integration_types": [
+    0,
+    1
+  ],
+  "contexts": [
+    0,
+    1,
+    2
+  ],
+  "options": [
+    {
+      "type": 1,
+      "name": "list",
+      "description": "Liste les rappels existant"
+    },
+    {
+      "type": 1,
+      "name": "add",
+      "description": "Ajoute un rappel"
+    },
+    {
+      "type": 1,
+      "name": "remove",
+      "description": "Supprime un rappel",
+      "options": [
+        {
+          "type": 4,
+          "name": "id",
+          "description": "ID du reminder",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "id": "1395695279885389926"
+}

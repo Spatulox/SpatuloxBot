@@ -1,0 +1,33 @@
+{
+    "name": "nom_commande",
+    "description": "Description",
+    "default_member_permissions": ["Administrator"],
+    "default_member_permissions_description":"This need to be inside the 'PermissionFlatBits' enum",
+    "dmPermission": false,
+    "integration_types":[0,1],
+    "integration_type_comment":{
+      "0":"GUILD_INSTALL",
+      "1":"USER_INSTALL"
+    },
+    "contexts": [0,1,2],
+    "contexts_comment": {
+      "0":"Interaction can be used inside server",
+      "1":"Interaction can be used inside DMs with the app's bot user",
+      "2":"Interaction can be used inside Groups DMs and DMs other than the app bot user"
+    },
+    "options": [
+      {
+        "type": 3,
+        "name": "parametre",
+        "description": "Description paramètre",
+        "required": true,
+        "choices": [
+          {
+            "name": "Option 1",
+            "value": "valeur1"
+          }
+        ]
+      }
+    ]
+}
+  

@@ -1,0 +1,22 @@
+{
+  "name": "set-status",
+  "description": "Set the status of the bot éyé",
+  "dmPermission": true,
+  "integration_types": [
+    0
+  ],
+  "contexts": [
+    0,
+    1,
+    2
+  ],
+  "options": [
+    {
+      "type": 3,
+      "name": "new-status",
+      "description": "The new status of the bot",
+      "required": true
+    }
+  ],
+  "id": "1395695279885389927"
+}

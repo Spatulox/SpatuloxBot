@@ -1,0 +1,39 @@
+{
+  "name": "ytb-channel",
+  "description": "Manage youtube channels",
+  "default_member_permissions": 8,
+  "dmPermission": true,
+  "integration_types": [
+    0
+  ],
+  "contexts": [
+    0
+  ],
+  "options": [
+    {
+      "type": 1,
+      "name": "list",
+      "description": "List all the YTB channel followed"
+    },
+    {
+      "type": 1,
+      "name": "add",
+      "description": "Add a YTB channel to follow",
+      "options": [
+        {
+          "type": 3,
+          "name": "ytb-channel-id",
+          "description": "Specifie the ytb channel ID",
+          "required": true
+        },
+        {
+          "type": 7,
+          "name": "discord-channel-to-post",
+          "description": "Specifie the channel where videos are going to be posted...",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "id": "1395722940217299017"
+}

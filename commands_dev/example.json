@@ -1,0 +1,144 @@
+{
+  "name": "server-management",
+  "type": 1,
+  "description": "Manage various aspects of the server",
+  "permissions": ["admin", "manage_role", "manage_users"],
+  "permissionsComment": "if undefined, or empty, all user gonna have access to the command",
+  "options": [
+    {
+      "type": 2,
+      "name": "user",
+      "description": "User management commands",
+      "options": [
+        {
+          "type": 1,
+          "name": "info",
+          "description": "Get information about a user",
+          "options": [
+            {
+              "type": 6,
+              "name": "target",
+              "description": "The user to get information about",
+              "required": true
+            }
+          ]
+        },
+        {
+          "type": 1,
+          "name": "role",
+          "description": "Manage user roles",
+          "options": [
+            {
+              "type": 6,
+              "name": "user",
+              "description": "The user to manage roles for",
+              "required": true
+            },
+            {
+              "type": 8,
+              "name": "role",
+              "description": "The role to add or remove",
+              "required": true
+            },
+            {
+              "type": 5,
+              "name": "add",
+              "description": "Add the role if true, remove if false",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": 1,
+      "name": "channel",
+      "description": "Manage server channels",
+      "options": [
+        {
+          "type": 7,
+          "name": "target",
+          "description": "The channel to manage",
+          "required": true
+        },
+        {
+          "type": 3,
+          "name": "action",
+          "description": "The action to perform",
+          "required": true,
+          "choices": [
+            {
+              "name": "Rename",
+              "value": "rename"
+            },
+            {
+              "name": "Delete",
+              "value": "delete"
+            },
+            {
+              "name": "Archive",
+              "value": "archive"
+            }
+          ]
+        },
+        {
+          "type": 3,
+          "name": "new_name",
+          "description": "New name for the channel (only for rename action)",
+          "required": false,
+          "min_length": 1,
+          "max_length": 100
+        }
+      ]
+    },
+    {
+      "type": 1,
+      "name": "server-stats",
+      "description": "Get server statistics",
+      "options": [
+        {
+          "type": 4,
+          "name": "days",
+          "description": "Number of days to get stats for",
+          "required": false,
+          "min_value": 1,
+          "max_value": 30
+        },
+        {
+          "type": 10,
+          "name": "activity-threshold",
+          "description": "Minimum activity level to consider",
+          "required": false,
+          "min_value": 0.0,
+          "max_value": 1.0
+        }
+      ]
+    },
+    {
+      "type": 1,
+      "name": "announcement",
+      "description": "Make a server announcement",
+      "options": [
+        {
+          "type": 3,
+          "name": "message",
+          "description": "The announcement message",
+          "required": true
+        },
+        {
+          "type": 7,
+          "name": "channel",
+          "description": "The channel to post the announcement in",
+          "required": true,
+          "channel_types": [0, 5]
+        },
+        {
+          "type": 11,
+          "name": "attachment",
+          "description": "An optional attachment for the announcement",
+          "required": false
+        }
+      ]
+    }
+  ]
+}
