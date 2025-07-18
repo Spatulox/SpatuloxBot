@@ -8,6 +8,7 @@
         "noUncheckedIndexedAccess": true,
         "skipLibCheck": true,
         "outDir": "dist",
+        "rootDir": "src",
 
         "lib": ["es2021", "dom"],
 
@@ -23,11 +24,5 @@
         "erasableSyntaxOnly": false,
         "noFallthroughCasesInSwitch": true,
         "noUncheckedSideEffectImports": true
-    },
-    "include": [
-        "src"
-    ],
-    "exclude": [
-        "dist"
-    ]
+    }
 }
