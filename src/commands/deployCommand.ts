@@ -9,6 +9,21 @@ import { listJsonFile, readJsonFile, writeJsonFileRework } from "../functions/fi
 import { client } from '../client.js';
 import { isLogged, loginBot } from '../functions/login.js';
 
+import dotenv from 'dotenv';
+dotenv.config();
+const { COMMANDS_PATH_TO_DEPLOY } = process.env;
+
+for (const [key, value] of Object.entries({ COMMANDS_PATH_TO_DEPLOY })) {
+  if (!value) {
+    throw new Error(`Environment variable ${key} is not set`);
+  }
+}
+
+if (!COMMANDS_PATH_TO_DEPLOY) {
+  throw new Error('Missing environment variables: COMMANDS_PATH_TO_DEPLOY');
+}
+
+
 export interface Command {
     name: string;
     description: string;
@@ -22,7 +37,7 @@ export interface Command {
 // Initialisation du REST
 client.rest = new REST({ version: '10' }).setToken(config.token);
 
-export async function deployCommand(): Promise<void> {
+export async function deployCommand(commandPath: string): Promise<void> {
     if (!(await loginBot(client)) && !isLogged) {
         log("Erreur : Impossible de connecter le bot");
         process.exit()
@@ -31,7 +46,7 @@ export async function deployCommand(): Promise<void> {
     client.once("ready", async () => {
         log('INFO : Déploiement des commandes slash');
 
-        const slashFiles = await listJsonFile('./commands/');
+        const slashFiles = await listJsonFile(`./${commandPath}/`);
         if (!slashFiles) {
             log('ERREUR : Impossible de lire les fichiers de commandes');
             return;
@@ -45,7 +60,7 @@ export async function deployCommand(): Promise<void> {
         // Pour chaque guilde utilisée dans tes JSONs
         const allGuildIds = new Set<string>();
         for (const filename of slashFiles) {
-            const cmdData = await readJsonFile(`./commands/${filename}`);
+            const cmdData = await readJsonFile(`./${commandPath}/${filename}`);
             if (cmdData?.guildID) {
                 for (const gid of cmdData.guildID) allGuildIds.add(gid);
             }
@@ -61,7 +76,7 @@ export async function deployCommand(): Promise<void> {
 
         for (const file of slashFiles.filter(n=>!n.includes('example'))) {
             let updated = false;
-            const cmd: Command | false = await readJsonFile(`./commands/${file}`);
+            const cmd: Command | false = await readJsonFile(`./${commandPath}/${file}`);
             if(!cmd) continue;
 
             // Traitement permissions
@@ -129,13 +144,13 @@ export async function deployCommand(): Promise<void> {
                     log(`MAJ : Commande globale "${cmd.name}" mise à jour, id = ${cmd.id}`);
                 }
             }
-            if (updated) await writeJsonFileRework(`./commands/`, `${file}`, cmd); // Sauvegarde l'id Discord
+            if (updated) await writeJsonFileRework(`./${commandPath}/`, `${file}`, cmd); // Sauvegarde l'id Discord
         }
 
         // ---------------------- SUPPRESSION COMMANDES ---------------------------
 
         // Commandes globales à conserver (par leurs ID)
-        const localNames = (await Promise.all(slashFiles.map(f=>readJsonFile('./commands/'+f)))).map(c=>c?.name);
+        const localNames = (await Promise.all(slashFiles.map(f=>readJsonFile(`./${commandPath}/`+f)))).map(c=>c?.name);
         for (const apiCmd of globalDiscordCmds) {
             if (!localNames.includes(apiCmd.name)) {
                 await client.rest.delete(
@@ -162,4 +177,4 @@ export async function deployCommand(): Promise<void> {
     });
 }
 
-deployCommand();
+deployCommand(COMMANDS_PATH_TO_DEPLOY);
