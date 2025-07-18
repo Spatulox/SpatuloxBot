@@ -22,16 +22,16 @@ export interface Command {
 client.rest = new REST({ version: '10' }).setToken(config.token);
 
 export async function deployCommand(): Promise<void> {
-    if (!isLogged && !(await loginBot(client))) {
+    if (!(await loginBot(client)) && !isLogged) {
         log("Erreur : Impossible de connecter le bot");
-        return;
+        process.exit()
     }
 
     client.once("ready", async () => {
         log('INFO : Déploiement des commandes slash et menus contextuels');
 
         // 1. Lire les commandes slash
-        const slashFiles = await listJsonFile('./dist/commands/');
+        const slashFiles = await listJsonFile('./dist/commands/json');
         // 2. Lire les menus contextuels
         //const contextFiles = await listJsonFile('./dist/context-menu/');
 
@@ -107,7 +107,7 @@ export async function deployCommand(): Promise<void> {
         }
 
         // Traiter les commandes slash
-        await processCommands('./dist/commands/');
+        await processCommands('./dist/commands/json/');
         // Traiter les menus contextuels
         //await processCommands('./dist/context-menu/', true);
 
@@ -122,6 +122,8 @@ export async function deployCommand(): Promise<void> {
             } catch (err: any) {
                 log(`ERREUR CRITIQUE : Déploiement des commandes/menus globaux : ${err.message}`);
             }
+        } else {
+            log("ERROR : globalCommands.length <= 0")
         }
 
         process.exit();
