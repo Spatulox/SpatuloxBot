@@ -168,10 +168,12 @@ async function listReminder(interaction: ChatInputCommandInteraction): Promise<v
     const reminders: RemindersByDate | false = await readJsonFile('./reminders/reminder.json');
     if(!reminders){
         log("No reminders")
+        await sendInteractionEmbed(interaction, createSimpleEmbed('Aucun rappel'));
         return
     }
 
     if (Array.isArray(reminders) && reminders[0] === 'Error') {
+      await sendInteractionEmbed(interaction, createErrorEmbed('Erreur'));
         return;
     }
 
