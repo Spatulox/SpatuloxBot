@@ -7,10 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:dev": "nodemon --exec node --loader ts-node/esm src/index.ts",
     "build": "tsc",
+    "clean": "rm -r dist/",
     "start": "tsc && node dist/index.js",
     "dev": "nodemon --exec tsx src/index.ts",
     "deploy":"node dist/commands/deployCommand.js",
-    "delete":""
+    "delete":"node dist/commands/deleteCommands.js"
   },
   "author": "Spatulox",
   "license": "ISC",
