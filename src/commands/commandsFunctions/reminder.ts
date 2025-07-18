@@ -289,6 +289,7 @@ async function removeReminder(interaction: ChatInputCommandInteraction): Promise
   try {
     const data: RemindersByDate | false = await readJsonFile('./reminders/reminder.json');
     if(!data){
+      await sendInteractionEmbed(interaction, createErrorEmbed('Aucun reminders'));
         return
     }
     const idToRemove = interaction.options.getInteger('id');
