@@ -8,7 +8,9 @@
     "start:dev": "nodemon --exec node --loader ts-node/esm src/index.ts",
     "build": "tsc",
     "start": "tsc && node dist/index.js",
-    "dev": "nodemon --exec tsx src/index.ts"
+    "dev": "nodemon --exec tsx src/index.ts",
+    "deploy":"node dist/commands/deployCommand.js",
+    "delete":""
   },
   "author": "Spatulox",
   "license": "ISC",
