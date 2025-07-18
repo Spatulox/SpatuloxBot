@@ -9,7 +9,7 @@ services:
       - MUSIC_PATH=/usr/src/app/Musique
       - COMMANDS_PATH_TO_DEPLOY=commands
     volumes:
-      - ${HOME}/Music/1-TelechargesViaDiscord:/usr/src/app/Musique
+      - ${HOME}/Musique/1-TelechargesViaDiscord:/usr/src/app/Musique
       - ./ytbChannels:/usr/src/app/ytbChannels
       - ./commands:/usr/src/app/commands
       - ./log:/usr/src/app/log
