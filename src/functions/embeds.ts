@@ -106,8 +106,8 @@ export function createEmbed(color:  EmbedColor | null = null): Embed{
         color: embedColor!,
         fields: [],
         footer:{
-            text:"Helldivers [FR] Bot",
-            icon_url:"https://cdn.discordapp.com/app-icons/1358119106087358675/2b09d868914dc494b0ce375a9c4e184f.png"
+            text:"",
+            icon_url:""
         },
         timestamp: new Date().toISOString(),
         url:""
