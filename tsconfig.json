@@ -1,28 +1,35 @@
 {
-    "compilerOptions": {
-        "target": "es2021",
-        "module": "nodenext",
-        "forceConsistentCasingInFileNames": true,
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "noUncheckedIndexedAccess": true,
-        "skipLibCheck": true,
-        "outDir": "dist",
-        "rootDir": "src",
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "nodenext",
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
 
-        "lib": ["es2021", "dom"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "stripInternal": true,
+    "declarationMap": true,
 
-        /*JSON*/
-         "moduleResolution": "nodenext",
-        "resolveJsonModule": true,
-        "esModuleInterop": true,
+    /*Only use the es2021/dom lib*/ /*need for "replaceAll" for example*/
+    "lib": ["es2021", "dom"],
 
-        /*Liting*/
-        "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "erasableSyntaxOnly": false,
-        "noFallthroughCasesInSwitch": true,
-        "noUncheckedSideEffectImports": true
-    }
+    /*JSON*/
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+
+    /*Liting*/
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": false,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+
+  },
+  "exclude": ["src_olr"]
 }
