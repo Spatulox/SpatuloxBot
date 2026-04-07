@@ -1,8 +1,16 @@
 import {Bot, type BotConfig} from "@spatulox/simplediscordbot";
 import {client} from "./client";
 import {Events} from "discord.js";
+import {ModuleManager} from "@spatulox/discord-module";
+import {YTB} from "./module/YTB/YTB";
+import {Interactions} from "./module/Interactions/Interactions";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 async function main(): Promise<void> {
+    const modules = ModuleManager.createInstance(client);
+
     const config: BotConfig = {
         botName: "Spatulox Bot",
         log: {
@@ -29,7 +37,8 @@ async function main(): Promise<void> {
     const bot = new Bot(client, config)
 
     bot.client.on(Events.ClientReady, () => {
-        console.log("Bot ready!")
+        modules.register(new Interactions())
+        modules.register(new YTB())
     })
 }
 
