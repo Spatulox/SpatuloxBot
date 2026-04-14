@@ -1,9 +1,9 @@
 import {Bot, type BotConfig} from "@spatulox/simplediscordbot";
 import {client} from "./client";
 import {Events} from "discord.js";
-import {ModuleManager} from "@spatulox/discord-module";
+import {ModuleManager, ModuleUI} from "@spatulox/discord-module";
 import {YTB} from "./module/YTB/YTB";
-import {Interactions} from "./module/Interactions/Interactions";
+import {Interactions} from "./module/Interactions";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -41,6 +41,7 @@ async function main(): Promise<void> {
     bot.client.on(Events.ClientReady, () => {
         modules.register(new Interactions())
         modules.register(new YTB())
+        new ModuleUI(Bot.client, "1493618804180123820")
     })
 }
 
