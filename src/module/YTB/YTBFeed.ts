@@ -1,7 +1,7 @@
 import {Bot, FileManager, Time} from "@spatulox/simplediscordbot";
 import {NoEventModule} from "../../utils/NoEventModule";
 import Parser from "rss-parser";
-import {addVideoToJsonFile} from "../../../src_olr/functions/files";
+import {ytbchannelFile} from "../../handlers/ytb-channel";
 
 interface ChannelData {
     ytbChannel: string;
@@ -70,7 +70,13 @@ export class YTBFeed extends NoEventModule {
                 Bot.log.debug(`Nothing to add for ${channel.data.name}`)
             } else {
                 Bot.log.debug("Adding new videos to JSON file")
-                await addVideoToJsonFile('./ytbChannels', channel.fileName, addVideoIdToFile);
+                const file = await FileManager.readJsonFile<ytbchannelFile>(`./ytbChannels/${channel.fileName}`)
+                if(!file){
+                    Bot.log.error(`Impossible to read the file ${channel.fileName}`);
+                    return
+                }
+                file.videosId = [...file.videosId, ...addVideoIdToFile];
+                await FileManager.writeJsonFile("./ytbChannels", channel.fileName, file)
             }
         } catch (error) {
             Bot.log.error(`Erreur lors de la vérification du flux : ${error}`);
