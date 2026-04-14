@@ -39,8 +39,8 @@ async function main(): Promise<void> {
     const bot = new Bot(client, config)
 
     bot.client.on(Events.ClientReady, () => {
-        modules.register(new Interactions())
         modules.register(new YTB())
+        modules.register(new Interactions())
         modules.enableAll()
         new ModuleUI(Bot.client, "1493618804180123820")
     })
