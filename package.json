@@ -5,13 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "nodemon --exec node --loader ts-node/esm src/index.ts",
+    "start:dev": "nodemon --exec tsx stc/index.ts",
     "build": "tsc",
     "clean": "rm -r dist/",
     "start": "tsc && node dist/index.js",
     "dev": "nodemon --exec tsx src/index.ts",
-    "deploy":"node dist/commands/deployCommand.js",
-    "delete":"node dist/commands/deleteCommands.js"
+    "deploy": "node dist/commands/deployCommand.js",
+    "delete": "node dist/commands/deleteCommands.js"
   },
   "author": "Spatulox",
   "license": "ISC",
@@ -19,24 +19,21 @@
     "@discordjs/builders": "^1.9.0",
     "@distube/ytdl-core": "^4.14.4",
     "@distube/ytsr": "^2.0.4",
-    "@types/node": "^24.0.14",
-    "discord.js": "^14.16.1",
-    "dotenv": "^17.2.0",
-    "fs": "^0.0.1-security",
-    "googleapis": "^128.0.0",
-    "is-online": "^10.0.0",
+    "@spatulox/discord-module": "^0.5.1",
+    "@spatulox/simplediscordbot": "^2.0.3",
+    "discord.js": "^14.26.2",
     "node-fetch": "^3.3.2",
-    "promise-timeout": "^1.3.0",
     "readline": "^1.3.0",
     "rss-parser": "^3.13.0",
-    "typescript": "^5.8.3",
+    "tsx": "^4.21.0",
     "ytdl-core": "^4.11.5",
     "ytpl": "^2.3.0"
   },
-  "type": "module",
   "devDependencies": {
+    "@types/node": "^25.5.2",
+    "dotenv": "^17.2.0",
     "nodemon": "^3.1.10",
-    "tsx": "^4.20.3"
+    "typescript": "^6.0.2"
   },
   "keywords": []
 }
