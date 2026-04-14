@@ -9,26 +9,28 @@ import dotenv from "dotenv";
 dotenv.config();
 
 async function main(): Promise<void> {
-    const modules = ModuleManager.createInstance(client);
+    const modules = ModuleManager.createOrGetInstance(client);
 
     const config: BotConfig = {
         botName: "Spatulox Bot",
         log: {
-            logChannelId: "1491028960681660486",
-            errorChannelId: "1176953648958406788",
             info: {
+                channelId: "1491028960681660486",
                 console: true,
                 discord: true,
             },
             error: {
+                channelId: "1176953648958406788",
                 console: true,
                 discord: true,
             },
             warn: {
+                channelId: "1176953648958406788",
                 console: true,
                 discord: true,
             },
             debug: {
+                channelId: "1491028960681660486",
                 console: true,
                 discord: false,
             },
