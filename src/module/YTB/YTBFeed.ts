@@ -21,7 +21,7 @@ export class YTBFeed extends NoEventModule {
 
     constructor() {
         super();
-        setTimeout(this.requestYtbVideo,  Time.minute.MIN_05.toMilliseconds())
+        setTimeout(this.requestYtbVideo.bind(this),  Time.minute.MIN_05.toMilliseconds())
     }
 
     private async readtYtbFiles(): Promise<Channel[] | null>{
