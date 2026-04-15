@@ -43,6 +43,7 @@ async function main(): Promise<void> {
         modules.register(new Interactions())
         modules.enableAll()
         new ModuleUI(Bot.client, "1493618804180123820")
+        Bot.client.user?.setStatus("dnd")
     })
 }
 
