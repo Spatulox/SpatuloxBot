@@ -18,7 +18,6 @@ docker compose -f docker-compose.linux.yml build
 to run the bot :
 docker compose -f docker-compose.linux.yml up
 
+Dans le DockerFile ? :
 
-https://github.com/Tyrrrz/YoutubeExplode
-
-https://github.com/Tyrrrz/YoutubeDownloader
+sudo ln -sf /usr/bin/python3 /usr/bin/python
