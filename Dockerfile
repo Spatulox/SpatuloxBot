@@ -21,6 +21,10 @@ WORKDIR /usr/src/app
 
 ENV NODE_ENV=production
 
+# Need to install python for the yt-dlp-exec node wrapper
+RUN apk add --no-cache python3 \
+    && ln -sf /usr/bin/python3 /usr/bin/python
+
 # Copie dist compilé
 COPY --from=builder /usr/src/app/dist ./dist
 
