@@ -21,3 +21,11 @@ docker compose -f docker-compose.linux.yml up
 Dans le DockerFile ? :
 
 sudo ln -sf /usr/bin/python3 /usr/bin/python
+
+
+
+
+
+"doc" :
+https://github.com/microlinkhq/youtube-dl-exec
+https://github.com/Marinos33/yt-dlp-exec
