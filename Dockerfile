@@ -11,6 +11,7 @@ RUN npm install
 COPY ./src ./src
 COPY ./commands ./commands
 COPY ./form ./form
+COPY ./dmcache ./dmcache
 
 RUN npm run build
 
@@ -33,6 +34,7 @@ COPY --from=builder /usr/src/app/package*.json ./
 
 COPY --from=builder /usr/src/app/commands ./commands
 COPY --from=builder /usr/src/app/form ./form
+COPY --from=builder /usr/src/app/dist ./dmcache
 
 # Installe uniquement les dépendances de production, avec le lockfile correcte
 RUN npm ci --only=production
