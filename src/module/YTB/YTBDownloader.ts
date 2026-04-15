@@ -1,14 +1,13 @@
-import { Module, ModuleEventsMap } from "@spatulox/discord-module";
-import { FileManager } from "@spatulox/simplediscordbot";
-import { Events, MessageReaction, PartialMessageReaction, PartialUser, User, TextChannel, Message } from "discord.js";
-import { SpatuloxBotEnv } from "../../utils/SpatuloxBotEnv";
+import {Module, ModuleEventsMap} from "@spatulox/discord-module";
+import {Bot, EmbedManager, FileManager, SimpleColor} from "@spatulox/simplediscordbot";
+import {Events, Message, MessageReaction, PartialMessageReaction, PartialUser, TextChannel, User} from "discord.js";
+import {SpatuloxBotEnv} from "../../utils/SpatuloxBotEnv";
 
-import youtubedl from "yt-dlp-exec";
-import {YtResponse} from "yt-dlp-exec"
-import { createWriteStream, promises as fs, existsSync, mkdirSync } from "node:fs";
+import youtubedl, {YtResponse} from "yt-dlp-exec";
+import {createWriteStream, existsSync, mkdirSync, promises as fs} from "node:fs";
 import * as https from "node:https";
 import * as pathModule from "path";
-import { URL } from "node:url";
+import {URL} from "node:url";
 
 interface VideoInfo {
     videoId: string;
@@ -47,8 +46,14 @@ export class YTBDownloader extends Module {
     private async downloader(reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser): Promise<void> {
         if (user.bot) return;
 
+        if(reaction.emoji.name != "💾"){
+            return
+        }
+
         const message = await reaction.message.fetch();
         const channel = message.channel as TextChannel;
+
+        Bot.log.info("Starting download...")
 
         // Regex pour URL YouTube (vidéo ou playlist)
         const regexUrl = /(https?:\/\/(www\.)?(youtube\.com\/(watch\?v=|playlist\?list=)|youtu\.be\/)([\w-]{11})(&.*)?)/g;
@@ -62,16 +67,21 @@ export class YTBDownloader extends Module {
                 const playlistId = match[1];
                 if (!playlistId) continue;
 
-                message.reply(`🎵 Downloading playlist... \`${playlistId}\``);
-                await this.downloadPlaylist(playlistId, channel, message);
+                const msg = await message.reply(`🔁 Downloading playlist... \`${playlistId}\``);
+                if(await this.downloadPlaylist(playlistId, channel, message)){
+                    msg.edit(`✅ Downloaded playlist... \`${playlistId}\``)
+                }
             } else {
                 const videoId = this.extractVideoId(url);
                 if (!videoId) continue;
 
-                message.reply(`🎵 Downloading video... \`${videoId}\``);
-                this.downloadVideo(videoId, channel, message);
+                const msg = await message.reply(`🔁 Downloading video... \`${videoId}\``);
+                if(await this.downloadVideo(videoId, channel, message)){
+                    msg.edit(`✅ Downloaded video... \`${videoId}\``)
+                }
             }
         }
+        Bot.log.info("Download finished...")
     }
 
     // Extraire l'ID vidéo d'une URL (watch?v= / youtu.be)
@@ -198,7 +208,7 @@ export class YTBDownloader extends Module {
         // Créer le dossier s'il n'existe pas
         if (!existsSync(basePath)) {
             mkdirSync(basePath, { recursive: true });
-            channel.send(`📁 Created directory: \`${basePath}\``);
+            channel.send(EmbedManager.toMessage(EmbedManager.success(`📁 Created directory: \`${basePath}\``)));
         }
 
         // Check si un fichier existe déjà + popup
@@ -234,12 +244,12 @@ export class YTBDownloader extends Module {
 
             const audioUrl = audioFormat.url;
             await this.downloadFile(audioUrl, finalPath);
-            channel.send(`✅ Download complete for \`${fileName}\``);
+            channel.send(EmbedManager.toMessage(EmbedManager.success(`✅ Download complete for \`${fileName}\``)));
 
             return true;
         } catch (e: unknown) {
             console.error("Failed to download video:", e);
-            channel.send(`❌ Failed to download \`${fileName}\`\n> ${(e as any)?.message}`);
+            channel.send(EmbedManager.toMessage(EmbedManager.error(`❌ Failed to download \`${fileName}\`\n> ${(e as any)?.message}`)));
             return false;
         }
     }
@@ -254,7 +264,7 @@ export class YTBDownloader extends Module {
             }) as unknown as PlaylistInfo
 
             if (!playlistInfo.entries || playlistInfo.entries.length === 0) {
-                channel.send("❌ Playlist is empty or cannot be retrieved.");
+                channel.send(EmbedManager.toMessage(EmbedManager.error("❌ Playlist is empty or cannot be retrieved.")));
                 return false;
             }
 
@@ -264,7 +274,7 @@ export class YTBDownloader extends Module {
 
             if (!existsSync(basePlaylistPath)) {
                 mkdirSync(basePlaylistPath, { recursive: true });
-                channel.send(`📁 Created playlist directory: \`${basePlaylistPath}\``);
+                channel.send(EmbedManager.toMessage(EmbedManager.success(`📁 Created playlist directory: \`${basePlaylistPath}\``)));
             }
 
             const downloadPromises = playlistInfo.entries.map(async (entry) => {
@@ -307,14 +317,13 @@ export class YTBDownloader extends Module {
                     msg.edit(`✅ Downloaded from playlist: \`${fileName}\``)
                 } catch (e: unknown) {
                     console.error("Failed to download playlist item:", e);
-                    channel.send(`⚠️ Failed to download \`${fileName}\` from playlist.`);
+                    channel.send(EmbedManager.toMessage(EmbedManager.simple(`⚠️ Failed to download \`${fileName}\` from playlist.`, SimpleColor.yellow)));
                     msg.edit(`❌ Downloaded from playlist: \`${fileName}\``)
                 }
             });
 
             await Promise.all(downloadPromises);
-
-            channel.send("✅ Playlist download completed.");
+            channel.send(EmbedManager.toMessage(EmbedManager.success("✅ Playlist download completed.")));
             return true;
         } catch (e: unknown) {
             console.error("Failed to fetch playlist info:", e);
