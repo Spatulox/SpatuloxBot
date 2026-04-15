@@ -68,7 +68,7 @@ export class YTBDownloader extends Module {
                 const videoId = this.extractVideoId(url);
                 if (!videoId) continue;
 
-                message.reply(`🎵 Downloading video... \`${videoId}\``)
+                message.reply(`🎵 Downloading video... \`${videoId}\``);
                 this.downloadVideo(videoId, channel, message);
             }
         }
@@ -253,14 +253,6 @@ export class YTBDownloader extends Module {
                 dumpSingleJson: true,
             }) as unknown as PlaylistInfo
 
-            console.log(playlistInfo)
-            console.log(playlistInfo.title)
-            console.log(playlistInfo.entries[0]?.channel)
-            console.log(playlistInfo.entries[0]?.id)
-            //console.log(playlistInfo.entries)
-            /*channel.send("Playlist downloaded is not supported.");
-            return false*/
-
             if (!playlistInfo.entries || playlistInfo.entries.length === 0) {
                 channel.send("❌ Playlist is empty or cannot be retrieved.");
                 return false;
@@ -272,7 +264,7 @@ export class YTBDownloader extends Module {
 
             if (!existsSync(basePlaylistPath)) {
                 mkdirSync(basePlaylistPath, { recursive: true });
-                channel.send(`📁 Created playlist directory: \`${basePlaylistPath}\``)
+                channel.send(`📁 Created playlist directory: \`${basePlaylistPath}\``);
             }
 
             const downloadPromises = playlistInfo.entries.map(async (entry) => {
@@ -291,7 +283,7 @@ export class YTBDownloader extends Module {
                 const fileName = userAnswer.value;
                 const finalPath = pathModule.join(basePlaylistPath, `${fileName}.mp3`);
 
-                const msg = await channel.send(`🔁 Downloading from playlist: \`${fileName}\``);
+                const msg = await channel.send(`🔁 Downloading from playlist: \`${fileName}\``)
 
                 try {
                     const rawInfo = await youtubedl(
@@ -316,6 +308,7 @@ export class YTBDownloader extends Module {
                 } catch (e: unknown) {
                     console.error("Failed to download playlist item:", e);
                     channel.send(`⚠️ Failed to download \`${fileName}\` from playlist.`);
+                    msg.edit(`❌ Downloaded from playlist: \`${fileName}\``)
                 }
             });
 
