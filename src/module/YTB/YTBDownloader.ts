@@ -272,12 +272,51 @@ export class YTBDownloader extends Module {
 
             if (!existsSync(basePlaylistPath)) {
                 mkdirSync(basePlaylistPath, { recursive: true });
-                channel.send(`📁 Created playlist directory: \`${basePlaylistPath}\``).then((msg) => msg.delete());
+                channel.send(`📁 Created playlist directory: \`${basePlaylistPath}\``)
             }
 
-            const downloadPromises = playlistInfo.entries.map((entry) => {
+            const downloadPromises = playlistInfo.entries.map(async (entry) => {
                 const videoId = entry.id;
-                return this.downloadVideo(videoId, channel, originalMessage);
+                const title = this.checkCorrectString(entry.fulltitle || "Unknown");
+
+                // On garde le même comportement utilisateur
+                const userAnswer = await this.getUserAnswerIfDuplicateFile(
+                    originalMessage,
+                    basePlaylistPath,
+                    title,
+                );
+
+                if (!userAnswer || userAnswer.value === "cancel") return;
+
+                const fileName = userAnswer.value;
+                const finalPath = pathModule.join(basePlaylistPath, `${fileName}.mp3`);
+
+                const msg = await channel.send(`🔁 Downloading from playlist: \`${fileName}\``);
+
+                try {
+                    const rawInfo = await youtubedl(
+                        `https://www.youtube.com/watch?v=${videoId}`,
+                        {
+                            dumpSingleJson: true,
+                            noCheckCertificate: true,
+                            noWarnings: true,
+                            extractAudio: true,
+                            audioFormat: "mp3",
+                        },
+                    );
+
+                    const formats = rawInfo.formats.filter((f: any) => f.acodec !== "none" && f.vcodec === "none");
+                    const audioFormat = formats.sort((a: any, b: any) => (b.abr ?? 0) - (a.abr ?? 0))[0];
+
+                    if (!audioFormat) return;
+
+                    const audioUrl = audioFormat.url;
+                    await this.downloadFile(audioUrl, finalPath);
+                    msg.edit(`✅ Downloaded from playlist: \`${fileName}\``)
+                } catch (e: unknown) {
+                    console.error("Failed to download playlist item:", e);
+                    channel.send(`⚠️ Failed to download \`${fileName}\` from playlist.`);
+                }
             });
 
             await Promise.all(downloadPromises);
