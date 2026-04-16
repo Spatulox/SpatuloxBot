@@ -1,6 +1,10 @@
 # Étape 1 : build / compilation
 FROM node:22-alpine AS builder
 
+# Need to install python for the yt-dlp-exec node wrapper
+RUN apk add --no-cache python3 \
+    && ln -sf /usr/bin/python3 /usr/bin/python
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./
@@ -11,20 +15,19 @@ RUN npm install
 COPY ./src ./src
 COPY ./commands ./commands
 COPY ./form ./form
-COPY ./dmcache ./dmcache
+COPY ./.dmcache ./.dmcache
 
 RUN npm run build
 
 # Étape 2 : image finale allégée
 FROM node:22-alpine
 
+RUN apk add --no-cache python3 \
+    && ln -sf /usr/bin/python3 /usr/bin/python
+
 WORKDIR /usr/src/app
 
 ENV NODE_ENV=production
-
-# Need to install python for the yt-dlp-exec node wrapper
-RUN apk add --no-cache python3 \
-    && ln -sf /usr/bin/python3 /usr/bin/python
 
 # Copie dist compilé
 COPY --from=builder /usr/src/app/dist ./dist
@@ -34,7 +37,7 @@ COPY --from=builder /usr/src/app/package*.json ./
 
 COPY --from=builder /usr/src/app/commands ./commands
 COPY --from=builder /usr/src/app/form ./form
-COPY --from=builder /usr/src/app/dist ./dmcache
+COPY --from=builder /usr/src/app/dist ./.dmcache
 
 # Installe uniquement les dépendances de production, avec le lockfile correcte
 RUN npm ci --only=production
