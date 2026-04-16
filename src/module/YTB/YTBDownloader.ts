@@ -40,7 +40,7 @@ export class YTBDownloader extends Module {
     }
 
     get music_path(): string {
-        return `${SpatuloxBotEnv.music_path}/01-Telecharge-via-discord`;
+        return `${SpatuloxBotEnv.music_path}`;
     }
 
     private async downloader(reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser): Promise<void> {
