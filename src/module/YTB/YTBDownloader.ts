@@ -110,7 +110,7 @@ export class YTBDownloader extends Module {
         }
 
         const reply = await message.reply(
-            `This video : \`${videoTitle}\` is already downloaded. What do you want to do?` +
+            `This video : \`${videoTitle}\` is already downloaded. What do you want to do?\n` +
             "> - ☠️ = Overwrite file\n" +
             "> - 💾 = Save the file without overwriting it\n" +
             "> - ❌ = Cancel",
