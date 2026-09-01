@@ -154,7 +154,7 @@ export async function addReminder(interaction: ModalSubmitInteraction): Promise<
             description,
         });
 
-        if (await FileManager.writeJsonFile('./reminders', 'reminder.json', data, true)) {
+        if (await FileManager.writeJsonFile('./reminders', 'reminder.json', data)) {
             await Bot.interaction.send(interaction, embed, true);
         } else {
             await Bot.interaction.send(interaction, EmbedManager.error('Impossible to save the reminder, plz check the writeJsonFileRework() function...'));
@@ -370,7 +370,7 @@ export async function deleteOldReminders(): Promise<boolean> {
         return true;
     }
 
-    if (await FileManager.writeJsonFile('./reminders', 'reminder.json', reminders, true)) {
+    if (await FileManager.writeJsonFile('./reminders', 'reminder.json', reminders)) {
         const infoChannel = await GuildManager.channel.text.find(ChannelList.log.bot_log);
         if (infoChannel) {
             Bot.message.send(infoChannel.id, `@everyone, Old reminders deleted`);
