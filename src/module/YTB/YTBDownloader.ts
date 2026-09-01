@@ -4,10 +4,8 @@ import {Events, Message, MessageReaction, PartialMessageReaction, PartialUser, T
 import {SpatuloxBotEnv} from "../../utils/SpatuloxBotEnv";
 
 import youtubedl, {YtResponse} from "yt-dlp-exec";
-import {createWriteStream, existsSync, mkdirSync, promises as fs} from "node:fs";
-import * as https from "node:https";
+import {existsSync, mkdirSync, promises as fs} from "node:fs";
 import * as pathModule from "path";
-import {URL} from "node:url";
 
 interface VideoInfo {
     videoId: string;
@@ -224,26 +222,22 @@ export class YTBDownloader extends Module {
         const finalPath = pathModule.join(basePath, `${fileName}.mp3`);
 
         try {
-            const rawInfo = await youtubedl(
+            // On laisse yt-dlp télécharger ET convertir directement vers finalPath.
+            // Il gère le déchiffrement de la signature / du paramètre `n` et les
+            // en-têtes requis, ce qu'un téléchargement manuel de l'URL brute ne
+            // fait pas (source du 403 Forbidden).
+            await youtubedl(
                 `https://www.youtube.com/watch?v=${videoId}`,
                 {
-                    dumpSingleJson: true,
-                    noCheckCertificate: true,
-                    noWarnings: true,
-                    preferFreeFormats: true,
                     extractAudio: true,
                     audioFormat: "mp3",
-                    // Vous pouvez ajouter `audioQuality` ici si besoin
+                    output: finalPath,
+                    noPlaylist: true,
+                    noCheckCertificate: true,
+                    noWarnings: true,
                 },
             );
 
-            const formats = rawInfo.formats.filter((f: any) => f.acodec !== "none" && f.vcodec === "none");
-            const audioFormat = formats.sort((a: any, b: any) => (b.abr ?? 0) - (a.abr ?? 0))[0];
-
-            if (!audioFormat) throw new Error("No audio format found");
-
-            const audioUrl = audioFormat.url;
-            await this.downloadFile(audioUrl, finalPath);
             channel.send(EmbedManager.toMessage(EmbedManager.success(`✅ Download complete for \`${fileName}\``)));
 
             return true;
@@ -296,24 +290,19 @@ export class YTBDownloader extends Module {
                 const msg = await channel.send(`🔁 Downloading from playlist: \`${fileName}\``)
 
                 try {
-                    const rawInfo = await youtubedl(
+                    // Idem downloadVideo : yt-dlp télécharge et convertit lui-même.
+                    await youtubedl(
                         `https://www.youtube.com/watch?v=${videoId}`,
                         {
-                            dumpSingleJson: true,
-                            noCheckCertificate: true,
-                            noWarnings: true,
                             extractAudio: true,
                             audioFormat: "mp3",
+                            output: finalPath,
+                            noPlaylist: true,
+                            noCheckCertificate: true,
+                            noWarnings: true,
                         },
                     );
 
-                    const formats = rawInfo.formats.filter((f: any) => f.acodec !== "none" && f.vcodec === "none");
-                    const audioFormat = formats.sort((a: any, b: any) => (b.abr ?? 0) - (a.abr ?? 0))[0];
-
-                    if (!audioFormat) return;
-
-                    const audioUrl = audioFormat.url;
-                    await this.downloadFile(audioUrl, finalPath);
                     msg.edit(`✅ Downloaded from playlist: \`${fileName}\``)
                 } catch (e: unknown) {
                     console.error("Failed to download playlist item:", e);
@@ -330,32 +319,5 @@ export class YTBDownloader extends Module {
             channel.send(`❌ Failed to retrieve playlist \`${playlistId}\`.`);
             return false;
         }
-    }
-
-    // Télécharger une URL vers un fichier (stream → fichier)
-    async downloadFile(url: string, filename: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            const file = createWriteStream(filename);
-            const urlObj = new URL(url);
-
-            const client = urlObj.protocol === "https:" ? https : require("http");
-
-            client.get(url, (res: { statusMessage?: any; pipe?: any; statusCode?: any; }) => {
-                const { statusCode } = res;
-                if (statusCode && (statusCode < 200 || statusCode >= 300)) {
-                    return reject(new Error(`HTTP ${statusCode}: ${res.statusMessage}`));
-                }
-
-                res.pipe(file);
-                file.on("finish", () => resolve());
-                file.on("error", (err) => {
-                    file.close();
-                    reject(err);
-                });
-            }).on("error", (err: any) => {
-                file.close();
-                reject(err);
-            });
-        });
     }
 }
