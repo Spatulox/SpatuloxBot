@@ -8,8 +8,10 @@ services:
     environment:
       - MUSIC_PATH=/usr/src/app/Musique
       - COMMANDS_PATH_TO_DEPLOY=commands
+      - TZ=Europe/Paris # Fuseau des dates saisies dans les rappels
     volumes:
       - ${HOME}/Musique/1-TelechargesViaDiscord:/usr/src/app/Musique
       - ./ytbChannels:/usr/src/app/ytbChannels
       - ./commands:/usr/src/app/commands
       - ./log:/usr/src/app/log
+      - ./reminders:/usr/src/app/reminders

@@ -2,60 +2,67 @@ import type {ChatInputCommandInteraction, CommandInteraction, ModalSubmitInterac
 import {
     Bot,
     EmbedManager,
-    FileManager,
-    GuildManager,
     ModalField,
     ModalFieldType,
     ModalManager,
     SelectMenuCreateOption,
     SelectMenuManager
 } from "@spatulox/simplediscordbot";
-import {ChannelList} from "../utils/ChannelList";
+import add_reminder from "../../form/reminderForm.json";
+import {
+    parseDueAt,
+    parseRecurrence,
+    RECURRENCE_LABEL,
+    type Reminder,
+    ReminderStore,
+} from "../module/Reminder/ReminderStore";
 
-// ------------------------------------------ //
+// ------------------------------------------------------------- //
 
-interface Reminder {
-    id: number;
-    hour: string;
-    name: string;
-    description: string;
+const MODAL_ID = add_reminder.id;
+
+/** ModalManager.add préfixe chaque champ par le customId du modal */
+const FIELD = {
+    name: `${MODAL_ID}_nom`,
+    description: `${MODAL_ID}_description`,
+    dateHour: `${MODAL_ID}_date-hour`,
+    recurrence: `${MODAL_ID}_recurrence`,
+} as const;
+
+const MAX_EMBED_FIELDS = 25;
+
+function formatDay(dueAt: number): string {
+    const date = new Date(dueAt);
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
 }
 
-interface RemindersByDate {
-    [date: string]: Reminder[];
+function formatHour(dueAt: number): string {
+    const date = new Date(dueAt);
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
-function parseDateTime(dateStr: string) {
-    const parts = dateStr.split(' ');
-    if (parts.length !== 2) {
-        throw new Error("Format de date invalide, attendu 'dd/mm/yyyy hh:mm'");
+function groupByDay(reminders: Reminder[]): Map<string, Reminder[]> {
+    const grouped = new Map<string, Reminder[]>();
+    for (const reminder of reminders) {
+        const day = formatDay(reminder.dueAt);
+        const bucket = grouped.get(day);
+        if (bucket) {
+            bucket.push(reminder);
+        } else {
+            grouped.set(day, [reminder]);
+        }
     }
-
-    // Ici, on est sûrs que parts[0] et parts[1] existent
-    const datePart = parts[0];
-    const timePart = parts[1];
-    if (!datePart) {
-        throw new Error("Pas de date Part")
-    }
-
-    const dateParts = datePart.split('/');
-    if (dateParts.length !== 3) {
-        throw new Error("Format de date invalide, attendu 'dd/mm/yyyy'");
-    }
-    const [day, month, year] = dateParts;
-
-    if (!timePart) {
-        throw new Error("Pas de time Part")
-    }
-    const timeParts = timePart.split(':');
-    if (timeParts.length !== 2) {
-        throw new Error("Format de temps invalide, attendu 'hh:mm'");
-    }
-    const [hours, minutes] = timeParts;
-
-    return {day, month, year, hours, minutes};
+    return grouped;
 }
 
+/** Un champ optionnel absent fait throw getTextInputValue */
+function optionalField(interaction: ModalSubmitInteraction, customId: string): string {
+    try {
+        return interaction.fields.getTextInputValue(customId);
+    } catch {
+        return '';
+    }
+}
 
 // ------------------------------------------------------------- //
 
@@ -92,73 +99,53 @@ export async function reminderCommand(interaction: ChatInputCommandInteraction):
 
 export async function addReminder(interaction: ModalSubmitInteraction): Promise<void> {
     try {
-        const nom = interaction.fields.getTextInputValue('nom');
-        const description = interaction.fields.getTextInputValue('description');
-        const dateStr = interaction.fields.getTextInputValue('date-hour');
+        const nom = interaction.fields.getTextInputValue(FIELD.name);
+        const description = interaction.fields.getTextInputValue(FIELD.description);
+        const dateStr = interaction.fields.getTextInputValue(FIELD.dateHour);
+        const recurrence = parseRecurrence(optionalField(interaction, FIELD.recurrence));
 
-        if (!dateStr.includes('/') || !dateStr.includes(' ') || !dateStr.includes(':')) {
-            await Bot.interaction.send(interaction, EmbedManager.error("Date invalide. Veuillez utiliser le format 'JJ/MM/AAAA hh:mm'."), true);
+        let dueAt: number;
+        try {
+            dueAt = parseDueAt(dateStr);
+        } catch (e) {
+            await Bot.interaction.send(interaction, EmbedManager.error(`${(e as Error).message}\nExemple : \`25/12/2026 20:30\``), true);
             return;
         }
 
-        const {day, month, year, hours, minutes} = parseDateTime(dateStr)
-
-        const date = new Date(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes));
-
-        if (isNaN(date.getTime())) {
-            await Bot.interaction.send(interaction, EmbedManager.error("Date invalide. Veuillez utiliser le format 'JJ/MM/AAAA hh:mm'."), true);
-            return;
-        }
-
-        if (date < new Date()) {
+        if (dueAt < Date.now()) {
             await Bot.interaction.send(interaction, EmbedManager.error(`Vous ne pouvez pas rajouter un évènement avant le ${new Date().toLocaleString()}`), true);
             return;
         }
 
-        const embed = EmbedManager.create();
-        embed.setTitle('Événement créé :')
-        EmbedManager.fields(embed, [
-            {name: 'Nom', value: nom},
-            {name: 'Description', value: description},
-            {name: 'Date', value: date.toLocaleDateString()},
-        ])
-
-        let data: RemindersByDate | false = await FileManager.readJsonFile('./reminders/reminder.json');
-        if (!data) {
-            Bot.log.info("No reminder, or impossible to read the file, the file will be created")
-            data = {}
-            //return
-        }
-        if (!day || !month || !hours || !minutes) {
-            throw new Error("Pas de création de date possible")
-        }
-        const formattedDate = `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
-        const formattedTime = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
-
-        // Compter le nombre total de reminders
-        let eventCount = 0;
-        if (typeof data === 'object') {
-            for (const reminders of Object.values(data)) {
-                eventCount += Array.isArray(reminders) ? reminders.length : 0;
-            }
-        }
-
-        if (!data[formattedDate]) {
-            data[formattedDate] = [];
-        }
-
-        data[formattedDate].push({
-            id: eventCount,
-            hour: formattedTime,
+        const outcome = await ReminderStore.mutate((file) => ReminderStore.create(file, {
             name: nom,
             description,
-        });
+            dueAt,
+            recurrence,
+            userId: interaction.user.id,
+            guildId: interaction.guildId,
+        }));
 
-        if (await FileManager.writeJsonFile('./reminders', 'reminder.json', data)) {
-            await Bot.interaction.send(interaction, embed, true);
-        } else {
-            await Bot.interaction.send(interaction, EmbedManager.error('Impossible to save the reminder, plz check the writeJsonFileRework() function...'));
+        if (!outcome.ok) {
+            await Bot.interaction.send(interaction, EmbedManager.error("Impossible de sauvegarder le rappel (écriture de reminder.json en échec)"), true);
+            return;
         }
+
+        const reminder = outcome.result;
+        const timestamp = Math.floor(reminder.dueAt / 1000);
+
+        const embed = EmbedManager.create();
+        embed.setTitle('Événement créé :');
+        EmbedManager.fields(embed, [
+            {name: 'ID', value: `${reminder.shortId}`},
+            {name: 'Nom', value: reminder.name},
+            {name: 'Description', value: reminder.description},
+            {name: 'Date', value: `<t:${timestamp}:F> (<t:${timestamp}:R>)`},
+            {name: 'Récurrence', value: RECURRENCE_LABEL[reminder.recurrence]},
+            {name: 'Rappels', value: "En DM : 1 jour avant, 1 heure avant, puis à l'heure dite"},
+        ]);
+
+        await Bot.interaction.send(interaction, embed, true);
     } catch (e) {
         Bot.log.error(`ERROR : Impossible to execute the addReminder function : ${e}`);
         await Bot.interaction.send(interaction, EmbedManager.error(`ERROR : Impossible to execute the addReminder function : ${e}`));
@@ -169,36 +156,32 @@ export async function addReminder(interaction: ModalSubmitInteraction): Promise<
 
 async function listReminder(interaction: ChatInputCommandInteraction): Promise<void> {
     try {
-        const reminders: RemindersByDate | false = await FileManager.readJsonFile('./reminders/reminder.json');
-        if (!reminders) {
-            Bot.log.info("No reminders")
-            await Bot.interaction.send(interaction, EmbedManager.simple('Aucun rappel'));
-            return
-        }
-
-        if (Array.isArray(reminders) && reminders[0] === 'Error') {
-            await Bot.interaction.send(interaction, EmbedManager.error('Erreur'));
-            return;
-        }
-
-        const dates = Object.keys(reminders);
-        if (dates.length === 0) {
+        const reminders = await ReminderStore.list();
+        if (reminders.length === 0) {
             await Bot.interaction.send(interaction, EmbedManager.simple('Aucun rappel'));
             return;
         }
 
-        const options : SelectMenuCreateOption[] = dates.map(date => ({
-                label: date,
-                value: date
-        }))
-        const selectMenu = SelectMenuManager.simple("select_date", options, 'Sélectionnez une date')
+        const grouped = groupByDay(reminders);
+        const allDates = [...grouped.keys()];
+        // Discord plafonne à 25 champs par embed et 25 options par select menu
+        const dates = allDates.slice(0, MAX_EMBED_FIELDS);
+
+        const options: SelectMenuCreateOption[] = dates.map(date => ({
+            label: date,
+            value: date
+        }));
+        const selectMenu = SelectMenuManager.simple("select_date", options, 'Sélectionnez une date');
 
         const embed = EmbedManager.create();
-        embed.setTitle('Liste des rappels')
+        embed.setTitle('Liste des rappels');
+        if (allDates.length > dates.length) {
+            embed.setDescription(`${allDates.length} dates au total, seules les ${dates.length} premières sont affichées.`);
+        }
         EmbedManager.fields(embed, dates.map((date) => ({
             name: date,
-            value: `> Nombres d'évènements : ${reminders[date]?.length ?? "Unknown"}`,
-        })))
+            value: `> Nombres d'évènements : ${grouped.get(date)?.length ?? "Unknown"}`,
+        })));
 
         await Bot.interaction.send(interaction, embed);
         await Bot.interaction.send(interaction, SelectMenuManager.row(selectMenu));
@@ -213,19 +196,27 @@ async function listReminder(interaction: ChatInputCommandInteraction): Promise<v
                 if (!i.isStringSelectMenu()) return
                 const selectedDate = i.values[0];
                 if (!selectedDate) return
-                const embed = EmbedManager.create()
 
+                const reminderList = grouped.get(selectedDate);
+                if (!reminderList) return
+
+                const embed = EmbedManager.create()
                 embed.setTitle(selectedDate)
                 embed.setDescription('Liste des rappels')
 
-                const reminderList = reminders[selectedDate]
-                if (!reminderList) return
-                for (const reminder of reminderList) {
+                for (const reminder of reminderList.slice(0, MAX_EMBED_FIELDS)) {
+                    const timestamp = Math.floor(reminder.dueAt / 1000);
                     EmbedManager.fields(embed, [{
-                        name: reminder.hour,
-                        value: `> **ID**: ${reminder.id}\n> **Title**: ${reminder.name}\n> **Description**: ${reminder.description}`,
+                        name: formatHour(reminder.dueAt),
+                        value: `> **ID**: ${reminder.shortId}\n`
+                            + `> **Title**: ${reminder.name}\n`
+                            + `> **Description**: ${reminder.description}\n`
+                            + `> **Récurrence**: ${RECURRENCE_LABEL[reminder.recurrence]}\n`
+                            + `> **Échéance**: <t:${timestamp}:R>\n`
+                            + `> **Pour**: ${reminder.userId ? `<@${reminder.userId}>` : 'destinataire inconnu'}`,
                     }])
                 }
+
                 const res = {
                     ...embed,
                     components: [],
@@ -274,11 +265,13 @@ async function openReminderForm(interaction: CommandInteraction): Promise<void> 
         const fields: ModalField[] = [
             {type: ModalFieldType.SHORT, label: "nom", required: true, placeholder: "Nom de l'évènement"},
             {type: ModalFieldType.LONG, label: "description", required: true, placeholder: "Description de l'évènement"},
-            {type: ModalFieldType.DATE, label: "date-hour", required: true}
+            // Volontairement SHORT et pas DATE : ModalFieldType.DATE limite à 10
+            // caractères, il n'y tient pas d'heure
+            {type: ModalFieldType.SHORT, label: "date-hour", required: true, placeholder: "JJ/MM/AAAA hh:mm"},
+            {type: ModalFieldType.SHORT, label: "recurrence", required: false, placeholder: "aucune / quotidien / hebdomadaire / mensuel"},
         ]
-        const modal = ModalManager.create("Créer un évènement", "reminderForm")
+        const modal = ModalManager.create("Créer un évènement", MODAL_ID)
         ModalManager.add(modal, fields)
-        //const modal = await loadForm('reminderForm');
         if (!modal) {
             await Bot.interaction.send(interaction, EmbedManager.error('Impossible to create the reminder form'));
             return;
@@ -294,91 +287,27 @@ async function openReminderForm(interaction: CommandInteraction): Promise<void> 
 
 async function removeReminder(interaction: ChatInputCommandInteraction): Promise<void> {
     try {
-        const data: RemindersByDate | false = await FileManager.readJsonFile('./reminders/reminder.json');
-        if (!data) {
-            await Bot.interaction.send(interaction, EmbedManager.error('Aucun reminders'));
-            return
-        }
         const idToRemove = interaction.options.getInteger('id');
-        let reminderRemoved = false;
-
         if (idToRemove === null) {
             await Bot.interaction.send(interaction, EmbedManager.error('ID invalide'));
             return;
         }
 
-        for (const date in data) {
-            const reminders = data[date];
+        const outcome = await ReminderStore.mutate((file) => ReminderStore.remove(file, idToRemove));
 
-            if (Array.isArray(reminders)) {
-                const beforeLength = reminders.length;
-                const filtered = reminders.filter((reminder) => reminder.id !== idToRemove);
-
-                if (filtered.length !== beforeLength) {
-                    reminderRemoved = true;
-                }
-
-                if (filtered.length > 0) {
-                    data[date] = filtered;
-                } else {
-                    delete data[date];
-                }
-            }
+        if (!outcome.ok) {
+            await Bot.interaction.send(interaction, EmbedManager.error("Impossible d'écrire reminder.json"));
+            return;
         }
 
-        if (reminderRemoved) {
-            await FileManager.writeJsonFile('./reminders', 'reminder.json', data);
-            await Bot.interaction.send(interaction, EmbedManager.simple('Reminder supprimé avec succès'));
-        } else {
+        if (!outcome.result) {
             await Bot.interaction.send(interaction, EmbedManager.simple('Aucun reminder trouvé avec cet ID'));
+            return;
         }
+
+        await Bot.interaction.send(interaction, EmbedManager.simple(`Reminder **${outcome.result.name}** (id ${outcome.result.shortId}) supprimé avec succès`));
     } catch (e) {
         await Bot.interaction.send(interaction, EmbedManager.error(`Error : ${(e as Error).message}`));
         Bot.log.error(`ERROR : ${(e as Error).message}`);
     }
-}
-
-// ------------------------------------------------------------- //
-
-export async function deleteOldReminders(): Promise<boolean> {
-    Bot.log.info('INFO : Checking for old reminders');
-    const reminders: RemindersByDate | false = await FileManager.readJsonFile('./reminders/reminder.json');
-    if (!reminders) {
-        return false
-    }
-    const bkpReminders = JSON.parse(JSON.stringify(reminders));
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (Array.isArray(reminders)) {
-        Bot.log.error('ERROR : Invalid reminders structure');
-        return false;
-    }
-
-    for (const reminderDate in reminders) {
-        const [day, month, year] = reminderDate.split('/');
-        const reminderDateObj = new Date(Number(year), Number(month) - 1, Number(day));
-
-        if (today > reminderDateObj) {
-            delete reminders[reminderDate];
-        }
-    }
-
-    if (JSON.stringify(reminders) === JSON.stringify(bkpReminders)) {
-        Bot.log.info('INFO : No old reminders to delete');
-        return true;
-    }
-
-    if (await FileManager.writeJsonFile('./reminders', 'reminder.json', reminders)) {
-        const infoChannel = await GuildManager.channel.text.find(ChannelList.log.bot_log);
-        if (infoChannel) {
-            Bot.message.send(infoChannel.id, `@everyone, Old reminders deleted`);
-        } else {
-            Bot.log.warn('WARNING : deleteOldCommand searchClientChannel result is false');
-        }
-        return true;
-    }
-
-    return false;
 }

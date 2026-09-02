@@ -4,6 +4,7 @@ import {Events} from "discord.js";
 import {ModuleManager, ModuleUI} from "@spatulox/discord-module";
 import {YTB} from "./module/YTB/YTB";
 import {Interactions} from "./module/Interactions";
+import {ReminderScheduler} from "./module/Reminder/ReminderScheduler";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -41,6 +42,7 @@ async function main(): Promise<void> {
     bot.client.on(Events.ClientReady, () => {
         modules.register(new YTB())
         modules.register(new Interactions())
+        modules.register(new ReminderScheduler())
         modules.enableAll()
         new ModuleUI(Bot.client, "1493618804180123820")
         Bot.client.user?.setStatus("dnd")
