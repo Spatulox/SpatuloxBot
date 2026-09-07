@@ -224,7 +224,7 @@ export class ReminderScheduler extends NoEventModule {
             return true;
         }
 
-        const message = await Bot.message.sendDM(reminder.userId, undefined, embed);
+        const message = await Bot.message.sendDM(reminder.userId, embed);
         if (!message) {
             Bot.log.warn(`WARNING : DM impossible pour <@${reminder.userId}> (rappel ${reminder.shortId}), repli sur le salon de log`);
             await this.sendToLogChannel(`<@${reminder.userId}> (DM impossible)`, embed);
