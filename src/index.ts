@@ -10,6 +10,12 @@ import dotenv from "dotenv";
 dotenv.config();
 
 async function main(): Promise<void> {
+    // InteractionsManager throw depuis son listener async quand un customId de
+    // composant n'est pas enregistré : sans ce garde, le bot meurt au lieu de logguer
+    process.on('unhandledRejection', (reason) => {
+        Bot.log.error(`Unhandled rejection : ${reason instanceof Error ? reason.stack : reason}`);
+    });
+
     const modules = ModuleManager.createOrGetInstance(client);
 
     const config: BotConfig = {
