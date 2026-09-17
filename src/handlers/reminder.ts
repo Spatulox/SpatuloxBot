@@ -1,12 +1,23 @@
-import type {ChatInputCommandInteraction, CommandInteraction, ModalSubmitInteraction} from 'discord.js';
+import {
+    type ButtonInteraction,
+    type ChatInputCommandInteraction,
+    type CommandInteraction,
+    type ContainerBuilder,
+    type MessageComponentInteraction,
+    type ModalSubmitInteraction,
+    SeparatorSpacingSize,
+    type StringSelectMenuInteraction
+} from 'discord.js';
 import {
     Bot,
-    EmbedManager,
+    ButtonManager,
+    ComponentManager,
     ModalField,
     ModalFieldType,
     ModalManager,
     SelectMenuCreateOption,
-    SelectMenuManager
+    SelectMenuManager,
+    SimpleColor
 } from "@spatulox/simplediscordbot";
 import add_reminder from "../../form/reminderForm.json";
 import {
@@ -16,10 +27,17 @@ import {
     type Reminder,
     ReminderStore,
 } from "../module/Reminder/ReminderStore";
+import {sendContainer, updateContainer} from "../utils/ComponentReply";
 
 // ------------------------------------------------------------- //
 
 const MODAL_ID = add_reminder.id;
+
+/** customIds des composants de `/reminder list`, enregistrés dans Interactions.ts */
+export const REMINDER_LIST_SELECT_ID = 'reminder_list_date';
+export const REMINDER_LIST_BACK_ID = 'reminder_list_back';
+/** Suivi du shortId : enregistré en START_WITH */
+export const REMINDER_DELETE_PREFIX = 'reminder_delete_';
 
 /** ModalManager.add préfixe chaque champ par le customId du modal */
 const FIELD = {
@@ -29,7 +47,11 @@ const FIELD = {
     recurrence: `${MODAL_ID}_recurrence`,
 } as const;
 
-const MAX_EMBED_FIELDS = 25;
+// Un message ComponentV2 plafonne à 40 composants ; un champ en pèse 2 à 3
+const MAX_DAYS_DISPLAYED = 10;
+/** Limite Discord du select menu */
+const MAX_SELECT_OPTIONS = 25;
+const MAX_REMINDERS_PER_DAY = 10;
 
 function formatDay(dueAt: number): string {
     const date = new Date(dueAt);
@@ -73,7 +95,6 @@ export async function reminderCommand(interaction: ChatInputCommandInteraction):
         switch (subcommand) {
             case 'list':
                 Bot.log.info('Listing reminder');
-                await interaction.deferReply();
                 await listReminder(interaction);
                 break;
             case 'add':
@@ -82,16 +103,15 @@ export async function reminderCommand(interaction: ChatInputCommandInteraction):
                 break;
             case 'remove':
                 Bot.log.info('Removing reminder');
-                await interaction.deferReply();
                 await removeReminder(interaction);
                 break;
             default:
-                await Bot.interaction.send(interaction, EmbedManager.error('Commande inconnue'));
+                await sendContainer(interaction, ComponentManager.error('Commande inconnue'));
                 break;
         }
     } catch (e) {
         Bot.log.error(`ERROR : Impossible to run the reminder command : ${e}`);
-        await Bot.interaction.send(interaction, EmbedManager.error(`ERROR : Impossible to run the reminder command : ${e}`));
+        await sendContainer(interaction, ComponentManager.error(`ERROR : Impossible to run the reminder command : ${e}`));
     }
 }
 
@@ -108,12 +128,12 @@ export async function addReminder(interaction: ModalSubmitInteraction): Promise<
         try {
             dueAt = parseDueAt(dateStr);
         } catch (e) {
-            await Bot.interaction.send(interaction, EmbedManager.error(`${(e as Error).message}\nExemple : \`25/12/2026 20:30\``), true);
+            await sendContainer(interaction, ComponentManager.error(`${(e as Error).message}\nExemple : \`25/12/2026 20:30\``), true);
             return;
         }
 
         if (dueAt < Date.now()) {
-            await Bot.interaction.send(interaction, EmbedManager.error(`Vous ne pouvez pas rajouter un évènement avant le ${new Date().toLocaleString()}`), true);
+            await sendContainer(interaction, ComponentManager.error(`Vous ne pouvez pas rajouter un évènement avant le ${new Date().toLocaleString()}`), true);
             return;
         }
 
@@ -127,17 +147,21 @@ export async function addReminder(interaction: ModalSubmitInteraction): Promise<
         }));
 
         if (!outcome.ok) {
-            await Bot.interaction.send(interaction, EmbedManager.error("Impossible de sauvegarder le rappel (écriture de reminder.json en échec)"), true);
+            await sendContainer(interaction, ComponentManager.error("Impossible de sauvegarder le rappel (écriture de reminder.json en échec)"), true);
             return;
         }
 
         const reminder = outcome.result;
         const timestamp = Math.floor(reminder.dueAt / 1000);
 
-        const embed = EmbedManager.create();
-        embed.setTitle('Événement créé :');
-        EmbedManager.fields(embed, [
-            {name: 'ID', value: `${reminder.shortId}`},
+        const container = ComponentManager.create({
+            title: '## ✅ Événement créé',
+            description: `Retenez son ID : c'est lui que prend \`/reminder remove\`.`,
+            color: SimpleColor.success,
+            separator: SeparatorSpacingSize.Small,
+        });
+        ComponentManager.fields(container, [
+            {name: 'ID', value: `\`#${reminder.shortId}\``},
             {name: 'Nom', value: reminder.name},
             {name: 'Description', value: reminder.description},
             {name: 'Date', value: `<t:${timestamp}:F> (<t:${timestamp}:R>)`},
@@ -145,116 +169,202 @@ export async function addReminder(interaction: ModalSubmitInteraction): Promise<
             {name: 'Rappels', value: "En DM : 1 jour avant, 1 heure avant, puis à l'heure dite"},
         ]);
 
-        await Bot.interaction.send(interaction, embed, true);
+        await sendContainer(interaction, container, true);
     } catch (e) {
         Bot.log.error(`ERROR : Impossible to execute the addReminder function : ${e}`);
-        await Bot.interaction.send(interaction, EmbedManager.error(`ERROR : Impossible to execute the addReminder function : ${e}`));
+        await sendContainer(interaction, ComponentManager.error(`ERROR : Impossible to execute the addReminder function : ${e}`));
     }
 }
 
 // ------------------------------------------------------------- //
 
+function buildDateSelectMenu(dates: string[]) {
+    const options: SelectMenuCreateOption[] = dates.map(date => ({
+        label: date,
+        value: date
+    }));
+    return SelectMenuManager.simple(REMINDER_LIST_SELECT_ID, options, 'Sélectionnez une date');
+}
+
+/** Vue principale : un résumé par jour + le select menu, tout dans le container */
+function buildListContainer(reminders: Reminder[], notice?: string): ContainerBuilder {
+    if (reminders.length === 0) {
+        return ComponentManager.simple(notice ? `${notice}\n\nAucun rappel` : 'Aucun rappel');
+    }
+
+    const grouped = groupByDay(reminders);
+    const allDates = [...grouped.keys()];
+    const displayed = allDates.slice(0, MAX_DAYS_DISPLAYED);
+    const selectable = allDates.slice(0, MAX_SELECT_OPTIONS);
+
+    const description: string[] = [];
+    if (notice) description.push(notice);
+    description.push(`**${reminders.length}** rappel(s) répartis sur **${allDates.length}** jour(s)`);
+    if (allDates.length > displayed.length) {
+        description.push(`-# Seuls les ${displayed.length} premiers jours sont affichés, ${selectable.length} sont sélectionnables dans le menu.`);
+    }
+
+    const container = ComponentManager.create({
+        title: '## 📅 Rappels',
+        description: description.join('\n'),
+        color: SimpleColor.blue,
+        separator: SeparatorSpacingSize.Small,
+    });
+
+    ComponentManager.fields(container, displayed.map(date => ({
+        name: `📆 ${date}`,
+        value: `> ${grouped.get(date)?.length ?? 0} évènement(s)`,
+        separator: SeparatorSpacingSize.Small,
+    })));
+
+    ComponentManager.selectMenu(container, buildDateSelectMenu(selectable));
+
+    return container;
+}
+
+function describeReminder(reminder: Reminder): string {
+    const timestamp = Math.floor(reminder.dueAt / 1000);
+    return [
+        reminder.description,
+        `> **Échéance** : <t:${timestamp}:F> (<t:${timestamp}:R>)`,
+        `> **Récurrence** : ${RECURRENCE_LABEL[reminder.recurrence]}`,
+        `> **Pour** : ${reminder.userId ? `<@${reminder.userId}>` : 'destinataire inconnu'}`,
+    ].join('\n');
+}
+
+/** Vue détail d'un jour : l'ID en tête de chaque rappel, un bouton de suppression par rappel */
+function buildDayContainer(date: string, reminders: Reminder[], notice?: string): ContainerBuilder {
+    const displayed = reminders.slice(0, MAX_REMINDERS_PER_DAY);
+
+    const description: string[] = [];
+    if (notice) description.push(notice);
+    description.push(reminders.length > displayed.length
+        ? `**${displayed.length}** rappel(s) affichés sur **${reminders.length}**`
+        : `**${reminders.length}** rappel(s)`);
+
+    const container = ComponentManager.create({
+        title: `## 📆 ${date}`,
+        description: description.join('\n'),
+        color: SimpleColor.blue,
+        separator: SeparatorSpacingSize.Small,
+    });
+
+    ComponentManager.fields(container, displayed.map(reminder => ({
+        name: `\`#${reminder.shortId}\` · ${formatHour(reminder.dueAt)} — ${reminder.name}`,
+        value: describeReminder(reminder),
+        button: ButtonManager.danger({
+            customId: `${REMINDER_DELETE_PREFIX}${reminder.shortId}`,
+            label: 'Supprimer',
+            emoji: '🗑️',
+        }),
+        separator: SeparatorSpacingSize.Small,
+    })));
+
+    ComponentManager.field(container, {
+        button: ButtonManager.secondary({customId: REMINDER_LIST_BACK_ID, label: 'Retour', emoji: '⬅️'}),
+        separator: false,
+    });
+
+    return container;
+}
+
 async function listReminder(interaction: ChatInputCommandInteraction): Promise<void> {
     try {
-        const reminders = await ReminderStore.list();
-        if (reminders.length === 0) {
-            await Bot.interaction.send(interaction, EmbedManager.simple('Aucun rappel'));
+        await sendContainer(interaction, buildListContainer(await ReminderStore.list()));
+    } catch (e) {
+        Bot.log.error(`ERROR : Crash when listReminder : ${(e as Error).message}`);
+        await sendContainer(interaction, ComponentManager.error((e as Error).message));
+    }
+}
+
+// ------------------------------------------------------------- //
+
+/**
+ * followUp throw si l'interaction n'a jamais été acquittée : on masquerait
+ * l'erreur d'origine derrière un "didn't respond in time"
+ */
+async function reportComponentError(interaction: MessageComponentInteraction, context: string, error: unknown): Promise<void> {
+    const err = error as Error;
+    if (err.toString().includes("Connect Timeout Error")) return;
+
+    Bot.log.error(`ERROR : Erreur lors de la mise à jour de l'interaction (${context}) : ${err.message}`);
+    if (!interaction.replied && !interaction.deferred) return;
+    try {
+        await sendContainer(interaction, ComponentManager.error(`Une erreur s'est produite. Veuillez réessayer.\n${err.message}`), true);
+    } catch (followUpError) {
+        Bot.log.error(`ERROR : Impossible d'envoyer un message de suivi (${context}) : ${followUpError}`);
+    }
+}
+
+/**
+ * Handlers des composants de `/reminder list`, enregistrés auprès de InteractionsManager.
+ * Sans état : les rappels sont relus depuis le store, donc les composants restent utilisables
+ * après un redémarrage du bot, contrairement à un collector gardé en mémoire.
+ */
+export async function reminderListSelect(interaction: StringSelectMenuInteraction): Promise<void> {
+    try {
+        const selectedDate = interaction.values[0];
+        if (!selectedDate) {
+            await interaction.deferUpdate();
             return;
         }
 
-        const grouped = groupByDay(reminders);
-        const allDates = [...grouped.keys()];
-        // Discord plafonne à 25 champs par embed et 25 options par select menu
-        const dates = allDates.slice(0, MAX_EMBED_FIELDS);
-
-        const options: SelectMenuCreateOption[] = dates.map(date => ({
-            label: date,
-            value: date
-        }));
-        const selectMenu = SelectMenuManager.simple("select_date", options, 'Sélectionnez une date');
-
-        const embed = EmbedManager.create();
-        embed.setTitle('Liste des rappels');
-        if (allDates.length > dates.length) {
-            embed.setDescription(`${allDates.length} dates au total, seules les ${dates.length} premières sont affichées.`);
+        const grouped = groupByDay(await ReminderStore.list());
+        const reminderList = grouped.get(selectedDate);
+        if (!reminderList) {
+            await updateContainer(interaction, ComponentManager.simple(`Aucun rappel pour le ${selectedDate}`));
+            return;
         }
-        EmbedManager.fields(embed, dates.map((date) => ({
-            name: date,
-            value: `> Nombres d'évènements : ${grouped.get(date)?.length ?? "Unknown"}`,
-        })));
 
-        await Bot.interaction.send(interaction, embed);
-        await Bot.interaction.send(interaction, SelectMenuManager.row(selectMenu));
+        await updateContainer(interaction, buildDayContainer(selectedDate, reminderList));
+    } catch (error) {
+        await reportComponentError(interaction, 'reminderListSelect', error);
+    }
+}
 
-        const collector = interaction.channel?.createMessageComponentCollector({
-            filter: (i) => i.customId === 'select_date' && i.user.id === interaction.user.id,
-            time: 60000,
-        });
+export async function reminderListBack(interaction: ButtonInteraction): Promise<void> {
+    try {
+        await updateContainer(interaction, buildListContainer(await ReminderStore.list()));
+    } catch (error) {
+        await reportComponentError(interaction, 'reminderListBack', error);
+    }
+}
 
-        collector?.on('collect', async (i) => {
-            try {
-                if (!i.isStringSelectMenu()) return
-                const selectedDate = i.values[0];
-                if (!selectedDate) return
+export async function reminderDelete(interaction: ButtonInteraction): Promise<void> {
+    try {
+        const shortId = Number(interaction.customId.slice(REMINDER_DELETE_PREFIX.length));
+        if (!Number.isInteger(shortId)) {
+            await updateContainer(interaction, ComponentManager.error(`ID de rappel illisible : \`${interaction.customId}\``));
+            return;
+        }
 
-                const reminderList = grouped.get(selectedDate);
-                if (!reminderList) return
+        const outcome = await ReminderStore.mutate((file) => ReminderStore.remove(file, shortId));
+        if (!outcome.ok) {
+            await updateContainer(interaction, ComponentManager.error("Impossible d'écrire reminder.json"));
+            return;
+        }
 
-                const embed = EmbedManager.create()
-                embed.setTitle(selectedDate)
-                embed.setDescription('Liste des rappels')
+        const reminders = await ReminderStore.list();
+        if (!outcome.result) {
+            // Déjà supprimé entre l'affichage et le clic : on se contente de rafraîchir
+            await updateContainer(interaction, buildListContainer(reminders, `⚠️ Aucun rappel \`#${shortId}\`, il a déjà été supprimé`));
+            return;
+        }
 
-                for (const reminder of reminderList.slice(0, MAX_EMBED_FIELDS)) {
-                    const timestamp = Math.floor(reminder.dueAt / 1000);
-                    EmbedManager.fields(embed, [{
-                        name: formatHour(reminder.dueAt),
-                        value: `> **ID**: ${reminder.shortId}\n`
-                            + `> **Title**: ${reminder.name}\n`
-                            + `> **Description**: ${reminder.description}\n`
-                            + `> **Récurrence**: ${RECURRENCE_LABEL[reminder.recurrence]}\n`
-                            + `> **Échéance**: <t:${timestamp}:R>\n`
-                            + `> **Pour**: ${reminder.userId ? `<@${reminder.userId}>` : 'destinataire inconnu'}`,
-                    }])
-                }
+        const removed = outcome.result;
+        const notice = `🗑️ Rappel \`#${removed.shortId}\` (**${removed.name}**) supprimé`;
+        const day = formatDay(removed.dueAt);
+        const remaining = groupByDay(reminders).get(day);
 
-                const res = {
-                    ...embed,
-                    components: [],
-                    flags: undefined
-                }
-                await i.update(res);
-            } catch (error) {
-                const err = error as Error;
-                if (!err.toString().includes("Connect Timeout Error")) {
-                    Bot.log.error(`ERROR : Erreur lors de la mise à jour de l'interaction : (listReminder collector) : ${err.message}`);
-                    try {
-                        const res = {
-                            ...EmbedManager.error(`Une erreur s'est produite. Veuillez réessayer.\n${err.message}`),
-                            components: [],
-                            flags: undefined
-                        };
-                        await i.followUp(res);
-                    } catch (followUpError) {
-                        Bot.log.error(`ERROR : Impossible d'envoyer un message de suivi (listReminder collector) : ${followUpError}`);
-                    }
-                }
-            }
+        if (!remaining || remaining.length === 0) {
+            // Plus rien ce jour-là : la vue jour n'a plus lieu d'être
+            await updateContainer(interaction, buildListContainer(reminders, notice));
+            return;
+        }
 
-        });
-
-        collector?.on('end', (collected) => {
-            try {
-                const embed = EmbedManager.error('Temps écoulé. Veuillez réessayer.');
-                if (collected.size === 0) {
-                    Bot.interaction.send(interaction, embed)
-                }
-            } catch (e) {
-                Bot.log.error(`ERROR : Impossible d\'envoyer un message de suivi (listReminder collector) : ${e}`,);
-            }
-        });
-    } catch (e) {
-        Bot.log.error(`ERROR : Crash when listReminder : ${(e as Error).message}`);
-        await Bot.interaction.send(interaction, EmbedManager.error((e as Error).message));
+        await updateContainer(interaction, buildDayContainer(day, remaining, notice));
+    } catch (error) {
+        await reportComponentError(interaction, 'reminderDelete', error);
     }
 }
 
@@ -273,13 +383,13 @@ async function openReminderForm(interaction: CommandInteraction): Promise<void> 
         const modal = ModalManager.create("Créer un évènement", MODAL_ID)
         ModalManager.add(modal, fields)
         if (!modal) {
-            await Bot.interaction.send(interaction, EmbedManager.error('Impossible to create the reminder form'));
+            await sendContainer(interaction, ComponentManager.error('Impossible to create the reminder form'));
             return;
         }
         await interaction.showModal(modal);
     } catch (e) {
         Bot.log.error(`ERROR : Crashed addReminder: ${(e as Error).message}`);
-        await Bot.interaction.send(interaction, EmbedManager.error(`ERROR : Crashed addReminder: ${(e as Error).message}`));
+        await sendContainer(interaction, ComponentManager.error(`ERROR : Crashed addReminder: ${(e as Error).message}`));
     }
 }
 
@@ -289,25 +399,25 @@ async function removeReminder(interaction: ChatInputCommandInteraction): Promise
     try {
         const idToRemove = interaction.options.getInteger('id');
         if (idToRemove === null) {
-            await Bot.interaction.send(interaction, EmbedManager.error('ID invalide'));
+            await sendContainer(interaction, ComponentManager.error('ID invalide'));
             return;
         }
 
         const outcome = await ReminderStore.mutate((file) => ReminderStore.remove(file, idToRemove));
 
         if (!outcome.ok) {
-            await Bot.interaction.send(interaction, EmbedManager.error("Impossible d'écrire reminder.json"));
+            await sendContainer(interaction, ComponentManager.error("Impossible d'écrire reminder.json"));
             return;
         }
 
         if (!outcome.result) {
-            await Bot.interaction.send(interaction, EmbedManager.simple('Aucun reminder trouvé avec cet ID'));
+            await sendContainer(interaction, ComponentManager.simple(`Aucun reminder trouvé avec l'ID \`#${idToRemove}\``));
             return;
         }
 
-        await Bot.interaction.send(interaction, EmbedManager.simple(`Reminder **${outcome.result.name}** (id ${outcome.result.shortId}) supprimé avec succès`));
+        await sendContainer(interaction, ComponentManager.success(`Reminder **${outcome.result.name}** (ID \`#${outcome.result.shortId}\`) supprimé avec succès`));
     } catch (e) {
-        await Bot.interaction.send(interaction, EmbedManager.error(`Error : ${(e as Error).message}`));
+        await sendContainer(interaction, ComponentManager.error(`Error : ${(e as Error).message}`));
         Bot.log.error(`ERROR : ${(e as Error).message}`);
     }
 }

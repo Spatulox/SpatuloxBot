@@ -17,7 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "@discordjs/builders": "^1.9.0",
-    "@spatulox/discord-module": "^0.10.1",
+    "@spatulox/discord-module": "^0.10.2",
     "@spatulox/simplediscordbot": "^3.0.2",
     "discord.js": "^14.26.2",
     "node-fetch": "^3.3.2",

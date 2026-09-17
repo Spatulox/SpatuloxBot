@@ -31,5 +31,6 @@
     "noUncheckedSideEffectImports": true
 
   },
-  "exclude": ["src_olr"]
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
 }
