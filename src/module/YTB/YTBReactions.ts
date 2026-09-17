@@ -15,7 +15,7 @@ export class YTBReactions extends Module{
     private async addYtbReactions(message: Message){
         try {
 
-            const regexUrl = /https?:\/\/(www\.)?youtu(be\.com\/watch\?v=|\.be\/)[\w-]{11}/;
+            const regexUrl = /https?:\/\/(www\.|music\.)?(youtube\.com\/(watch\?v=[\w-]{11}|playlist\?list=[\w-]+)|youtu\.be\/[\w-]{11})/;
 
             if (YTB.channelFeed.includes(message.channelId) && regexUrl.test(message.content)) {
                 for (const emoji of YTB.emojiReact) {

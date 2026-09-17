@@ -54,14 +54,16 @@ export class YTBDownloader extends Module {
         Bot.log.info("Starting download...")
 
         // Regex pour URL YouTube (vidéo ou playlist)
-        const regexUrl = /(https?:\/\/(www\.)?(youtube\.com\/(watch\?v=|playlist\?list=)|youtu\.be\/)([\w-]{11})(&.*)?)/g;
+        // Formats : watch?v=ID&list=... / playlist?list=... / youtu.be/ID?list=...
+        const regexUrl = /https?:\/\/(www\.|music\.)?(youtube\.com\/(watch\?v=[\w-]{11}|playlist\?list=[\w-]+)|youtu\.be\/[\w-]{11})([?&]\S*)?/g;
         const urls = message.content.match(regexUrl);
         if (!urls) return;
 
         for (const url of urls) {
-            if (url.includes("&list=")) {
-                const match = url.match(/[?&]list=([^&]+)/);
-                if (!match) continue;
+            const match = url.match(/[?&]list=([\w-]+)/);
+            // Mix YouTube (list=RD...) sur un lien vidéo : on ne télécharge que la vidéo
+            const isMixOnVideo = !!match?.[1]?.startsWith("RD") && /watch\?v=|youtu\.be\//.test(url);
+            if (match && !isMixOnVideo) {
                 const playlistId = match[1];
                 if (!playlistId) continue;
 
