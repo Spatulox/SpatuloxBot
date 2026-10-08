@@ -287,7 +287,13 @@ export class ReminderStore {
         await this.mutex.lock();
         try {
             const file = await this.load();
+            const before = JSON.stringify(file);
             const result = await fn(file);
+
+            // Le tick tourne toutes les 30s : ne réécrit le fichier que s'il a changé
+            if (JSON.stringify(file) === before) {
+                return {ok: true, result};
+            }
 
             if (!await this.save(file)) {
                 return {ok: false};
