@@ -63,16 +63,21 @@ async function listYtbChannel(interaction: CommandInteraction): Promise<boolean>
 
         const embed = EmbedManager.create(SimpleColor.youtube)
         embed.setTitle('\n # Liste des chaînes youtube suivies # ')
-        embed.setThumbnail('https://cdn.discordapp.com/attachments/123456789/youtube_icon.png')
+        // An empty iconURL fails discord.js URL validation ("Received one or more errors")
         embed.setFooter({
-            text: `Total des chaînes suivies : ${listFile.length}`,
-            iconURL: ""
+            text: `Total des chaînes suivies : ${listFile.length}`
         })
 
-        for (const file of listFile) {
+        // Discord embeds accept at most 25 fields
+        const MAX_FIELDS = 25;
+        const overflow = listFile.length > MAX_FIELDS;
+        const filesToShow = overflow ? listFile.slice(0, MAX_FIELDS - 1) : listFile;
+
+        for (const file of filesToShow) {
             const data = await FileManager.readJsonFile<ytbchannelFile>(`./ytbChannels/${file}`);
 
             if (!data) {
+                Bot.interaction.send(interaction, EmbedManager.error(`Something went wrong when reading the file ${file}`));
                 return false
             }
 
@@ -90,11 +95,18 @@ async function listYtbChannel(interaction: CommandInteraction): Promise<boolean>
             })
         }
 
+        if (overflow) {
+            EmbedManager.field(embed, {
+                name: '…',
+                value: `et ${listFile.length - filesToShow.length} autres chaînes`,
+            })
+        }
+
         Bot.interaction.send(interaction, embed)
         return true;
     } catch (e) {
-        Bot.log.error(`Crash when listYtbChannel : ${(e as Error).message}`);
-        Bot.interaction.send(interaction, EmbedManager.error((e as Error).message));
+        Bot.log.error(`Crash when listYtbChannel : ${(e as Error).stack ?? (e as Error).message}`);
+        Bot.interaction.send(interaction, EmbedManager.error(`Erreur lors du listing des chaînes : ${(e as Error).message}`));
         return false;
     }
 }
