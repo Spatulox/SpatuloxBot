@@ -15,3 +15,4 @@ services:
       - ./commands:/usr/src/app/commands
       - ./log:/usr/src/app/log
       - ./reminders:/usr/src/app/reminders
+      - ./.utilscache:/usr/src/app/.utilscache # Cache du bot (discord-module…) : conservé entre les rebuilds
