@@ -22,8 +22,8 @@
       "options": [
         {
           "type": 3,
-          "name": "ytb-channel-id",
-          "description": "Specifie the ytb channel ID",
+          "name": "ytb-channel",
+          "description": "Channel ID (UC...), @handle or channel link",
           "required": true
         },
         {

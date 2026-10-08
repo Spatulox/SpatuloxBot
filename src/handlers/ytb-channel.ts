@@ -1,6 +1,7 @@
 import type {ChatInputCommandInteraction, CommandInteraction, TextChannel} from 'discord.js';
 import fs from 'fs'
 import fetch from 'node-fetch';
+import Parser from "rss-parser";
 import {Bot, EmbedManager, FileManager, SimpleColor} from "@spatulox/simplediscordbot";
 
 
@@ -20,7 +21,7 @@ export async function ytbChannelCommand(interaction: ChatInputCommandInteraction
                 await interaction.deferReply();
 
                 const discordChannel = interaction.options.getChannel('discord-channel-to-post') as TextChannel;
-                const ytbChannel = interaction.options.getString('ytb-channel-id');
+                const ytbChannel = interaction.options.getString('ytb-channel');
 
                 if (!discordChannel || !ytbChannel) {
                     Bot.interaction.send(interaction, EmbedManager.error('Invalid parameters.'))
@@ -29,10 +30,10 @@ export async function ytbChannelCommand(interaction: ChatInputCommandInteraction
 
                 const res = await addYtbChannel(ytbChannel, discordChannel.id);
 
-                if (res === 'Error') {
-                    Bot.interaction.send(interaction, EmbedManager.error(`Error when adding the YouTube channel ${ytbChannel}`));
+                if ('error' in res) {
+                    Bot.interaction.send(interaction, EmbedManager.error(`Error when adding the YouTube channel ${ytbChannel} : ${res.error}`));
                 } else {
-                    Bot.interaction.send(interaction, EmbedManager.error(`Added ${res} : ${ytbChannel}`));
+                    Bot.interaction.send(interaction, EmbedManager.success(`Added ${res.name} (${res.channelId}) : new videos will be posted in <#${discordChannel.id}>`));
                 }
                 break;
 
@@ -112,39 +113,84 @@ async function listYtbChannel(interaction: CommandInteraction): Promise<boolean>
 }
 
 
-async function addYtbChannel(channelId: string, channelToPost: string) {
+type AddYtbChannelResult = { name: string; channelId: string } | { error: string };
+
+async function addYtbChannel(input: string, channelToPost: string): Promise<AddYtbChannelResult> {
     try {
-        const html = await getChannelInfos(channelId);
-        const initialData = extractInitialData(html);
-        const {channelTitle, videos} = parseVideosFromInitialData(initialData);
+        const channelRef = normalizeChannelInput(input);
+        if (!channelRef) {
+            return {error: 'Expected a channel ID (UC...), a @handle or a channel link'};
+        }
 
-        let listVideosId = videos.map((v: any) => v.id);
+        // The RSS feed only works with the UC... channel ID, so resolve @handles from the channel page
+        const html = await getChannelInfos(channelRef);
+        const metadata = extractInitialData(html)?.metadata?.channelMetadataRenderer;
+        const channelId: string | undefined = metadata?.externalId;
+        const channelTitle: string | undefined = metadata?.title;
+        if (!channelId || !channelTitle) {
+            return {error: 'Channel not found'};
+        }
 
-        const jsonToWrite = {
+        const alreadyFollowed = await findFollowedChannel(channelId);
+        if (alreadyFollowed) {
+            return {error: `Already followed as ${alreadyFollowed.name}`};
+        }
+
+        // Seed with the videos currently in the feed so the first poll doesn't repost them
+        let listVideosId: string[];
+        try {
+            const feed = await new Parser().parseURL('https://www.youtube.com/feeds/videos.xml?channel_id=' + channelId);
+            listVideosId = feed.items
+                .map(entry => entry.id?.split(':')[2])
+                .filter((id): id is string => !!id);
+        } catch (e) {
+            return {error: `YouTube RSS feed unavailable for ${channelId}, try again later (${e})`};
+        }
+
+        const jsonToWrite: ytbchannelFile = {
             name: channelTitle,
             ytbChannel: channelId,
             guildChannelToPostVideo: channelToPost,
             videosId: listVideosId,
         };
 
-        const jsonData = JSON.stringify(jsonToWrite, null, 2);
+        fs.writeFileSync(`./ytbChannels/${channelTitle.split('|')[0]!.trim()}.json`, JSON.stringify(jsonToWrite, null, 2));
 
-        fs.writeFileSync(`./ytbChannels/${channelTitle.split('|')[0].trim()}.json`, jsonData);
-
-        return channelTitle;
+        return {name: channelTitle, channelId};
     } catch (error) {
-        Bot.log.error(`${error}`);
-        return 'Error';
+        Bot.log.error(`Crash when addYtbChannel (${input}) : ${error}`);
+        return {error: `${error}`};
     }
+}
+
+/**
+ * Accepts "UC...", "@handle" or a youtube.com/@handle | youtube.com/channel/UC... link
+ */
+function normalizeChannelInput(input: string): string | null {
+    const value = input.trim();
+    const fromUrl = value.match(/youtube\.com\/(?:channel\/(UC[\w-]+)|(@[\w.\-]+))/);
+    if (fromUrl) return fromUrl[1] ?? fromUrl[2] ?? null;
+    if (/^UC[\w-]{22}$/.test(value) || /^@[\w.\-]+$/.test(value)) return value;
+    return null;
+}
+
+async function findFollowedChannel(channelId: string): Promise<ytbchannelFile | null> {
+    const files = await FileManager.listJsonFiles('./ytbChannels/');
+    if (!files) return null;
+    for (const file of files) {
+        const data = await FileManager.readJsonFile<ytbchannelFile>(`./ytbChannels/${file}`);
+        if (data && !Array.isArray(data) && data.ytbChannel === channelId) return data;
+    }
+    return null;
 }
 
 
 async function getChannelInfos(channelIdOrUsername: string): Promise<string> {
     let url
     if (channelIdOrUsername.startsWith('@')) {
-        url = `https://www.youtube.com/${channelIdOrUsername}/videos`;
+        url = `https://www.youtube.com/${channelIdOrUsername}`;
     } else {
-        url = `https://www.youtube.com/channel/${channelIdOrUsername}/videos`;
+        url = `https://www.youtube.com/channel/${channelIdOrUsername}`;
     }
 
     const response = await fetch(url, {
@@ -162,28 +208,4 @@ function extractInitialData(html: string) {
     const match = html.match(regex);
     if (!match) throw new Error('Impossible de trouver ytInitialData');
     return JSON.parse(match[1]!);
-}
-
-function parseVideosFromInitialData(data: any) {
-    const tabs = data.contents.twoColumnBrowseResultsRenderer.tabs;
-    const videosTab = tabs.find((tab: any) =>
-        tab.tabRenderer && tab.tabRenderer.title.toLowerCase().includes('vidéo')
-    );
-    const gridRenderer = videosTab.tabRenderer.content.sectionListRenderer.contents[0]
-        .itemSectionRenderer.contents[0].gridRenderer;
-
-    const videos = gridRenderer.items
-        .filter((item: any) => item.gridVideoRenderer)
-        .map((item: any) => {
-            const v = item.gridVideoRenderer;
-            return {
-                id: v.videoId,
-                title: v.title.runs[0].text
-            };
-        });
-
-    // Nom de la chaîne (exemple dans la donnée, possible ailleurs)
-    const channelTitle = data.metadata.channelMetadataRenderer.title;
-
-    return {channelTitle, videos};
 }
