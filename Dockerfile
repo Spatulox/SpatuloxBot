@@ -13,7 +13,7 @@ COPY tsconfig.json ./
 RUN npm install
 
 COPY ./src ./src
-COPY ./commands ./commands
+COPY ./handlers ./handlers
 COPY ./form ./form
 
 RUN npm run build
@@ -34,7 +34,7 @@ COPY --from=builder /usr/src/app/dist ./dist
 # COPIE LES PACKAGE.JSON ET PACKAGE-LOCK.JSON DEPUIS LE BUILDER (important)
 COPY --from=builder /usr/src/app/package*.json ./
 
-COPY --from=builder /usr/src/app/commands ./commands
+COPY --from=builder /usr/src/app/handlers ./handlers
 COPY --from=builder /usr/src/app/form ./form
 
 # Installe uniquement les dépendances de production, avec le lockfile correcte

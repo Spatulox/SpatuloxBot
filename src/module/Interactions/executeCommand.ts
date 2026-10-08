@@ -4,9 +4,9 @@ import { ytbChannelCommand } from '../../handlers/ytb-channel';
 import { setStatus } from "../../handlers/set-status";
 import { reminderCommand } from "../../handlers/reminder";
 
-import ytb from "../../../commands/addytbchannel.json"
-import status from "../../../commands/setstatus.json"
-import reminder from "../../../commands/reminder.json"
+import ytb from "../../../handlers/commands/addytbchannel.json"
+import status from "../../../handlers/commands/setstatus.json"
+import reminder from "../../../handlers/commands/reminder.json"
 import {Bot, EmbedManager} from "@spatulox/simplediscordbot";
 
 export async function executeSlashCommand(interaction: CommandInteraction){

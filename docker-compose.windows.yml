@@ -7,12 +7,12 @@ services:
       - .env
     environment:
       - MUSIC_PATH=/usr/src/app/Musique
-      - COMMANDS_PATH_TO_DEPLOY=commands
+      - COMMANDS_PATH_TO_DEPLOY=handlers/commands
       - TZ=Europe/Paris # Fuseau des dates saisies dans les rappels
     volumes:
       - D:\\Music\\1-TelechargesViaDiscord:/usr/src/app/Musique
       - ./ytbChannels:/usr/src/app/ytbChannels
-      - ./commands:/usr/src/app/commands
+      - ./handlers:/usr/src/app/handlers
       - ./log:/usr/src/app/log
       - ./reminders:/usr/src/app/reminders
       - ./.utilscache:/usr/src/app/.utilscache # Cache du bot (discord-module…) : conservé entre les rebuilds

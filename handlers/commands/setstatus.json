@@ -1,0 +1,26 @@
+{
+  "type": 1,
+  "name": "set-status",
+  "name_localizations": null,
+  "description": "Set the status of the bot",
+  "description_localizations": null,
+  "options": [
+    {
+      "type": 3,
+      "name": "new-status",
+      "name_localizations": null,
+      "description": "The new status of the bot",
+      "description_localizations": null,
+      "required": true
+    }
+  ],
+  "default_member_permissions": null,
+  "dm_permission": true,
+  "integration_types": [
+    0
+  ],
+  "contexts": null,
+  "nsfw": false,
+  "command_scope": "global",
+  "id": "1282475915208822828"
+}

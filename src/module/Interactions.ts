@@ -14,9 +14,9 @@ import {
     reminderListSelect
 } from "../handlers/reminder";
 
-import ytb from "../../commands/addytbchannel.json"
-import status from "../../commands/setstatus.json"
-import reminder from "../../commands/reminder.json"
+import ytb from "../../handlers/commands/addytbchannel.json"
+import status from "../../handlers/commands/setstatus.json"
+import reminder from "../../handlers/commands/reminder.json"
 
 
 import add_reminder from "../../form/reminderForm.json"

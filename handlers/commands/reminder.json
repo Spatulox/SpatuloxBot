@@ -1,0 +1,49 @@
+{
+  "type": 1,
+  "name": "reminder",
+  "name_localizations": null,
+  "description": "Manage the reminders",
+  "description_localizations": null,
+  "options": [
+    {
+      "type": 1,
+      "name": "list",
+      "name_localizations": null,
+      "description": "Liste les rappels existant",
+      "description_localizations": null
+    },
+    {
+      "type": 1,
+      "name": "add",
+      "name_localizations": null,
+      "description": "Ajoute un rappel",
+      "description_localizations": null
+    },
+    {
+      "type": 1,
+      "name": "remove",
+      "name_localizations": null,
+      "description": "Supprime un rappel",
+      "description_localizations": null,
+      "options": [
+        {
+          "type": 4,
+          "name": "id",
+          "name_localizations": null,
+          "description": "ID du reminder",
+          "description_localizations": null,
+          "required": true
+        }
+      ]
+    }
+  ],
+  "default_member_permissions": null,
+  "dm_permission": true,
+  "integration_types": [
+    0
+  ],
+  "contexts": null,
+  "nsfw": false,
+  "command_scope": "global",
+  "id": "1282714304432570455"
+}
