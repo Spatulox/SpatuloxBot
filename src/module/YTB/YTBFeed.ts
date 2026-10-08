@@ -40,7 +40,7 @@ export class YTBFeed extends NoEventModule {
         return datas
     }
 
-    private async checkYoutubeFeed(channel: Channel): Promise<void> {
+    private async checkYoutubeFeed(channel: Channel): Promise<boolean> {
         let YOUTUBE_RSS_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + channel.data.ytbChannel;
         const parser = new Parser();
         try {
@@ -73,21 +73,27 @@ export class YTBFeed extends NoEventModule {
                 const file = await FileManager.readJsonFile<ytbchannelFile>(`./ytbChannels/${channel.fileName}`)
                 if(!file){
                     Bot.log.error(`Impossible to read the file ${channel.fileName}`);
-                    return
+                    return false
                 }
                 file.videosId = [...file.videosId, ...addVideoIdToFile];
                 await FileManager.writeJsonFile("./ytbChannels", channel.fileName, file)
             }
+            return true
         } catch (error) {
-            Bot.log.error(`Erreur lors de la vérification du flux : ${error}`);
+            Bot.log.error(`Erreur lors de la vérification du flux de ${channel.data.name} (${channel.data.ytbChannel}) : ${error}`);
+            return false
         }
     }
 
     private async requestYtbVideo(){
         const data = await this.readtYtbFiles();
         if(data){
+            let failed = 0
             for (const d of data) {
-                await this.checkYoutubeFeed(d);
+                if(!await this.checkYoutubeFeed(d)) failed++
+            }
+            if(data.length > 0 && failed === data.length){
+                Bot.log.error(`Tous les flux YouTube (${failed}) ont échoué : probable panne de l'endpoint RSS de YouTube`);
             }
         }
     }
