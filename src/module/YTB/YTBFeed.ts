@@ -19,9 +19,15 @@ export class YTBFeed extends NoEventModule {
     name = "YTBFeed";
     description = "Feed Youtube of designated YTB channels";
 
+    private isRunning = false;
+    private outageLogged = false;
+
     constructor() {
         super();
-        setTimeout(this.requestYtbVideo.bind(this),  Time.minute.MIN_05.toMilliseconds())
+        setTimeout(() => {
+            void this.requestYtbVideo();
+            setInterval(() => void this.requestYtbVideo(), Time.minute.MIN_05.toMilliseconds());
+        }, Time.minute.MIN_05.toMilliseconds())
     }
 
     private async readtYtbFiles(): Promise<Channel[] | null>{
@@ -40,7 +46,10 @@ export class YTBFeed extends NoEventModule {
         return datas
     }
 
-    private async checkYoutubeFeed(channel: Channel): Promise<boolean> {
+    /**
+     * @returns null on success, the error message otherwise
+     */
+    private async checkYoutubeFeed(channel: Channel): Promise<string | null> {
         let YOUTUBE_RSS_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + channel.data.ytbChannel;
         const parser = new Parser();
         try {
@@ -72,29 +81,48 @@ export class YTBFeed extends NoEventModule {
                 Bot.log.debug("Adding new videos to JSON file")
                 const file = await FileManager.readJsonFile<ytbchannelFile>(`./ytbChannels/${channel.fileName}`)
                 if(!file){
-                    Bot.log.error(`Impossible to read the file ${channel.fileName}`);
-                    return false
+                    return `Impossible to read the file ${channel.fileName}`
                 }
                 file.videosId = [...file.videosId, ...addVideoIdToFile];
                 await FileManager.writeJsonFile("./ytbChannels", channel.fileName, file)
             }
-            return true
+            return null
         } catch (error) {
-            Bot.log.error(`Erreur lors de la vérification du flux de ${channel.data.name} (${channel.data.ytbChannel}) : ${error}`);
-            return false
+            return `${error}`
         }
     }
 
     private async requestYtbVideo(){
-        const data = await this.readtYtbFiles();
-        if(data){
-            let failed = 0
+        if(this.isRunning) return
+        this.isRunning = true
+        try {
+            const data = await this.readtYtbFiles();
+            if(!data || data.length === 0) return
+
+            const failures: string[] = []
             for (const d of data) {
-                if(!await this.checkYoutubeFeed(d)) failed++
+                const error = await this.checkYoutubeFeed(d)
+                if(error) failures.push(`${d.data.name} (${d.data.ytbChannel}) : ${error}`)
             }
-            if(data.length > 0 && failed === data.length){
-                Bot.log.error(`Tous les flux YouTube (${failed}) ont échoué : probable panne de l'endpoint RSS de YouTube`);
+
+            // Every channel failing at once points to a YouTube RSS outage: log it once, not every cycle
+            if(failures.length === data.length){
+                if(!this.outageLogged){
+                    Bot.log.error(`Tous les flux YouTube (${failures.length}) ont échoué : probable panne de l'endpoint RSS de YouTube, nouvel essai toutes les 5 minutes. Première erreur : ${failures[0]}`);
+                    this.outageLogged = true
+                }
+                return
             }
+
+            if(this.outageLogged){
+                Bot.log.info("Les flux YouTube répondent à nouveau");
+                this.outageLogged = false
+            }
+            for (const failure of failures) {
+                Bot.log.error(`Erreur lors de la vérification du flux de ${failure}`);
+            }
+        } finally {
+            this.isRunning = false
         }
     }
 }
